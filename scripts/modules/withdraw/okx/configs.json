@@ -1,0 +1,13 @@
+{
+  "available_chains": [
+    "ethereum",
+    "arbitrum",
+    "base",
+    "optimism"
+  ],
+  "available_symbols": [
+    "ETH",
+    "USDT",
+    "USDC"
+  ]
+}

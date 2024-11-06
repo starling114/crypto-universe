@@ -1,0 +1,16 @@
+{
+  "available_networks": [
+    "ethereum",
+    "arbitrum",
+    "base",
+    "optimism",
+    "scroll",
+    "blast",
+    "polygon",
+    "bsc"
+  ],
+  "available_naming_strategies": [
+    "indexes",
+    "alphabet_batches"
+  ]
+}
