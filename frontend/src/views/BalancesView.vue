@@ -42,8 +42,8 @@
           <cu-table-cell></cu-table-cell>
           <cu-table-cell class="text-right">Total:</cu-table-cell>
           <cu-table-cell>{{ totalRowData.transactionsCount }}</cu-table-cell>
-          <cu-table-cell>{{ totalRowData.native }} {{ totalRowData.nativeName }}</cu-table-cell>
-          <cu-table-cell>${{ totalRowData.nativeInUsd }}</cu-table-cell>
+          <cu-table-cell>{{ formatAmount(totalRowData.native) }} {{ totalRowData.nativeName }}</cu-table-cell>
+          <cu-table-cell>${{ formatAmount(totalRowData.nativeInUsd, 2) }}</cu-table-cell>
         </cu-table-row>
       </cu-table-foot>
     </cu-table>
@@ -120,6 +120,12 @@ const showTotalRow = computed(() => {
   return paginatedData.value.length != 0 && totalRow.value
 })
 
+const formatAmount = (value, decimals = 5) => {
+  let float = parseFloat(value)
+
+  return float > 0 ? parseFloat(float.toFixed(decimals)) : parseFloat(float.toFixed(1))
+}
+
 const totalRowData = computed(() => {
   let totalRowData = { transactionsCount: 0, native: 0, nativeInUsd: 0 }
 
@@ -129,8 +135,6 @@ const totalRowData = computed(() => {
     totalRowData.nativeInUsd += data.nativeInUsd
     totalRowData.nativeName = data.nativeName
   })
-  totalRowData.native = totalRowData.native.toFixed(5)
-  totalRowData.nativeInUsd = totalRowData.nativeInUsd.toFixed(2)
 
   return totalRowData
 })

@@ -147,6 +147,50 @@
         "https://bsc.meowrpc.com",
         "https://bsc.drpc.org"
       ]
+    },
+    "avalanche": {
+      "chain_id": 43114,
+      "tnative_oken": "AVAX",
+      "scan": "https://snowtrace.io",
+      "rpcs": [
+        "https://rpc.ankr.com/avalanche",
+        "https://avax.meowrpc.com",
+        "https://avalanche.public-rpc.com",
+        "https://blastapi.io/public-api/avalanche",
+        "https://1rpc.io/avax/c",
+        "https://avalanche.drpc.org"
+      ]
+    },
+    "fantom": {
+      "chain_id": 250,
+      "native_token": "FTM",
+      "scan": "https://ftmscan.com",
+      "rpcs": [
+        "https://rpcapi.fantom.network",
+        "https://endpoints.omniatech.io/v1/fantom/mainnet/public",
+        "https://fantom-pokt.nodies.app",
+        "https://rpc.ftm.tools",
+        "https://rpc.fantom.network",
+        "https://rpc.ankr.com/fantom",
+        "https://rpc2.fantom.network",
+        "https://rpc3.fantom.network"
+      ]
+    },
+    "zora": {
+      "chain_id": 7777777,
+      "native_token": "ETH",
+      "scan": "https://zora.superscan.network",
+      "rpcs": [
+        "https://zora.rpc.thirdweb.com"
+      ]
+    },
+    "mode": {
+      "chain_id": 34443,
+      "native_token": "ETH",
+      "scan": "https://explorer.mode.network",
+      "rpcs": [
+        "https://1rpc.io/mode"
+      ]
     }
   }
 }

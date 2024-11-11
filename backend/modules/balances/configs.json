@@ -7,7 +7,11 @@
     "scroll",
     "blast",
     "polygon",
-    "bsc"
+    "bsc",
+    "avalanche",
+    "fantom",
+    "zora",
+    "mode"
   ],
   "available_naming_strategies": [
     "indexes",
