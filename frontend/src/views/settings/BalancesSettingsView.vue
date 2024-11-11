@@ -11,6 +11,11 @@
     placeholder="Select strategy" label="Wallet naming strategy"
     tooltip="Choose how to show wallet labels in the table." />
 
+  <div
+    class="mt-2 mb-2 p-5 text-sm font-normal border bg-white rounded-lg border-gray-200 dark:text-white dark:border-gray-700 dark:bg-gray-800">
+    <cu-checkbox name="totalRow" v-model="totalRow" label="Total row" tooltip="Show total row on each page to see the summ of all the columns." />
+  </div>
+
   <cu-label label="Networks" />
   <cu-horizontal-checkbox-group v-model="selectedNetworks" :options="availableNetworks" />
 
@@ -33,13 +38,15 @@ import {
   CuLabel,
   CuHorizontalCheckboxGroup,
   CuButton,
-  CuLogs
+  CuLogs,
+  CuCheckbox
 } from '@/components/cu'
 
 const addresses = ref('')
 const minBalanceHighlight = ref('')
 const availableNamingStrategies = ref([])
 const namingStrategy = ref('')
+const totalRow = ref(false)
 const availableNetworks = ref([])
 const selectedNetworks = ref([])
 
@@ -58,6 +65,7 @@ const loadDefaults = async () => {
     addresses.value = data.addresses.join('\n')
     minBalanceHighlight.value = data.min_balance_highlight
     namingStrategy.value = data.naming_strategy
+    totalRow.value = data.total_row
 
     selectedNetworks.value = Object.entries(data.networks)
       .filter(([, config]) => config.enabled)
@@ -77,6 +85,7 @@ const handleSave = async () => {
     addresses: addresses.value.split('\n').filter(Boolean),
     min_balance_highlight: minBalanceHighlight.value.toString(),
     naming_strategy: namingStrategy.value,
+    total_row: totalRow.value,
     networks: availableNetworks.value.reduce((acc, value) => {
       acc[value] = { enabled: selectedNetworks.value.includes(value) }
       return acc

@@ -37,6 +37,15 @@
           <cu-table-cell>${{ item.nativeInUsd }}</cu-table-cell>
         </cu-table-row>
       </cu-table-body>
+      <cu-table-foot v-if="showTotalRow">
+        <cu-table-row>
+          <cu-table-cell></cu-table-cell>
+          <cu-table-cell class="text-right">Total:</cu-table-cell>
+          <cu-table-cell>{{ totalRowData.transactionsCount }}</cu-table-cell>
+          <cu-table-cell>{{ totalRowData.native }} {{ totalRowData.nativeName }}</cu-table-cell>
+          <cu-table-cell>${{ totalRowData.nativeInUsd }}</cu-table-cell>
+        </cu-table-row>
+      </cu-table-foot>
     </cu-table>
 
     <cu-pagination :current-page="currentPage" :total-items="totalItems" :items-per-page="itemsPerPage"
@@ -56,6 +65,7 @@ import {
   CuTableBody,
   CuTableRow,
   CuTableCell,
+  CuTableFoot,
   CuButton,
   CuSpinner,
   CuPagination
@@ -64,6 +74,7 @@ import {
 const minBalanceHighlight = ref(0.00001)
 const availableNetworks = ref([])
 const networks = ref({})
+const totalRow = ref(false)
 
 const activeNetwork = ref()
 const isDataLoaded = ref(false)
@@ -88,6 +99,7 @@ const loadDefaults = async () => {
 
     minBalanceHighlight.value = parseFloat(data.min_balance_highlight)
     networks.value = data.networks
+    totalRow.value = data.total_row
   })
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
@@ -102,6 +114,25 @@ const loadDefaults = async () => {
 const enabledNetworks = computed(() => {
   return availableNetworks.value
     .filter((network) => networks.value[network] ? networks.value[network].enabled : false)
+})
+
+const showTotalRow = computed(() => {
+  return paginatedData.value.length != 0 && totalRow.value
+})
+
+const totalRowData = computed(() => {
+  let totalRowData = { transactionsCount: 0, native: 0, nativeInUsd: 0 }
+
+  paginatedData.value.forEach(data => {
+    totalRowData.transactionsCount += data.transactionsCount
+    totalRowData.native += data.native
+    totalRowData.nativeInUsd += data.nativeInUsd
+    totalRowData.nativeName = data.nativeName
+  })
+  totalRowData.native = totalRowData.native.toFixed(5)
+  totalRowData.nativeInUsd = totalRowData.nativeInUsd.toFixed(2)
+
+  return totalRowData
 })
 
 const totalItems = computed(() => {
