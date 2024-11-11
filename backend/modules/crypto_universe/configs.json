@@ -1,0 +1,8 @@
+{
+  "available_modules": [
+    "balances",
+    "withdraw_okx",
+    "bridge_relay",
+    "transfer"
+  ]
+}

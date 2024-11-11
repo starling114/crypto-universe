@@ -1,0 +1,152 @@
+{
+  "chains": {
+    "ethereum": {
+      "chain_id": 1,
+      "native_token": "ETH",
+      "scan": "https://etherscan.io",
+      "rpcs": [
+        "https://eth.llamarpc.com",
+        "https://eth-mainnet.public.blastapi.io",
+        "https://eth-pokt.nodies.app",
+        "https://ethereum-rpc.publicnode.com",
+        "https://ethereum.blockpi.network/v1/rpc/public",
+        "https://rpc.ankr.com/eth",
+        "https://eth.meowrpc.com"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "USDC": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+      }
+    },
+    "arbitrum": {
+      "chain_id": 42161,
+      "native_token": "ETH",
+      "scan": "https://arbiscan.io",
+      "rpcs": [
+        "https://arbitrum.llamarpc.com",
+        "https://1rpc.io/arb",
+        "https://arbitrum-one.public.blastapi.io",
+        "https://arb1.arbitrum.io/rpc",
+        "https://rpc.ankr.com/arbitrum",
+        "https://arbitrum.meowrpc.com",
+        "https://api.zan.top/node/v1/arb/one/public",
+        "https://arbitrum-one-rpc.publicnode.com",
+        "https://arb-pokt.nodies.app",
+        "https://arbitrum.drpc.org",
+        "https://arbitrum.blockpi.network/v1/rpc/public"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "USDC": "0xaf88d065e77c8cc2239327c5edb3a432268e5831"
+      }
+    },
+    "base": {
+      "chain_id": 8453,
+      "native_token": "ETH",
+      "scan": "https://basescan.org",
+      "rpcs": [
+        "https://base.meowrpc.com",
+        "https://base-mainnet.public.blastapi.io",
+        "https://mainnet.base.org",
+        "https://1rpc.io/base",
+        "https://base.blockpi.network/v1/rpc/public"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+        "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+      }
+    },
+    "optimism": {
+      "chain_id": 10,
+      "native_token": "ETH",
+      "scan": "https://optimistic.etherscan.io",
+      "rpcs": [
+        "https://optimism.llamarpc.com",
+        "https://optimism.drpc.org",
+        "https://optimism-mainnet.public.blastapi.io",
+        "https://optimism.meowrpc.com",
+        "https://optimism.blockpi.network/v1/rpc/public",
+        "https://optimism-rpc.publicnode.com",
+        "https://mainnet.optimism.io",
+        "https://rpc.ankr.com/optimism",
+        "https://1rpc.io/op"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+        "USDC": "0x0b2c639c533813f4aa9d7837caf62653d097ff85"
+      }
+    },
+    "scroll": {
+      "chain_id": 534352,
+      "native_token": "ETH",
+      "scan": "https://scrollscan.com",
+      "rpcs": [
+        "https://rpc.scroll.io",
+        "https://1rpc.io/scroll"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xf55bec9cafdbe8730f096aa55dad6d22d44099df",
+        "USDC": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4"
+      }
+    },
+    "blast": {
+      "chain_id": 81457,
+      "native_token": "ETH",
+      "scan": "https://blastscan.io",
+      "rpcs": [
+        "https://rpc.envelop.is/blast",
+        "https://blast.din.dev/rpc",
+        "https://blastl2-mainnet.public.blastapi.io",
+        "https://blast.blockpi.network/v1/rpc/public"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDB": "0x4300000000000000000000000000000000000003"
+      }
+    },
+    "polygon": {
+      "chain_id": 137,
+      "native_token": "MATIC",
+      "scan": "https://polygonscan.com",
+      "rpcs": [
+        "https://polygon.llamarpc.com",
+        "https://polygon-rpc.com",
+        "https://rpc-mainnet.matic.network",
+        "https://rpc-mainnet.matic.quiknode.pro",
+        "https://matic-mainnet-full-rpc.bwarelabs.com",
+        "https://polygon-pokt.nodies.app",
+        "https://rpc.ankr.com/polygon",
+        "https://polygon-mainnet.public.blastapi.io",
+        "https://polygonapi.terminet.io/rpc",
+        "https://1rpc.io/matic",
+        "https://polygon-mainnet-public.unifra.io",
+        "https://polygon.blockpi.network/v1/rpc/public",
+        "https://polygon.drpc.org",
+        "https://polygon.meowrpc.com"
+      ]
+    },
+    "bsc": {
+      "chain_id": 56,
+      "native_token": "BNB",
+      "scan": "https://bscscan.com",
+      "rpcs": [
+        "https://binance.llamarpc.com",
+        "https://endpoints.omniatech.io/v1/bsc/mainnet/public",
+        "https://bsc-pokt.nodies.app",
+        "https://rpc.ankr.com/bsc",
+        "https://binance.nodereal.io",
+        "https://1rpc.io/bnb",
+        "https://bsc.blockpi.network/v1/rpc/public",
+        "https://bsc-rpc.publicnode.com",
+        "https://bsc-mainnet.public.blastapi.io",
+        "https://bsc.meowrpc.com",
+        "https://bsc.drpc.org"
+      ]
+    }
+  }
+}

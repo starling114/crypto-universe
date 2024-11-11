@@ -1,0 +1,44 @@
+<template>
+  <div>
+    <cu-label v-if="label" :name="name" :label="label" :tooltip="tooltip" />
+    <select :id="name" :value="modelValue" @change="handleChange"
+      @input="$emit('update:modelValue', $event.target.value)" :class="[
+        'mb-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-gray-600 focus:border-gray-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-white dark:focus:border-white',
+        sizeClasses]">
+      <option v-if="placeholder" disabled selected>{{ placeholder }}</option>
+      <option v-for="option in options" :key="option" :value="option">
+        {{ option }}
+      </option>
+    </select>
+  </div>
+</template>
+
+<script setup>
+import { defineProps, defineEmits, computed } from 'vue'
+import { CuLabel } from '@/components/cu'
+
+const props = defineProps({
+  name: { type: String, reqiured: true },
+  modelValue: { type: [String, Number], reqiured: true },
+  label: { type: String },
+  tooltip: { type: String },
+  placeholder: { type: String },
+  options: { type: Array, required: true },
+  size: { type: String, default: 'normal' }
+})
+
+const emit = defineEmits(['change'])
+
+const availableSizeClasses = {
+  small: 'text-xs p-2',
+  normal: 'p-2.5'
+}
+
+const sizeClasses = computed(() => {
+  return availableSizeClasses[props.size]
+})
+
+const handleChange = (event) => {
+  emit('change', event)
+}
+</script>
