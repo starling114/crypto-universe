@@ -40,7 +40,7 @@
     </cu-table>
 
     <cu-pagination :current-page="currentPage" :total-items="totalItems" :items-per-page="itemsPerPage"
-      @update:currentPage="handlePageChange" />
+      @update:currentPage="handlePageChange" @update:itemsPerPage="handleItemsPerPageChange" />
   </cu-spinner>
 </template>
 
@@ -128,6 +128,10 @@ const loadNetwork = (network) => {
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage
+}
+
+const handleItemsPerPageChange = (newItemsPerPage) => {
+  itemsPerPage.value = newItemsPerPage
 }
 
 onMounted(async () => {
