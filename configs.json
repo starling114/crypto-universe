@@ -148,6 +148,16 @@
         "https://bsc.drpc.org"
       ]
     },
+    "taiko": {
+      "chain_id": 167000,
+      "native_token": "ETH",
+      "scan": "https://taikoscan.io",
+      "rpcs": [
+        "https://taiko-rpc.publicnode.com",
+        "https://rpc.taiko.tools",
+        "https://rpc.ankr.com/taiko"
+      ]
+    },
     "avalanche": {
       "chain_id": 43114,
       "tnative_oken": "AVAX",
