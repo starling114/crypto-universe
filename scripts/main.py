@@ -1,6 +1,5 @@
 import sys
 from dotenv import load_dotenv
-import os
 from modules import *
 from utils import log_error
 

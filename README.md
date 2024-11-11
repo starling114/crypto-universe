@@ -45,6 +45,12 @@ To get a local copy of this project up and running, follow these simple steps.
     source myenv/bin/activate
     ```
 
+    Activate the virtual environment (Windows):
+
+    ```bash
+    myenv\Scripts\activate
+    ```
+
     Install the required Python packages:
 
     ```bash

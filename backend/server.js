@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath, checkVersion } from "./utils.js"
+import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion } from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -89,7 +89,7 @@ apiRoutes.post('/start_module', (req, res) => {
   } else {
     try {
       logEmitter.emit('log', `Starting ${module} module...`, module)
-      pythonProcesses[module] = spawn(`myenv/bin/python`, ['main.py', module], { cwd: 'scripts' })
+      pythonProcesses[module] = spawn(pythonExecutable(), ['main.py', module], { cwd: 'scripts' })
 
       res.json(true)
 

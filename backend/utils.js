@@ -1,4 +1,5 @@
 import fs from 'fs'
+import os from 'os'
 import axios from 'axios'
 import path from 'path'
 
@@ -71,6 +72,10 @@ export async function checkVersion() {
   }
 
   return upToDate
+}
+
+export function pythonExecutable() {
+  return os.platform() === 'win32' ? 'myenv\\Scripts\\python.exe' : 'myenv/bin/python'
 }
 
 export function moduleDataFilepath(module, type, script_type) {
