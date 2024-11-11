@@ -55,7 +55,7 @@
 
 
 <script setup>
-import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+import { ref, computed, onMounted, getCurrentInstance, watch } from 'vue'
 import { loadModuleData } from '@/utils'
 import { initFlowbite } from 'flowbite'
 import {
@@ -76,12 +76,12 @@ const availableNetworks = ref([])
 const networks = ref({})
 const totalRow = ref(false)
 
-const activeNetwork = ref()
+const activeNetwork = ref(localStorage.getItem('activeNetwork') || null)
 const isDataLoaded = ref(false)
 const data = ref([])
 const dataCount = ref(0)
-const currentPage = ref(1)
-const itemsPerPage = ref(5)
+const currentPage = ref(parseInt(localStorage.getItem('currentPage')) || 1)
+const itemsPerPage = ref(parseInt(localStorage.getItem('itemsPerPage')) || 5)
 
 const configs = ref({})
 
@@ -108,7 +108,7 @@ const loadDefaults = async () => {
     availableNetworks.value = data.available_networks
   })
 
-  activeNetwork.value = enabledNetworks.value[0]
+  activeNetwork.value = activeNetwork.value || enabledNetworks.value[0]
 }
 
 const enabledNetworks = computed(() => {
@@ -137,6 +137,18 @@ const totalRowData = computed(() => {
   })
 
   return totalRowData
+})
+
+watch(itemsPerPage, (newVal) => {
+  localStorage.setItem('itemsPerPage', newVal)
+})
+
+watch(currentPage, (newVal) => {
+  localStorage.setItem('currentPage', newVal)
+})
+
+watch(activeNetwork, (newVal) => {
+  localStorage.setItem('activeNetwork', newVal)
 })
 
 const totalItems = computed(() => {
