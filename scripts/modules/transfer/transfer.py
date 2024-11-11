@@ -18,6 +18,7 @@ from utils import (
     get_gas_price,
     sign_tx,
     wait_tx_completion,
+    debug_mode,
     ExecutionError,
 )
 from utils import logger
@@ -110,7 +111,6 @@ class Transfer:
     def transfer(self):
         try:
             scan = self.configs["chains"][self.chain]["scan"]
-            private_key = get_private_key(self.web3, self.secrets, self.source_address)
 
             token_address, token_contract, decimals, symbol = (
                 self.calculate_token_data()
@@ -158,14 +158,16 @@ class Transfer:
                 gas_estimate = int(contract_txn["gasPrice"] * contract_txn["gas"])
                 contract_txn["value"] = calculated_amount - gas_estimate
 
-            logger.info(
-                f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
-            )
-            logger.success(
-                f"{self.source_address} | {symbol} | {humanify_number(wei_to_int(calculated_amount, decimals))} | Transfer successful"
-            )
-            return True
+            if debug_mode():
+                logger.info(
+                    f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
+                )
+                logger.success(
+                    f"{self.source_address} | {symbol} | {humanify_number(wei_to_int(calculated_amount, decimals))} | Transfer successful"
+                )
+                return True
 
+            private_key = get_private_key(self.web3, self.secrets, self.source_address)
             tx_hash = sign_tx(self.web3, contract_txn, private_key)
 
             logger.info(f"{get_tx_link(scan, tx_hash)}")

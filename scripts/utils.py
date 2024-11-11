@@ -162,6 +162,10 @@ def get_token_data(web3, token_address):
     return web3.to_checksum_address(token_address), token_contract, decimals, symbol
 
 
+def debug_mode():
+    return os.getenv("DEBUG") == "true"
+
+
 def log_error(error, prefix=""):
     formatted_prefix = f"{prefix} | " if prefix == "" else ""
 

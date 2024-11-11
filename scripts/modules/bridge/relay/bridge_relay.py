@@ -19,6 +19,7 @@ from utils import (
     get_tx_link,
     wait_tx_completion,
     log_error,
+    debug_mode,
     ExecutionError,
 )
 from utils import logger
@@ -98,7 +99,6 @@ class BridgeRelay:
     def bridge(self):
         try:
             scan = self.configs["chains"][self.from_chain]["scan"]
-            private_key = get_private_key(self.web3, self.secrets, self.address)
 
             calculated_amount = self.calculate_amount()
 
@@ -118,19 +118,19 @@ class BridgeRelay:
             contract_txn["gas"] = get_gas_limit(self.web3, contract_txn)
             contract_txn["gasPrice"] = get_gas_price(self.web3)
 
-            logger.info(
-                f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
-            )
-            logger.success(
-                f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(calculated_amount))} | Bridge successful"
-            )
-            return True
+            if debug_mode():
+                logger.info(
+                    f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
+                )
+                logger.success(
+                    f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(calculated_amount))} | Bridge successful"
+                )
+                return True
 
+            private_key = get_private_key(self.web3, self.secrets, self.address)
             tx_hash = sign_tx(self.web3, contract_txn, private_key)
 
-            logger.info(
-                f"{get_tx_link(scan, tx_hash)}"
-            )
+            logger.info(f"{get_tx_link(scan, tx_hash)}")
 
             if wait_tx_completion(self.web3, tx_hash):
                 logger.success(

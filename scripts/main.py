@@ -1,6 +1,10 @@
 import sys
+from dotenv import load_dotenv
+import os
 from modules import *
 from utils import log_error
+
+load_dotenv()
 
 MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": Transfer}
 ARGS_MODULES = {

@@ -8,7 +8,8 @@ from utils import (
     humanify_number,
     round_number,
     zip_to_addresses,
-    log_error
+    log_error,
+    debug_mode,
 )
 from utils import logger
 
@@ -58,6 +59,12 @@ class WithdrawBase:
         try:
             params = self.params()
             calculated_amount = self.calculate_amount(params["fee"])
+
+            if debug_mode():
+                logger.success(
+                    f"{self.address} | {self.symbol} | {humanify_number(calculated_amount)} | Withdrawal successful"
+                )
+                return True
 
             self.exchange.withdraw(
                 code=self.symbol,
