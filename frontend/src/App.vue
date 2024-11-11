@@ -1,4 +1,20 @@
 <template>
+  <div v-if="!versionUpToDate && showVersionBanner"
+    class="fixed bottom-0 start-0 z-50 flex justify-between w-full p-4 border-t border-orange-400 bg-orange-200 dark:bg-orange-900 dark:border-orange-600">
+    <div class="flex items-center mx-auto">
+      <p class="flex items-center text-sm font-normal text-gray-900 dark:text-white">
+        <FireIcon class="mr-1 flex-shrink-0 w-6 h-6" />
+
+        <span>Crypto Universe is out of date, please update it running `git pull`</span>
+      </p>
+    </div>
+    <div class="flex items-center">
+      <button @click="handleBannderDismiss" type="button"
+        class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-none hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:text-white">
+        <XMarkIcon class="flex-shrink-0 w-6 h-6" />
+      </button>
+    </div>
+  </div>
   <section>
     <cu-sidebar>
       <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" />
@@ -106,10 +122,14 @@ import {
   BanknotesIcon,
   ArrowDownOnSquareStackIcon,
   PaperAirplaneIcon,
-  ArrowUpOnSquareStackIcon
+  ArrowUpOnSquareStackIcon,
+  FireIcon,
+  XMarkIcon
 } from "@heroicons/vue/24/solid"
 
 const modules = ref({})
+const versionUpToDate = ref(true)
+const showVersionBanner = ref(true)
 
 const module = ref('crypto_universe')
 
@@ -121,10 +141,18 @@ const loadDefaults = async () => {
 
     modules.value = data.modules
   })
+
+  await proxy.$axios.get('/api/version').then((response) => {
+    versionUpToDate.value = response.data.up_to_date
+  })
 }
 
 const moduleEnabled = (module) => {
   return modules.value[module] ? modules.value[module].enabled : false
+}
+
+const handleBannderDismiss = () => {
+  showVersionBanner.value = false
 }
 
 onMounted(async () => {

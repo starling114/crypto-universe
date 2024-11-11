@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath } from "./utils.js"
+import { readJson, writeJson, parseLogs, moduleDataFilepath, checkVersion } from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -14,6 +14,7 @@ const logEmitter = new EventEmitter()
 const ansiToHtml = new AnsiToHtml()
 
 let pythonProcesses = {}
+const versionUpTodate = await checkVersion()
 
 app.use(cors())
 app.use(express.json())
@@ -23,6 +24,10 @@ app.use(express.static('./frontend/dist'))
 
 app.get('*', (req, res) => {
   res.sendFile('./frontend/dist/index.html')
+})
+
+apiRoutes.get('/version', async (req, res) => {
+  res.json({ up_to_date: versionUpTodate })
 })
 
 apiRoutes.get('/balances', async (req, res) => {

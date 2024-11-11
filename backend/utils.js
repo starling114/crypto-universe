@@ -37,6 +37,42 @@ export function parseLogs(log) {
   return log.split('\n').filter(line => line.trim() !== '')
 }
 
+export function compareVersions(version1, version2) {
+  const v1Parts = version1.split('.').map(Number)
+  const v2Parts = version2.split('.').map(Number)
+  const maxLength = Math.max(v1Parts.length, v2Parts.length)
+
+  for (let i = 0; i < maxLength; i++) {
+    const part1 = v1Parts[i] || 0
+    const part2 = v2Parts[i] || 0
+
+    if (part1 < part2) return false
+  }
+
+  return true
+}
+
+export async function checkVersion() {
+  const localVersion = readJson('./package.json').version
+
+  if (!localVersion) return true
+
+  let latestVersion
+  await axios.get('https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/package.json').then(response => {
+    latestVersion = response.data.version
+  })
+
+  const upToDate = compareVersions(localVersion, latestVersion)
+
+  if (!upToDate) {
+    console.log('\x1b[31m', 'Crypto Universe is out of date, please update it running `git pull`')
+    console.log('\x1b[31m', `Latest available version: ${latestVersion}, Local version: ${localVersion}`)
+    console.log('\x1b[0m')
+  }
+
+  return upToDate
+}
+
 export function moduleDataFilepath(module, type, script_type) {
   let folder = ''
 
