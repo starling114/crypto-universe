@@ -94,6 +94,20 @@
         "USDC": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4"
       }
     },
+    "linea": {
+      "chain_id": 59144,
+      "native_token": "ETH",
+      "scan": "https://lineascan.build",
+      "rpcs": [
+        "https://linea-rpc.publicnode.com",
+        "https://1rpc.io/linea"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xA219439258ca9da29E9Cc4cE5596924745e12B93",
+        "USDC": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff"
+      }
+    },
     "blast": {
       "chain_id": 81457,
       "native_token": "ETH",

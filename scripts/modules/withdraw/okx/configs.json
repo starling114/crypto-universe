@@ -3,7 +3,8 @@
     "ethereum",
     "arbitrum",
     "base",
-    "optimism"
+    "optimism",
+    "linea"
   ],
   "available_symbols": [
     "ETH",

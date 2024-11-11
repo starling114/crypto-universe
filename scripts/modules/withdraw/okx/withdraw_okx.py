@@ -7,6 +7,7 @@ OKX_CHAIN_MAPPING = {
     "arbitrum": "Arbitrum One",
     "base": "Base",
     "optimism": "Optimism",
+    "linea": "Linea",
 }
 
 

@@ -35,6 +35,13 @@
         "USDC"
       ]
     },
+    "linea": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC"
+      ]
+    },
     "blast": {
       "tokens": [
         "ETH",
