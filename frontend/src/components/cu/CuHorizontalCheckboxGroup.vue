@@ -1,8 +1,9 @@
 <template>
-  <div class="mb-2 flex items-center">
+  <div v-for="optionsBatch in optionsBatches" :key="optionsBatch" class="mb-1 flex items-center">
+
     <ul
       class="items-center w-full font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-      <li v-for="option in options" :key="option"
+      <li v-for="option in optionsBatch" :key="option"
         class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
         <div class="flex items-center ps-3">
           <input type="checkbox" :id="option" :value="option" :checked="modelValue.includes(option)"
@@ -18,17 +19,24 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, computed } from 'vue'
 
 const props = defineProps({
   name: { type: String, reqiured: true },
   modelValue: { type: Array, reqiured: true },
   label: { type: String },
   tooltip: { type: String },
-  options: { type: Array, required: true }
+  options: { type: Array, required: true },
+  batchSize: { type: Number, default: 5 }
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const optionsBatches = computed(() => {
+  return Array.from({ length: Math.ceil(props.options.length / props.batchSize) }, (_, i) =>
+    props.options.slice(i * props.batchSize, i * props.batchSize + props.batchSize)
+  )
+})
 
 const handleCheckboxChange = (value, isChecked) => {
   const newValue = isChecked
