@@ -12,6 +12,8 @@ import WithdrawOkxView from '@/views/WithdrawOkxView.vue'
 import WithdrawOkxSettingsView from '@/views/settings/WithdrawOkxSettingsView.vue'
 import BridgeRelayView from '@/views/BridgeRelayView.vue'
 import BridgeRelaySettingsView from '@/views/settings/BridgeRelaySettingsView.vue'
+import BridgeHyperlaneView from '@/views/BridgeHyperlaneView.vue'
+import BridgeHyperlaneSettingsView from '@/views/settings/BridgeHyperlaneSettingsView.vue'
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 
@@ -48,28 +50,40 @@ const routes = [
     meta: { title: 'CU | Balances Settings' }
   },
   {
-    path: '/withdraw_okx',
+    path: '/withdraw-okx',
     name: 'Withdraw OKX',
     component: WithdrawOkxView,
     meta: { title: 'CU | Withdraw OKX' }
   },
   {
-    path: '/withdraw_okx/settings',
+    path: '/withdraw-okx/settings',
     name: 'Withdraw OKX Settings',
     component: WithdrawOkxSettingsView,
     meta: { title: 'CU | Withdraw OKX Settings' }
   },
   {
-    path: '/bridge_relay',
+    path: '/bridge-relay',
     name: 'Bridge Relay',
     component: BridgeRelayView,
     meta: { title: 'CU | Bridge Relay' }
   },
   {
-    path: '/bridge_relay/settings',
+    path: '/bridge-relay/settings',
     name: 'Bridge Relay Settings',
     component: BridgeRelaySettingsView,
     meta: { title: 'CU | Bridge Relay Settings' }
+  },
+  {
+    path: '/bridge-hyperlane',
+    name: 'Bridge Hyperlane',
+    component: BridgeHyperlaneView,
+    meta: { title: 'CU | Bridge Hyperlane' }
+  },
+  {
+    path: '/bridge-hyperlane/settings',
+    name: 'Bridge Hyperlane Settings',
+    component: BridgeHyperlaneSettingsView,
+    meta: { title: 'CU | Bridge Hyperlane Settings' }
   },
   {
     path: '/transfer',

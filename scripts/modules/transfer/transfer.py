@@ -132,9 +132,7 @@ class Transfer:
 
             else:
                 contract_txn = token_contract.functions.transfer(
-                    Web3.to_checksum_address(
-                        self.web3.to_checksum_address(self.source_address)
-                    ),
+                    self.web3.to_checksum_address(self.source_address),
                     calculated_amount,
                 ).build_transaction(
                     {
@@ -153,7 +151,7 @@ class Transfer:
             if (
                 token_address == NATIVE_TOKEN_ADDRESS
                 and self.leave_balance
-                and int(self.leave_balance_amount) == 0
+                and float(self.leave_balance_amount) == 0
             ):
                 gas_estimate = int(contract_txn["gasPrice"] * contract_txn["gas"])
                 contract_txn["value"] = calculated_amount - gas_estimate

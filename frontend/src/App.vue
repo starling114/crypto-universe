@@ -46,34 +46,75 @@
         </template>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('withdraw_okx')">
+      <cu-sidebar-item v-if="moduleEnabled('withdraw-okx')">
         <template #left>
           <ArrowDownOnSquareStackIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
         <template #center>Withdraw</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/withdraw_okx">
+        <cu-sidebar-sub-item tag="router-link" link="/withdraw-okx"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(okx.png)',
+                WebkitMaskImage: 'url(okx.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
           <template #center>OKX</template>
           <template #right>
-            <router-link to="/withdraw_okx/settings">
+            <router-link to="/withdraw-okx/settings">
               <AdjustmentsHorizontalIcon
                 class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
             </router-link> </template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('bridge_relay')">
+      <cu-sidebar-item v-if="moduleEnabled('bridge-relay') || moduleEnabled('bridge-hyperlane')">
         <template #left>
           <PaperAirplaneIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
         <template #center>Bridge</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/bridge_relay">
+        <cu-sidebar-sub-item v-if="moduleEnabled('bridge-relay')" tag="router-link" link="/bridge-relay">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(relay.png)',
+                WebkitMaskImage: 'url(relay.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
           <template #center>Relay</template>
           <template #right>
-            <router-link to="/bridge_relay/settings">
+            <router-link to="/bridge-relay/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+            </router-link> </template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item v-if="moduleEnabled('bridge-hyperlane')" tag="router-link" link="/bridge-hyperlane">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(hyperlane.png)',
+                WebkitMaskImage: 'url(hyperlane.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Hyperlane</template>
+          <template #right>
+            <router-link to="/bridge-hyperlane/settings">
               <AdjustmentsHorizontalIcon
                 class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
             </router-link> </template>

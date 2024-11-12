@@ -25,8 +25,7 @@
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <cu-checkbox name="randomize" v-model="randomize" label="Randomize"
-      tooltip="Shuffle addresses during execution." />
+    <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />
     <div v-if="sleep" class="mt-1 grid grid-cols-6 gap-2">

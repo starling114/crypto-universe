@@ -5,10 +5,11 @@ from utils import log_error
 
 load_dotenv(find_dotenv('../.env'))
 
-MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": Transfer}
+MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": BridgeHyperlane, "4": Transfer}
 ARGS_MODULES = {
     "withdraw-okx": WithdrawOkx,
     "bridge-relay": BridgeRelay,
+    "bridge-hyperlane": BridgeHyperlane,
     "transfer": Transfer,
 }
 
@@ -31,7 +32,8 @@ def display_menu():
     print("Select a module to run:")
     print("1. Withdraw OKX")
     print("2. Bridge Relay")
-    print("3. Transfer")
+    print("3. Bridge Hyperlane")
+    print("4. Transfer")
 
     choice = input("Enter your choice: ")
 

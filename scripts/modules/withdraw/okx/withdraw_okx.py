@@ -1,7 +1,5 @@
 from modules.withdraw.withdraw_base import WithdrawBase
 
-from utils import logger, humanify_number, debug_mode
-
 OKX_CHAIN_MAPPING = {
     "ethereum": "ERC20",
     "arbitrum": "Arbitrum One",

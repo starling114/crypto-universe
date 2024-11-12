@@ -1,8 +1,9 @@
 {
   "available_modules": [
     "balances",
-    "withdraw_okx",
-    "bridge_relay",
+    "withdraw-okx",
+    "bridge-relay",
+    "bridge-hyperlane",
     "transfer"
   ]
 }

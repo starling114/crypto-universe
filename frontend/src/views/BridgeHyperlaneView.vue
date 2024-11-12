@@ -1,22 +1,30 @@
 <template>
-  <cu-title title="Withdraw OKX" />
+  <cu-title title="Bridge Hyperlane" />
 
-  <div class="grid grid-cols-2 gap-2">
-    <cu-textarea name="addresses" v-model="addresses" label="Destination Addresses"
-      placeholder="Enter addresses each on the new line..." tooltip="Addresses you want to withdraw funds to." />
-    <cu-textarea name="amounts" v-model="amounts" label="Withdrawal Amounts"
-      tooltip="Amounts for the withdrawal operation corresponding to the specific address on the left."
+  <cu-checkbox name="leaveBalance" v-model="leaveBalance" label="Leave Balance Amount"
+    tooltip="Leave this amount on the balance and withdraw everything else." />
+  <div v-if="leaveBalance" class="mt-1 grid grid-cols-4 gap-2">
+    <cu-input name="leaveBalanceAmount" v-model="leaveBalanceAmount" placeholder="Leave amount..." />
+  </div>
+
+  <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': !leaveBalance }">
+    <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
+      placeholder="Enter wallet addresses each on the new line..."
+      tooltip="Wallet addresses for the bridge operation." />
+    <cu-textarea v-if="!leaveBalance" name="amounts" v-model="amounts" label="Bridge Amounts"
+      tooltip="Amounts for the bridge operation corresponding to the specific wallet address on the left."
       placeholder="Enter amounts each on the new line..." />
   </div>
 
-  <div class="grid grid-cols-2 gap-2">
-    <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
+  <div class="grid grid-cols-3 gap-3">
+    <cu-select name="fromChain" v-model="fromChain" :options="availableChains" @change="handleFromChainChange"
+      label="Source Network" />
+    <cu-select name="toChain" v-model="toChain" :options="availableChains" @change="handleToChainChange"
+      label="Destination Network" />
     <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <cu-checkbox name="amountIncludesFee" v-model="amountIncludesFee" label="Amount Includes Fee"
-      tooltip="Deduct fee from the amount entered in `amounts` field. Usefull when you want that exact amount to be withdrawn from OKX otherwise fee will be added to amount." />
     <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />
@@ -41,31 +49,37 @@ import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
   CuTitle,
-  CuTextarea,
+  CuCheckbox,
   CuInput,
+  CuTextarea,
   CuSelect,
   CuCollapsibleSection,
-  CuCheckbox,
   CuButton,
   CuLogs
 } from '@/components/cu'
 
+const leaveBalance = ref(false)
+const leaveBalanceAmount = ref('0.0005')
 const addresses = ref('')
 const amounts = ref('')
 const availableChains = ref([])
-const chain = ref(null)
+const fromChain = ref(null)
+const toChain = ref(null)
+const previousFromChain = ref(null)
+const previousToChain = ref(null)
 const availableSymbols = ref([])
 const symbol = ref(null)
 
-const amountIncludesFee = ref(true)
 const randomize = ref(true)
 const sleep = ref(true)
 const sleepDelays = ref(['120', '240'])
 
+const chains = ref({})
+
 const logs = ref([])
 const moduleRunning = ref(false)
 
-const module = ref('withdraw-okx')
+const module = ref('bridge-hyperlane')
 
 const { proxy } = getCurrentInstance()
 
@@ -74,28 +88,35 @@ const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
-    if (!Object.hasOwn(data, 'addresses')) return
+    if (!Object.hasOwn(data, 'randomize')) return
+
+    leaveBalance.value = data.leave_balance
+    leaveBalanceAmount.value = data.leave_balance_amount
 
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
 
-    chain.value = data.chain
+    fromChain.value = data.from_chain
+    toChain.value = data.to_chain
     symbol.value = data.symbol
 
-    amountIncludesFee.value = data.amount_includes_fee
     randomize.value = data.randomize
     sleep.value = data.sleep
     sleepDelays.value = data.sleep_delays
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
-    if (!Object.hasOwn(data, 'available_chains')) return
+    if (!Object.hasOwn(data, 'chains')) return
 
-    availableChains.value = data.available_chains
-    availableSymbols.value = data.available_symbols
+    chains.value = data.chains
+    availableChains.value = Object.keys(data.chains)
   }, logs)
 
-  chain.value = chain.value || availableChains.value[0]
+  fromChain.value = fromChain.value || availableChains.value[0]
+  previousFromChain.value = fromChain.value
+  toChain.value = toChain.value || availableChains.value[1]
+  previousToChain.value = toChain.value
+  availableSymbols.value = chainSymbols(fromChain.value)
   symbol.value = symbol.value || availableSymbols.value[0]
 }
 
@@ -106,8 +127,10 @@ const handleExecute = async () => {
     randomize: randomize.value,
     sleep: sleep.value,
     sleep_delays: sleepDelays.value,
-    amount_includes_fee: amountIncludesFee.value,
-    chain: chain.value,
+    leave_balance: leaveBalance.value,
+    leave_balance_amount: leaveBalanceAmount.value,
+    from_chain: fromChain.value,
+    to_chain: toChain.value,
     symbol: symbol.value,
     addresses: addresses.value.split('\n').filter(Boolean),
     amounts: amounts.value.split('\n').filter(Boolean)
@@ -119,6 +142,35 @@ const handleExecute = async () => {
 const handleStop = async () => {
   await stopModule(proxy, module.value)
   moduleRunning.value = false
+}
+
+const handleFromChainChange = async () => {
+  const oldFromChain = previousFromChain.value
+  previousFromChain.value = fromChain.value
+
+  if (fromChain.value === toChain.value) {
+    fromChain.value = toChain.value
+    toChain.value = oldFromChain
+    previousToChain.value = toChain.value
+  }
+
+  availableSymbols.value = chainSymbols(fromChain.value)
+  symbol.value = availableSymbols.value[0]
+}
+
+const handleToChainChange = async () => {
+  const oldToChain = previousToChain.value
+  previousToChain.value = toChain.value
+
+  if (toChain.value === fromChain.value) {
+    toChain.value = fromChain.value
+    fromChain.value = oldToChain
+    previousFromChain.value = fromChain.value
+  }
+}
+
+const chainSymbols = (chain) => {
+  return chains.value[chain] ? chains.value[chain].tokens : []
 }
 
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)
