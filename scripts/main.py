@@ -1,9 +1,9 @@
 import sys
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from modules import *
 from utils import log_error
 
-load_dotenv()
+load_dotenv(find_dotenv('../.env'))
 
 MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": Transfer}
 ARGS_MODULES = {

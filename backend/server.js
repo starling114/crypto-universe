@@ -1,4 +1,6 @@
 import express from 'express'
+import dotenv from 'dotenv'
+import path from 'path'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
 import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion } from "./utils.js"
@@ -6,10 +8,11 @@ import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
 
+dotenv.config({ path: path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.env') })
+
 const app = express()
 const port = 3000
 const apiRoutes = express.Router()
-
 const logEmitter = new EventEmitter()
 const ansiToHtml = new AnsiToHtml()
 

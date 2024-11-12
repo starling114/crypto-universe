@@ -53,15 +53,30 @@ export function compareVersions(version1, version2) {
   return true
 }
 
+function debugMode() {
+  return process.env.DEBUG === "true"
+}
+
+async function fetchRemoteVersion(localVersion) {
+  try {
+    const response = await axios.get(`https://crypto-universe.starling114.workers.dev?version=${localVersion}`)
+    return response.data
+  } catch {
+    return false
+  }
+}
+
 export async function checkVersion() {
+  if (debugMode()) return true
+
   const localVersion = readJson('./package.json').version
 
   if (!localVersion) return true
 
-  let latestVersion
-  await axios.get('https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/package.json').then(response => {
-    latestVersion = response.data.version
-  })
+  let latestVersion = await fetchRemoteVersion(localVersion)
+  latestVersion ||= await fetchVersion()
+
+  if (!latestVersion) return true
 
   const upToDate = compareVersions(localVersion, latestVersion)
 
@@ -72,6 +87,15 @@ export async function checkVersion() {
   }
 
   return upToDate
+}
+
+async function fetchVersion() {
+  try {
+    const response = await axios.get('https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/package.json')
+    return response.data.version
+  } catch {
+    return false
+  }
 }
 
 export function pythonExecutable() {
