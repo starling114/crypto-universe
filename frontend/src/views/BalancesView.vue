@@ -20,7 +20,7 @@
           <cu-table-cell>
             {{ item.wallet }}
             <div class="float-right">
-              <a :href="'https://debank.com/profile/' + item.wallet">
+              <a :href="`https://debank.com/profile/${item.wallet}/history`">
                 <img src="debank.png" class="inline-block h-4 w-4" />
               </a>
               <a :href="`${configs.chains[activeNetwork].scan}/address/${item.wallet}`" class="ml-2">

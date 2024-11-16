@@ -17,7 +17,7 @@
   </div>
   <section>
     <cu-sidebar>
-      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" />
+      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" />
       <cu-sidebar-item tag="router-link" link="/">
         <template #left>
           <ChartPieIcon
@@ -170,6 +170,7 @@ import {
 
 const modules = ref({})
 const versionUpToDate = ref(true)
+const debugMode = ref(false)
 const showVersionBanner = ref(true)
 
 const module = ref('crypto_universe')
@@ -183,8 +184,11 @@ const loadDefaults = async () => {
     modules.value = data.modules
   })
 
-  await proxy.$axios.get('/api/version').then((response) => {
-    versionUpToDate.value = response.data.up_to_date
+  await proxy.$axios.get('/api/configs').then((response) => {
+    if (!Object.hasOwn(response.data, 'debug_mode')) return
+
+    debugMode.value = response.data.debug_mode
+    versionUpToDate.value = response.data.version_up_to_date
   })
 }
 

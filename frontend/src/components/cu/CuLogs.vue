@@ -24,18 +24,34 @@ const emit = defineEmits(['append:logs', 'finished:script'])
 const eventSource = ref(null)
 const { proxy } = getCurrentInstance()
 
-const clickableLinks = (text) => {
-  const urlPattern = /https?:\/\/[^\s]+/g
-  return text.replace(urlPattern, (url) =>
-    `<a href="${url}" target="_blank" rel="noopener noreferrer" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">${url}</a>`
-  )
+const formatLogs = (text) => {
+  let newText = text
+  const replaces = [
+    {
+      regex: /https?:\/\/[^\s]+/g,
+      replaceText: (match) =>
+        `<a href="${match}" target="_blank" rel="noopener noreferrer" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">${match}</a>`,
+    },
+    {
+      regex: /\b0x[a-fA-F0-9]{40}\b/g,
+      replaceText: (match) =>
+        `<a href="https://debank.com/profile/${match}/history" target="_blank" rel="noopener noreferrer" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">${match}</a>`,
+    }
+  ]
+
+  replaces.forEach(({ regex, replaceText }) => {
+    newText = newText.replace(regex, replaceText)
+  })
+
+
+  return newText
 }
 
 const startLogStreaming = () => {
   eventSource.value = new EventSource(`${proxy.$axios.defaults.baseURL}/api/logs?module=${props.module}`)
 
   eventSource.value.onmessage = (event) => {
-    emit('append:logs', clickableLinks(event.data))
+    emit('append:logs', formatLogs(event.data))
     if (event.data.includes("finished with exit code")) emit('finished:script')
   }
 

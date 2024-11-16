@@ -53,7 +53,7 @@ export function compareVersions(version1, version2) {
   return true
 }
 
-function debugMode() {
+export function debugMode() {
   return process.env.DEBUG === "true"
 }
 
