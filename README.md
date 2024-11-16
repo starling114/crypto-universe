@@ -80,10 +80,13 @@ The server will start on [http://localhost:3000](http://localhost:3000). You can
 - Withdraw funds from OKX using API integration to specified addresses.
 - To configure this feature, visit settings page (icon in the Withdraw -> OKX menu item on the right).
 
-### 3. Bridge Relay
+### 3. Bridge
+- Bridge funds from one network to another using specified addresses.
+- To configure this feature, visit settings page (icon in the Bridge -> menu item on the right) to enter addresses and their private keys.
 
-- Bridge funds via relay from one network to another using specified addresses.
-- To configure this feature, visit settings page (icon in the Bridge -> Relay menu item on the right) to enter addresses and their private keys.
+Currently supports following bridges:
+- Relay
+- Hyperlane
 
 ### 3. Transfer
 
