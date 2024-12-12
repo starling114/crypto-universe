@@ -4,6 +4,7 @@
     "withdraw-okx",
     "bridge-relay",
     "bridge-hyperlane",
-    "transfer"
+    "transfer",
+    "testnet-mitosis"
   ]
 }

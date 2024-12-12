@@ -4,14 +4,13 @@ import sys
 import requests
 import random
 import traceback
+import time
 
 from loguru import logger
 
 logger.remove()
 logger.level("INFO", color="<bold><cyan>")
-format = (
-    "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
-)
+format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
 logger.add(sys.stdout, colorize=True, format=format)
 
 
@@ -75,9 +74,7 @@ def post_call(url, data=None, json=None, headers=None):
 
 def get_balance(web3, wallet_address, contract=None):
     if contract:
-        balance = contract.functions.balanceOf(
-            web3.to_checksum_address(wallet_address)
-        ).call()
+        balance = contract.functions.balanceOf(web3.to_checksum_address(wallet_address)).call()
     else:
         balance = web3.eth.get_balance(web3.to_checksum_address(wallet_address))
 
@@ -109,9 +106,7 @@ def sign_tx(web3, contract_txn, private_key):
     elif hasattr(signed_tx, "rawTransaction"):
         raw_tx = signed_tx.rawTransaction
     else:
-        raise AttributeError(
-            "SignedTransaction does not contain raw_transaction or rawTransaction."
-        )
+        raise AttributeError("SignedTransaction does not contain raw_transaction or rawTransaction.")
 
     raw_tx_hash = web3.eth.send_raw_transaction(raw_tx)
     tx_hash = web3.to_hex(raw_tx_hash)
@@ -126,9 +121,7 @@ def zip_to_addresses(addresses, to_zip):
 def get_private_key(web3, settings, address):
     private_key = settings["private_keys"][address]
 
-    if web3.eth.account.from_key(private_key).address != web3.to_checksum_address(
-        address
-    ):
+    if web3.eth.account.from_key(private_key).address != web3.to_checksum_address(address):
         raise ExecutionError("Wrong private key for address")
 
     return private_key
@@ -153,9 +146,7 @@ def wait_tx_completion(web3, tx_hash):
 def get_token_data(web3, token_address):
     abi = load_json("../erc20abi.json")
 
-    token_contract = web3.eth.contract(
-        address=web3.to_checksum_address(token_address), abi=abi
-    )
+    token_contract = web3.eth.contract(address=web3.to_checksum_address(token_address), abi=abi)
     decimals = token_contract.functions.decimals().call()
     symbol = token_contract.functions.symbol().call()
 
@@ -177,6 +168,11 @@ def log_error(error, prefix=""):
     # lineno = exc_tb.tb_lineno
     # funcname = ""
 
-    logger.error(
-        f"{formatted_prefix}{type(error).__name__}: {str(error)}. {filename}:{lineno}, function: {funcname}"
-    )
+    logger.error(f"{formatted_prefix}{type(error).__name__}: {str(error)}. {filename}:{lineno}, function: {funcname}")
+
+
+def sleep(delay, max_delay=None):
+    if max_delay is not None:
+        delay = random.uniform(delay, max_delay)
+
+    time.sleep(delay)

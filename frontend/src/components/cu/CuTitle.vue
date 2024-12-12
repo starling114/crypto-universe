@@ -8,6 +8,6 @@
 import { defineProps } from 'vue'
 
 defineProps({
-  title: { type: String, reqiured: true }
+  title: { type: String, required: true }
 })
 </script>

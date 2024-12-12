@@ -25,7 +25,7 @@ import { defineProps } from 'vue'
 import { QuestionMarkCircleIcon } from '@heroicons/vue/16/solid'
 
 defineProps({
-  label: { type: String, reqiured: true },
+  label: { type: String, required: true },
   name: { type: String },
   tooltip: { type: String }
 })

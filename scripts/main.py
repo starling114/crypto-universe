@@ -1,16 +1,17 @@
 import sys
 from dotenv import load_dotenv, find_dotenv
 from modules import *
-from utils import log_error
+from utils import log_error, logger
 
-load_dotenv(find_dotenv('../.env'))
+load_dotenv(find_dotenv("../.env"))
 
-MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": BridgeHyperlane, "4": Transfer}
+MODULES = {"1": WithdrawOkx, "2": BridgeRelay, "3": BridgeHyperlane, "4": Transfer, "5": TestnetMitosis}
 ARGS_MODULES = {
     "withdraw-okx": WithdrawOkx,
     "bridge-relay": BridgeRelay,
     "bridge-hyperlane": BridgeHyperlane,
     "transfer": Transfer,
+    "testnet-mitosis": TestnetMitosis,
 }
 
 
@@ -34,6 +35,7 @@ def display_menu():
     print("2. Bridge Relay")
     print("3. Bridge Hyperlane")
     print("4. Transfer")
+    print("5. Testnet Mitosis")
 
     choice = input("Enter your choice: ")
 
@@ -53,6 +55,8 @@ if __name__ == "__main__":
             selected_module.run()
         else:
             print("Invalid choice.")
+    except KeyboardInterrupt:
+        logger.info("Execution stopped.")
     except Exception as e:
         log_error(e)
         # raise e

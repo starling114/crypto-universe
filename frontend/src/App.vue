@@ -135,6 +135,28 @@
         </template>
       </cu-sidebar-item>
 
+      <cu-sidebar-item v-if="moduleEnabled('testnet-mitosis')">
+        <template #left>
+          <RectangleStackIcon
+            class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+        </template>
+        <template #center>Testnets</template>
+
+        <cu-sidebar-sub-item tag="router-link" link="/testnet-mitosis"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(mitosis.png)',
+                WebkitMaskImage: 'url(mitosis.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Mitosis</template>
+        </cu-sidebar-sub-item>
+      </cu-sidebar-item>
+
       <cu-sidebar-theme-switch />
     </cu-sidebar>
 
@@ -165,6 +187,7 @@ import {
   PaperAirplaneIcon,
   ArrowUpOnSquareStackIcon,
   FireIcon,
+  RectangleStackIcon,
   XMarkIcon
 } from "@heroicons/vue/24/solid"
 

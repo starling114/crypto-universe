@@ -11,8 +11,8 @@ import { defineProps } from 'vue'
 import { CuLabel } from '@/components/cu'
 
 defineProps({
-  name: { type: String, reqiured: true },
-  modelValue: { type: Boolean, reqiured: true },
+  name: { type: String, required: true },
+  modelValue: { type: Boolean, required: true },
   label: { type: String },
   tooltip: { type: String }
 })

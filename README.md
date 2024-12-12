@@ -88,10 +88,16 @@ Currently supports following bridges:
 - Relay
 - Hyperlane
 
-### 3. Transfer
+### 4. Transfer
 
 - Transfer funds from one wallet to another using specified addresses.
 - To configure this feature, visit settings page (icon in the Transfer menu item on the right) to enter addresses and their private keys.
+
+### 5. Testnets
+- Toolkit to run different testnets automations using AdsPower.
+
+Currently supports following testnets:
+- Mitosis (autoplay MITO, claim faceuts, make deposits, craft cells, auto swaps)
 
 ### Python Scripts configuration and execution
 

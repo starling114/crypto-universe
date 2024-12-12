@@ -16,6 +16,7 @@ import BridgeHyperlaneView from '@/views/BridgeHyperlaneView.vue'
 import BridgeHyperlaneSettingsView from '@/views/settings/BridgeHyperlaneSettingsView.vue'
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
+import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
 
 const app = createApp(App)
 
@@ -97,6 +98,12 @@ const routes = [
     component: TransferSettingsView,
     meta: { title: 'CU | Transfer Settings' }
   },
+  {
+    path: '/testnet-mitosis',
+    name: 'Testnet Mitosis',
+    component: TestnetMitosisView,
+    meta: { title: 'CU | Testnet Mitosis' }
+  }
 ]
 
 const router = new createRouter({

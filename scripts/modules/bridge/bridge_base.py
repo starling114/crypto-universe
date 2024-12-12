@@ -1,5 +1,4 @@
 from web3 import Web3
-import time
 import random
 
 from utils import (
@@ -15,6 +14,7 @@ from utils import (
     wait_tx_completion,
     log_error,
     debug_mode,
+    sleep,
     ExecutionError,
 )
 from utils import logger
@@ -64,13 +64,9 @@ class BridgeBase:
                 f"Not enough balance. Amount > Balance ({humanify_number(wei_to_int(amount))} > {humanify_number(wei_to_int(balance))})"
             )
         elif amount > max_amount:
-            raise ExecutionError(
-                f"Max transaction amount {humanify_number(wei_to_int(max_amount))}"
-            )
+            raise ExecutionError(f"Max transaction amount {humanify_number(wei_to_int(max_amount))}")
         elif amount < min_amount:
-            raise ExecutionError(
-                f"Min transaction amount {humanify_number(wei_to_int(min_amount))}"
-            )
+            raise ExecutionError(f"Min transaction amount {humanify_number(wei_to_int(min_amount))}")
 
     def calculate_amount_base(self, balance):
         if self.leave_balance:
@@ -160,4 +156,4 @@ class BridgeBase:
                     int(instructions["sleep_delays"][1]),
                 )
                 logger.info(f"Sleeping for {humanify_seconds(sleep_time)}")
-                time.sleep(sleep_time)
+                sleep(sleep_time)

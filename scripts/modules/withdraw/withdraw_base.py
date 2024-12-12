@@ -1,6 +1,5 @@
 import ccxt
 import random
-import time
 
 from utils import (
     load_json,
@@ -10,6 +9,7 @@ from utils import (
     zip_to_addresses,
     log_error,
     debug_mode,
+    sleep,
 )
 from utils import logger
 
@@ -113,4 +113,4 @@ class WithdrawBase:
                     int(instructions["sleep_delays"][1]),
                 )
                 logger.info(f"Sleeping for {humanify_seconds(sleep_time)}")
-                time.sleep(sleep_time)
+                sleep(sleep_time)

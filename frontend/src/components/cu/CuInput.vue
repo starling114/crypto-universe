@@ -13,8 +13,8 @@ import { defineProps, computed } from 'vue'
 import { CuLabel } from '@/components/cu'
 
 const props = defineProps({
-  name: { type: String, reqiured: true },
-  modelValue: { type: [String, Number], reqiured: true },
+  name: { type: String, required: true },
+  modelValue: { type: [String, Number], required: true },
   label: { type: String },
   placeholder: { type: String },
   tooltip: { type: String },

@@ -10,9 +10,7 @@ OKX_CHAIN_MAPPING = {
 
 
 class WithdrawOkx(WithdrawBase):
-    def __init__(
-        self, cex, secrets, address, chain, symbol, amount_includes_fee, amount
-    ):
+    def __init__(self, cex, secrets, address, chain, symbol, amount_includes_fee, amount):
         super().__init__(
             cex,
             secrets,

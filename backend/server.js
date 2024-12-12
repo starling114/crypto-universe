@@ -73,7 +73,7 @@ apiRoutes.post('/stop_module', (req, res) => {
 
   if (pythonProcesses[module]) {
     logEmitter.emit('log', `Stopping ${module} module...`, module)
-    pythonProcesses[module].kill()
+    pythonProcesses[module].kill('SIGINT')
     delete pythonProcesses[module]
     res.json(true)
     logEmitter.emit('log', `Module ${module} was successfuly stopped`, module)

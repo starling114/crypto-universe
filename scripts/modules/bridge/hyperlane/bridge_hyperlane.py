@@ -18,12 +18,8 @@ class BridgeHyperlane(BridgeBase):
         balance = get_balance(self.web3, self.address)
         amount = self.calculate_amount_base(balance)
 
-        bridge_fee_tmp = bridge_contract.functions.quoteBridge(
-            to_chain_id, amount
-        ).call()
-        bridge_fee = bridge_contract.functions.quoteBridge(
-            to_chain_id, amount - bridge_fee_tmp
-        ).call()
+        bridge_fee_tmp = bridge_contract.functions.quoteBridge(to_chain_id, amount).call()
+        bridge_fee = bridge_contract.functions.quoteBridge(to_chain_id, amount - bridge_fee_tmp).call()
         amount = amount - bridge_fee
 
         self.amount_validations(
@@ -36,22 +32,16 @@ class BridgeHyperlane(BridgeBase):
         self.calculated_amount = amount
 
     def get_contract_txn(self):
-        bridge_contract = self.web3.eth.contract(
-            address=HYPERLANE_CONTRACTS[self.from_chain], abi=HYPERLANE_ABI
-        )
+        bridge_contract = self.web3.eth.contract(address=HYPERLANE_CONTRACTS[self.from_chain], abi=HYPERLANE_ABI)
         to_chain_id = self.configs["chains"][self.to_chain]["chain_id"]
 
         self.calculate_amount(bridge_contract, to_chain_id)
 
         amount_without_fee = self.calculated_amount
-        fee = bridge_contract.functions.quoteBridge(
-            to_chain_id, amount_without_fee
-        ).call()
+        fee = bridge_contract.functions.quoteBridge(to_chain_id, amount_without_fee).call()
         self.calculated_amount = amount_without_fee + fee
 
-        contract_txn = bridge_contract.functions.bridgeETH(
-            to_chain_id, amount_without_fee
-        ).build_transaction(
+        contract_txn = bridge_contract.functions.bridgeETH(to_chain_id, amount_without_fee).build_transaction(
             {
                 "nonce": get_transactions_count(self.web3, self.address),
                 "from": self.web3.to_checksum_address(self.address),

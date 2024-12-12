@@ -1,5 +1,4 @@
 from web3 import Web3
-import time
 import random
 from utils import (
     load_json,
@@ -19,6 +18,7 @@ from utils import (
     sign_tx,
     wait_tx_completion,
     debug_mode,
+    sleep,
     ExecutionError,
 )
 from utils import logger
@@ -58,9 +58,7 @@ class Transfer:
 
     def calculate_token_data(self):
         if self.use_custom_asset:
-            address, contract, decimals, symbol = get_token_data(
-                self.web3, self.custom_asset
-            )
+            address, contract, decimals, symbol = get_token_data(self.web3, self.custom_asset)
         else:
             config_address = self.configs["chains"][self.chain]["tokens"][self.symbol]
 
@@ -70,9 +68,7 @@ class Transfer:
                 decimals = 18
                 symbol = self.symbol
             else:
-                address, contract, decimals, symbol = get_token_data(
-                    self.web3, config_address
-                )
+                address, contract, decimals, symbol = get_token_data(self.web3, config_address)
 
         return [address, contract, decimals, symbol]
 
@@ -90,9 +86,7 @@ class Transfer:
                     f"Not enough balance. Balance < Leave Balance ({humanify_number(wei_to_int(balance, decimals))} < {self.leave_balance_amount})"
                 )
             else:
-                amount = balance - int_to_wei(
-                    float(self.leave_balance_amount), decimals
-                )
+                amount = balance - int_to_wei(float(self.leave_balance_amount), decimals)
         else:
             amount = int_to_wei(float(self.amount), decimals)
 
@@ -112,12 +106,8 @@ class Transfer:
         try:
             scan = self.configs["chains"][self.chain]["scan"]
 
-            token_address, token_contract, decimals, symbol = (
-                self.calculate_token_data()
-            )
-            calculated_amount = self.calculate_amount(
-                token_address, token_contract, decimals
-            )
+            token_address, token_contract, decimals, symbol = self.calculate_token_data()
+            calculated_amount = self.calculate_amount(token_address, token_contract, decimals)
 
             if token_address == NATIVE_TOKEN_ADDRESS:
                 contract_txn = {
@@ -148,11 +138,7 @@ class Transfer:
             contract_txn["gasPrice"] = get_gas_price(self.web3)
 
             # In case of transfer max in native token gas should be deducted from amount
-            if (
-                token_address == NATIVE_TOKEN_ADDRESS
-                and self.leave_balance
-                and float(self.leave_balance_amount) == 0
-            ):
+            if token_address == NATIVE_TOKEN_ADDRESS and self.leave_balance and float(self.leave_balance_amount) == 0:
                 gas_estimate = int(contract_txn["gasPrice"] * contract_txn["gas"])
                 contract_txn["value"] = calculated_amount - gas_estimate
 
@@ -193,9 +179,7 @@ class Transfer:
 
         source_addresses = instructions["source_addresses"]
         amounts = zip_to_addresses(source_addresses, instructions["amounts"])
-        destinaion_addresses = zip_to_addresses(
-            source_addresses, instructions["destinaion_addresses"]
-        )
+        destinaion_addresses = zip_to_addresses(source_addresses, instructions["destinaion_addresses"])
 
         rpc = random.choice(configs["chains"][instructions["chain"]]["rpcs"])
         web3 = Web3(Web3.HTTPProvider(rpc))
@@ -227,4 +211,4 @@ class Transfer:
                     int(instructions["sleep_delays"][1]),
                 )
                 logger.info(f"Sleeping for {humanify_seconds(sleep_time)}")
-                time.sleep(sleep_time)
+                sleep(sleep_time)
