@@ -5,13 +5,20 @@ import requests
 import random
 import traceback
 import time
-
 from loguru import logger
+
+
+def debug_mode():
+    return os.getenv("DEBUG") == "true"
+
 
 logger.remove()
 logger.level("INFO", color="<bold><cyan>")
+logger.level("WARNING", color="<bold><yellow>")
+logger.level("DEBUG", color="<bold><blue>")
+level = "DEBUG" if debug_mode() else "INFO"
 format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
-logger.add(sys.stdout, colorize=True, format=format)
+logger.add(sys.stdout, colorize=True, format=format, level=level)
 
 
 class ExecutionError(Exception):
@@ -153,22 +160,17 @@ def get_token_data(web3, token_address):
     return web3.to_checksum_address(token_address), token_contract, decimals, symbol
 
 
-def debug_mode():
-    return os.getenv("DEBUG") == "true"
-
-
 def log_error(error, prefix=""):
-    formatted_prefix = f"{prefix} | " if prefix == "" else ""
+    formatted_prefix = f"{prefix} | " if prefix != "" else ""
 
-    tb_list = traceback.extract_tb(error.__traceback__)
-    filename, lineno, funcname, _ = tb_list[-1]
+    if debug_mode():
+        error_str = f"\n{''.join(traceback.format_exception(type(error), error, error.__traceback__))}"
+    else:
+        tb_list = traceback.extract_tb(error.__traceback__)
+        filename, lineno, funcname, _ = tb_list[-1]
+        error_str = f" {filename}:{lineno}, function: {funcname}"
 
-    # _, _, exc_tb = sys.exc_info()
-    # filename = exc_tb.tb_frame.f_code.co_filename
-    # lineno = exc_tb.tb_lineno
-    # funcname = ""
-
-    logger.error(f"{formatted_prefix}{type(error).__name__}: {str(error)}. {filename}:{lineno}, function: {funcname}")
+    logger.error(f"{formatted_prefix}{type(error).__name__}: {str(error)}{error_str}")
 
 
 def sleep(delay, max_delay=None):

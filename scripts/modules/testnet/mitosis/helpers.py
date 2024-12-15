@@ -1,4 +1,3 @@
-MITO_PLAY_MINUTES = 5
 MITO_GAME_CELLS = [
     "2-4",
     "2-5",
@@ -40,9 +39,20 @@ MITO_GAME_CELLS = [
     "20-7",
     "20-8",
 ]
+
 DEPOSITS_ASSETS = [
     {"name": "ETH", "networks": ["arbitrum", "optimism", "base"]},
     {"name": "LBTC", "networks": ["arbitrum", "optimism"]},
     {"name": "USDT", "networks": ["arbitrum", "optimism", "base", "linea"]},
     {"name": "USDe", "networks": ["arbitrum", "optimism", "base", "linea"]},
+]
+
+CHROMO_MAIN_ASSET_TO_TRADE = "ETH"
+CHROMO_ASSETS_TO_TRADE = ["LBTC", "USDT", "USDe", "WMITO"]
+
+TELO_ASSETS_TO_SUPPLY = [
+    {"symbol": "ETH", "min_supply": 0.1},
+    {"symbol": "LBTC", "min_supply": 0.004},
+    {"symbol": "USDT", "min_supply": 100},
+    {"symbol": "USDe", "min_supply": 100},
 ]

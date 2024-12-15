@@ -7,7 +7,7 @@
         <li v-for="(log, index) in logs" :key="index" v-html="log"></li>
       </ul>
     </div>
-    <button v-if="logs.length >= 10" @click="toggleAutoScroll" :class="['px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-gray-200 border-gray-200 hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-700 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none',
+    <button v-if="logs.length >= 10" @click="toggleAutoScroll" :class="['px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-white border-white hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-700 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none',
       isAutoScrolling ? 'self-end' : 'absolute top-2 right-2'
     ]">
       {{ isAutoScrolling ? 'To Top' : 'Auto-Scroll' }}

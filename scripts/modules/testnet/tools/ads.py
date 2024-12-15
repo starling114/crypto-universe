@@ -1,4 +1,5 @@
 import requests
+import random
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -17,10 +18,12 @@ class Ads:
     def __init__(self, profile_number=5, password=None, seed=None):
         self.profile_number = profile_number
         self.driver = self._start_profile()
+        self.actions = ActionChains(self.driver)
         self._prepare_browser()
         self.rabby = Rabby(self, password, seed)
 
     def open_url(self, url, xpath=None, timeout=30, track_mouse=False):
+        # logger.debug(f"Profile: {self.profile_number} | Openning url: {url}")
         if url.startswith("chrome-extension"):
             self.driver.get(url)
 
@@ -32,15 +35,28 @@ class Ads:
         if track_mouse:
             self._track_mouse_position()
 
-    def click_element(self, xpath, timeout=5):
+    def click_element(self, xpath, timeout=5, random_place=False):
+        # logger.debug(f"Profile: {self.profile_number} | Clicking element: {xpath}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
-            web_element.click()
+
+            if random_place:
+                middle_width = (web_element.size["width"] // 2) - 5
+                middle_height = (web_element.size["height"] // 2) - 5
+
+                random_x = random.randint(-middle_width, middle_width)
+                random_y = random.randint(-middle_height, middle_height)
+
+                ActionChains(self.driver).move_to_element_with_offset(web_element, random_x, random_y).click().perform()
+            else:
+                web_element.click()
+
             return True
         else:
             return False
 
     def input_text(self, xpath, text, timeout=5):
+        # logger.debug(f"Profile: {self.profile_number} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             web_element.clear()
@@ -52,6 +68,7 @@ class Ads:
             return False
 
     def find_element(self, xpath, timeout=5):
+        # logger.debug(f"Profile: {self.profile_number} | Finding element: {xpath}")
         for _ in range(timeout):
             try:
                 return self.driver.find_element(By.XPATH, xpath)
@@ -60,6 +77,7 @@ class Ads:
         return None
 
     def while_present(self, xpath, timeout=5):
+        # logger.debug(f"Profile: {self.profile_number} | While present: {xpath}")
         for _ in range(timeout):
             try:
                 self.driver.find_element(By.XPATH, xpath)
@@ -70,6 +88,7 @@ class Ads:
         return False
 
     def until_present(self, xpath, timeout=5):
+        # logger.debug(f"Profile: {self.profile_number} | Until present: {xpath}")
         for _ in range(timeout):
             element = self.find_element(xpath, timeout)
 
@@ -79,6 +98,7 @@ class Ads:
         return False
 
     def scroll(self, direction=None, pixels=None):
+        # logger.debug(f"Profile: {self.profile_number} | Scrolling: {direction}")
         if direction == "top":
             self.driver.execute_script("window.scrollTo(0, 0);")
 
@@ -141,6 +161,7 @@ class Ads:
     #   sleep(1)
 
     def close_browser(self):
+        # logger.debug(f"Profile: {self.profile_number} | Closing browser")
         for _ in range(3):
             sleep(5)
             data = self._check_browser()
@@ -155,9 +176,11 @@ class Ads:
         return self.driver.current_window_handle
 
     def switch_tab(self, tab):
+        # logger.debug(f"Profile: {self.profile_number} | Switching tab")
         self.driver.switch_to.window(tab)
 
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
+        # logger.debug(f"Profile: {self.profile_number} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
         for tab in self._filter_tabs():
             self.switch_tab(tab)
@@ -222,16 +245,16 @@ class Ads:
                 self.driver.close()
 
         self.switch_tab(tabs[0])
-        # self.driver.maximize_window()
+        self.driver.maximize_window()
 
     def _track_mouse_position(self):
         self.driver.execute_script(
             """
-          document.addEventListener('mousemove', function(event) {
-              window.mouseX = event.clientX;
-              window.mouseY = event.clientY;
-          });
-      """
+                document.addEventListener('mousemove', function(event) {
+                    window.mouseX = event.clientX;
+                    window.mouseY = event.clientY;
+                });
+            """
         )
 
     def _filter_tabs(self):

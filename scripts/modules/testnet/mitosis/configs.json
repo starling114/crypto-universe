@@ -3,6 +3,8 @@
     "mito_game",
     "faceuts",
     "make_deposits",
-    "craft_cells"
+    "craft_cells",
+    "chromo_swaps",
+    "mix_telo_supplies"
   ]
 }

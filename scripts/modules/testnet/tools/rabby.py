@@ -26,6 +26,7 @@ class Rabby:
         logger.success(f"Profile: {self.ads.profile_number} | Rabby | Authenticated")
 
     def sign(self):
+        # logger.debug(f"Profile: {self.ads.profile_number} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()
         sleep(2.5, 3.5)
 
@@ -36,7 +37,8 @@ class Rabby:
                 self.ads.click_element('//button[span[text()="Sign and Create"]]')
                 sleep(0.5, 1.5)
                 self.ads.click_element('//button[text()="Confirm"]')
-                sleep(0.5, 1.5)
+                sleep(2, 3)
                 self.ads.switch_tab(current_tab)
                 sleep(2.5, 3.5)
                 break
+            sleep(2, 3)

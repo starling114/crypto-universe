@@ -1,5 +1,10 @@
 from modules.bridge.bridge_base import BridgeBase
-from modules.bridge.hyperlane.helpers import *
+from modules.bridge.hyperlane.helpers import (
+    HYPERLANE_CONTRACTS,
+    HYPERLANE_ABI,
+    HYPERLANE_MIN_TRANSACTION_AMOUNT,
+    HYPERLANE_MAX_TRANSACTION_AMOUNT,
+)
 
 from utils import (
     get_balance,
@@ -7,9 +12,6 @@ from utils import (
     get_gas_price,
     get_gas_limit,
 )
-
-HYPERLANE_MIN_TRANSACTION_AMOUNT = 0.00001
-HYPERLANE_MAX_TRANSACTION_AMOUNT = 0.5
 
 
 class BridgeHyperlane(BridgeBase):

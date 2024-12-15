@@ -6,7 +6,7 @@
         :class="['w-full border-b border-gray-200 sm:border-b-0 dark:border-gray-600', index !== optionsBatch.length - 1 ? 'sm:border-r' : '']">
         <div class="flex items-center ps-3">
           <input type="checkbox" :id="option" :value="option" :checked="modelValue.includes(option)"
-            @change="handleCheckboxChange(option, $event.target.checked)"
+            @click="handleClick" @change="handleCheckboxChange(option, $event.target.checked)"
             class="mr-1 w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-offset-0 focus:ring-0 dark:ring-offset-gray-700 dark:bg-gray-600 dark:border-gray-500">
           <label :for="option" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
             {{ option }}
@@ -29,7 +29,7 @@ const props = defineProps({
   batchSize: { type: Number, default: 5 }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'click'])
 
 const optionsBatches = computed(() => {
   return Array.from({ length: Math.ceil(props.options.length / props.batchSize) }, (_, i) =>
@@ -43,5 +43,9 @@ const handleCheckboxChange = (value, isChecked) => {
     : props.modelValue.filter(item => item !== value)
 
   emit('update:modelValue', newValue)
+}
+
+const handleClick = (event) => {
+  emit('click', event)
 }
 </script>
