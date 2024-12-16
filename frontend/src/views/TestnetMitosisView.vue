@@ -10,12 +10,22 @@
       placeholder="Enter passwords each on the new line..." />
   </div>
 
-  <cu-label label="Tasks" />
-  <cu-horizontal-checkbox-group v-model="tasks" :options="availableTasks" batchSize="4" />
+  <cu-label name="tasks" label="Tasks" tooltip="
+    `mito_game` - play MITO game N minutes, 
+    `faceuts` - claim faceuts, 
+    `make_deposits` - deposit funds from other networks to Mitosis, 
+    `opt_in` - wrap assets to mi*,
+    `telo_wrap_mito` - wrap MITO to WMITO for swap volume (leaves min 5 MITO for fee)
+    `telo_withdraw` - repay and withdraw Telo LBTC and ETH pools,
+    `chromo_swaps` - swaps all the assets to miETH and then executes N swaps. At the end swaps 50% of funds back to WMITO, 25% leaves in miETH, 25% supplies to Telo pool (ETH, LBTC),
+    `telo_unwrap_mito` - unrap WMITO to MITO" />
+  <cu-horizontal-checkbox-group v-model="tasks" :options="availableTasks" :batchSize=4 />
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <cu-checkbox name="parallelExecution" v-model="parallelExecution" label="Parallel execution"
-      tooltip="Run profiles in parallel, set how many parallel processes to run." />
+    <div class="mb-2">
+      <cu-checkbox name="parallelExecution" v-model="parallelExecution" label="Parallel execution"
+        tooltip="Run profiles in parallel, set how many parallel processes to run." />
+    </div>
     <div v-if="parallelExecution" class="mt-1 grid grid-cols-6 gap-2">
       <cu-input name="maxProcesses" size="small" v-model="maxProcesses" placeholder="Max processes" />
     </div>
@@ -28,10 +38,10 @@
         tooltip="Number of chomo swaps from ETH to random asset (LBTC, USDT, USDe, WMITO) and back."
         placeholder="Enter number..." />
     </div>
-    <div v-if="tasks.includes('mix_telo_supplies')" class="mt-1 grid grid-cols-4 gap-2">
+    <!-- <div v-if="tasks.includes('mix_telo_supplies')" class="mt-1 grid grid-cols-4 gap-2">
       <cu-input name="supplyEverySwap" size="small" v-model="supplyEverySwap" label="Supply every Nth swap"
         tooltip="Mix in Telo supply every Nth swap." placeholder="Enter number..." />
-    </div>
+    </div> -->
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -129,7 +139,9 @@ const handleStop = async () => {
 }
 
 watch(tasks, () => {
-  initFlowbite()
+  setTimeout(() => {
+    initFlowbite()
+  }, 10)
 })
 
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)

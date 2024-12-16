@@ -16,7 +16,7 @@ logger.remove()
 logger.level("INFO", color="<bold><cyan>")
 logger.level("WARNING", color="<bold><yellow>")
 logger.level("DEBUG", color="<bold><blue>")
-level = "DEBUG" if debug_mode() else "INFO"
+level = "DEBUG" if debug_mode() and False else "INFO"
 format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
 logger.add(sys.stdout, colorize=True, format=format, level=level)
 

@@ -47,12 +47,11 @@ DEPOSITS_ASSETS = [
     {"name": "USDe", "networks": ["arbitrum", "optimism", "base", "linea"]},
 ]
 
-CHROMO_MAIN_ASSET_TO_TRADE = "ETH"
-CHROMO_ASSETS_TO_TRADE = ["LBTC", "USDT", "USDe", "WMITO"]
+OPT_IN_ASSETS = ["ETH", "LBTC", "USDT", "USDe"]
 
-TELO_ASSETS_TO_SUPPLY = [
-    {"symbol": "ETH", "min_supply": 0.1},
-    {"symbol": "LBTC", "min_supply": 0.004},
-    {"symbol": "USDT", "min_supply": 100},
-    {"symbol": "USDe", "min_supply": 100},
-]
+CHROMO_WMITO_ASSET = "WMITO"
+CHROMO_MAIN_ASSET = "miETH"
+CHROMO_MI_ASSETS = ["miLBTC", "miUSDT", "miUSDe", "WMITO"]
+CHROMO_ASSETS_TO_TRADE = ["miLBTC", "miUSDT", "miUSDe"]
+
+TELO_ASSETS = ["ETH", "LBTC"]

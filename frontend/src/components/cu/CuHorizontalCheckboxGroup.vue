@@ -23,8 +23,6 @@ import { defineProps, defineEmits, computed } from 'vue'
 const props = defineProps({
   name: { type: String, required: true },
   modelValue: { type: Array, required: true },
-  label: { type: String },
-  tooltip: { type: String },
   options: { type: Array, required: true },
   batchSize: { type: Number, default: 5 }
 })

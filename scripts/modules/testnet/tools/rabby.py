@@ -26,7 +26,7 @@ class Rabby:
         logger.success(f"Profile: {self.ads.profile_number} | Rabby | Authenticated")
 
     def sign(self):
-        # logger.debug(f"Profile: {self.ads.profile_number} | Rabby | Signing transaction")
+        logger.debug(f"Profile: {self.ads.profile_number} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()
         sleep(2.5, 3.5)
 

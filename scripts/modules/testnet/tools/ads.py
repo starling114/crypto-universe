@@ -23,7 +23,7 @@ class Ads:
         self.rabby = Rabby(self, password, seed)
 
     def open_url(self, url, xpath=None, timeout=30, track_mouse=False):
-        # logger.debug(f"Profile: {self.profile_number} | Openning url: {url}")
+        logger.debug(f"Profile: {self.profile_number} | Openning url: {url}")
         if url.startswith("chrome-extension"):
             self.driver.get(url)
 
@@ -36,7 +36,7 @@ class Ads:
             self._track_mouse_position()
 
     def click_element(self, xpath, timeout=5, random_place=False):
-        # logger.debug(f"Profile: {self.profile_number} | Clicking element: {xpath}")
+        logger.debug(f"Profile: {self.profile_number} | Clicking element: {xpath}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
 
@@ -56,7 +56,7 @@ class Ads:
             return False
 
     def input_text(self, xpath, text, timeout=5):
-        # logger.debug(f"Profile: {self.profile_number} | Inputting text: {xpath} -> {text}")
+        logger.debug(f"Profile: {self.profile_number} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             web_element.clear()
@@ -68,7 +68,7 @@ class Ads:
             return False
 
     def find_element(self, xpath, timeout=5):
-        # logger.debug(f"Profile: {self.profile_number} | Finding element: {xpath}")
+        logger.debug(f"Profile: {self.profile_number} | Finding element: {xpath}")
         for _ in range(timeout):
             try:
                 return self.driver.find_element(By.XPATH, xpath)
@@ -77,7 +77,7 @@ class Ads:
         return None
 
     def while_present(self, xpath, timeout=5):
-        # logger.debug(f"Profile: {self.profile_number} | While present: {xpath}")
+        logger.debug(f"Profile: {self.profile_number} | While present: {xpath}")
         for _ in range(timeout):
             try:
                 self.driver.find_element(By.XPATH, xpath)
@@ -88,7 +88,7 @@ class Ads:
         return False
 
     def until_present(self, xpath, timeout=5):
-        # logger.debug(f"Profile: {self.profile_number} | Until present: {xpath}")
+        logger.debug(f"Profile: {self.profile_number} | Until present: {xpath}")
         for _ in range(timeout):
             element = self.find_element(xpath, timeout)
 
@@ -98,7 +98,7 @@ class Ads:
         return False
 
     def scroll(self, direction=None, pixels=None):
-        # logger.debug(f"Profile: {self.profile_number} | Scrolling: {direction}")
+        logger.debug(f"Profile: {self.profile_number} | Scrolling: {direction}")
         if direction == "top":
             self.driver.execute_script("window.scrollTo(0, 0);")
 
@@ -113,55 +113,55 @@ class Ads:
         else:
             Exception("Invalid direction or missing pixels argument for scroll.")
 
-    # TODO: Implement move mouse events
-    # def move_mouse(self, element, duration=2, steps=3):
-    #   actions = ActionChains(self.driver)
+        # TODO: Implement move mouse events
+        # def move_mouse(self, element, duration=2, steps=3):
+        #   actions = ActionChains(self.driver)
 
-    #   location = element.location
-    #   size = element.size
+        #   location = element.location
+        #   size = element.size
 
-    #   start_x = 989
-    #   start_y = 760
+        #   start_x = 989
+        #   start_y = 760
 
-    #   # Calculate the center of the element
-    #   end_x = location['x'] + size['width'] // 2
-    #   end_y = location['y'] + size['height'] // 2
+        #   # Calculate the center of the element
+        #   end_x = location['x'] + size['width'] // 2
+        #   end_y = location['y'] + size['height'] // 2
 
-    #   delta_x = (end_x - start_x) // steps
-    #   delta_y = (end_y - start_y) // steps
+        #   delta_x = (end_x - start_x) // steps
+        #   delta_y = (end_y - start_y) // steps
 
-    #   x_position, y_position = start_x, start_y
-    #   logger.info(f"Delta - x: {delta_x}, y: {delta_y}")
-    #   logger.info(f"Start - x: {x_position}, y: {y_position}")
+        #   x_position, y_position = start_x, start_y
+        #   logger.info(f"Delta - x: {delta_x}, y: {delta_y}")
+        #   logger.info(f"Start - x: {x_position}, y: {y_position}")
 
-    #   # Ensure the initial position is within bounds
-    #   if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
-    #           0 <= y_position < self.driver.execute_script('return window.innerHeight')):
-    #       logger.error("Start position out of bounds!")
-    #       return
+        #   # Ensure the initial position is within bounds
+        #   if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
+        #           0 <= y_position < self.driver.execute_script('return window.innerHeight')):
+        #       logger.error("Start position out of bounds!")
+        #       return
 
-    #   for i in range(steps):
-    #       x_position += delta_x
-    #       y_position += delta_y
+        #   for i in range(steps):
+        #       x_position += delta_x
+        #       y_position += delta_y
 
-    #       logger.info(f"Move - x: {x_position}, y: {y_position}")
+        #       logger.info(f"Move - x: {x_position}, y: {y_position}")
 
-    #       if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
-    #               0 <= y_position < self.driver.execute_script('return window.innerHeight')):
-    #           logger.error("Move target out of bounds!")
-    #           break
+        #       if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
+        #               0 <= y_position < self.driver.execute_script('return window.innerHeight')):
+        #           logger.error("Move target out of bounds!")
+        #           break
 
-    #       actions.move_by_offset(delta_x, delta_y).perform()
-    #       logger.success("Moved")
+        #       actions.move_by_offset(delta_x, delta_y).perform()
+        #       logger.success("Moved")
 
-    #       sleep(duration / steps)
+        #       sleep(duration / steps)
 
-    #   logger.info(f"End - x: {x_position}, y: {y_position}")
-    #   actions.move_to_element(element).perform()
-    #   sleep(1)
+        #   logger.info(f"End - x: {x_position}, y: {y_position}")
+        #   actions.move_to_element(element).perform()
+        #   sleep(1)
 
     def close_browser(self):
-        # logger.debug(f"Profile: {self.profile_number} | Closing browser")
+        logger.debug(f"Profile: {self.profile_number} | Closing browser")
         for _ in range(3):
             sleep(5)
             data = self._check_browser()
@@ -176,11 +176,11 @@ class Ads:
         return self.driver.current_window_handle
 
     def switch_tab(self, tab):
-        # logger.debug(f"Profile: {self.profile_number} | Switching tab")
+        logger.debug(f"Profile: {self.profile_number} | Switching tab")
         self.driver.switch_to.window(tab)
 
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
-        # logger.debug(f"Profile: {self.profile_number} | Finding tab: {part_of_name}, {part_of_url}")
+        logger.debug(f"Profile: {self.profile_number} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
         for tab in self._filter_tabs():
             self.switch_tab(tab)

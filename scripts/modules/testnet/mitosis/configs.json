@@ -2,9 +2,14 @@
   "available_tasks": [
     "mito_game",
     "faceuts",
-    "make_deposits",
+    "claim_rewards",
     "craft_cells",
+    "make_deposits",
+    "opt_in",
+    "telo_wrap_mito",
+    "telo_withdraw",
     "chromo_swaps",
-    "mix_telo_supplies"
+    "telo_supply",
+    "telo_unwrap_mito"
   ]
 }
