@@ -47,7 +47,7 @@ class Ads:
                 random_x = random.randint(-middle_width, middle_width)
                 random_y = random.randint(-middle_height, middle_height)
 
-                ActionChains(self.driver).move_to_element_with_offset(web_element, random_x, random_y).click().perform()
+                self.actions.move_to_element_with_offset(web_element, random_x, random_y).click().perform()
             else:
                 web_element.click()
 
@@ -55,14 +55,23 @@ class Ads:
         else:
             return False
 
-    def input_text(self, xpath, text, timeout=5):
+    def hover_element(self, xpath, timeout=5):
+        logger.debug(f"Profile: {self.profile_number} | Hovering element: {xpath}")
+        web_element = self.find_element(xpath, timeout)
+        if web_element:
+            self.actions.move_to_element(web_element).perform()
+            return True
+        else:
+            return False
+
+    def input_text(self, xpath, text, timeout=5, delay=0.1):
         logger.debug(f"Profile: {self.profile_number} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             web_element.clear()
             for letter in str(text):
                 web_element.send_keys(letter)
-                sleep(0.1)
+                sleep(delay)
             return True
         else:
             return False
@@ -201,7 +210,12 @@ class Ads:
     def mouse_position(self):
         return self.driver.execute_script("return {x: window.mouseX, y: window.mouseY};")
 
+    def execute_script(self, script):
+        logger.debug(f"Profile: {self.profile_number} | Executing script")
+        self.driver.execute_script(script)
+
     def _start_profile(self):
+        logger.debug(f"Profile: {self.profile_number} | Starting profile")
         profile_data = self._check_browser()
         if profile_data["data"]["status"] != "Active":
             profile_data = self._open_browser()
@@ -222,10 +236,15 @@ class Ads:
 
     def _check_browser(self):
         try:
+            logger.debug(f"Profile: {self.profile_number} | Checking browser")
             parameters = {"serial_number": self.profile_number}
             response = requests.get(f"{Ads.URL}/active", params=parameters)
             response.raise_for_status()
-            return response.json()
+            json_response = response.json()
+            if json_response["code"] == 0:
+                return response.json()
+            else:
+                raise ExecutionError(json_response)
         except Exception as e:
             raise ExecutionError(f"Connection to AdsPower failed: {e}")
 
@@ -236,19 +255,21 @@ class Ads:
         return response.json()
 
     def _prepare_browser(self):
+        logger.debug(f"Profile: {self.profile_number} | Preparing browser")
         sleep(3, 4)
         tabs = self._filter_tabs()
 
         if len(tabs) > 1:
             for tab in tabs[1:]:
                 self.switch_tab(tab)
+                logger.debug(f"Profile: {self.profile_number} | Closing `{self.driver.title}` tab")
                 self.driver.close()
 
         self.switch_tab(tabs[0])
         self.driver.maximize_window()
 
     def _track_mouse_position(self):
-        self.driver.execute_script(
+        self.execute_script(
             """
                 document.addEventListener('mousemove', function(event) {
                     window.mouseX = event.clientX;
@@ -262,7 +283,8 @@ class Ads:
         final_tabs = []
         for tab in start_tabs:
             self.switch_tab(tab)
-            if self.driver.title != "Rabby Offscreen Page":
+            logger.debug(f"Profile: {self.profile_number} | Switched to `{self.driver.title}` tab")
+            if self.driver.title not in ["Rabby Offscreen Page", "DevTools"]:
                 final_tabs.append(tab)
 
         return final_tabs

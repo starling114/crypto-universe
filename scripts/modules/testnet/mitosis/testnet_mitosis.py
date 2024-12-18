@@ -603,9 +603,12 @@ class TestnetMitosis:
 
     @staticmethod
     def run_profile(profile, password, tasks, mito_game_time, chromo_swaps_count, supply_every_swap, initial_delay):
-        TestnetMitosis(
-            profile, password, tasks, mito_game_time, chromo_swaps_count, supply_every_swap, initial_delay
-        ).execute()
+        try:
+            TestnetMitosis(
+                profile, password, tasks, mito_game_time, chromo_swaps_count, supply_every_swap, initial_delay
+            ).execute()
+        except Exception as e:
+            log_error(e, f"Profile: {profile}")
 
     @classmethod
     def run(cls):
