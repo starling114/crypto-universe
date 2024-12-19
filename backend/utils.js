@@ -118,6 +118,30 @@ export function moduleDataFilepath(module, type, script_type) {
   return path.resolve(`${folder}${type}.json`)
 }
 
+export async function adsProfiles() {
+  const apiUrl = 'http://local.adspower.net:50325/api/v1/user/list';
+  const pageSize = 100;
+  let allProfiles = [];
+  let page = 1;
+
+  while (true) {
+    const { data: { code, data } } = await axios.get(apiUrl, {
+      params: { page_size: pageSize, page }
+    });
+
+    if (code !== 0 || !data?.list?.length) break;
+
+    allProfiles.push(...data.list.map(profile => ({
+      serial_number: profile.serial_number,
+      name: profile.name
+    })));
+
+    page++;
+  }
+
+  return allProfiles.sort((a, b) => a.serial_number - b.serial_number);
+}
+
 export function getRps(chain) {
   const rpcs = configs.chains[chain].rpcs
 

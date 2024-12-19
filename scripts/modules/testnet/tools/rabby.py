@@ -37,6 +37,7 @@ class Rabby:
                 self.ads.click_element('//button[span[text()="Sign and Create"]]')
                 sleep(0.5, 1.5)
                 self.ads.click_element('//button[text()="Confirm"]')
+                # TODO: Wait for confirmation, if failed quick check for `Fail to create` and click button span Cancel
                 sleep(2, 3)
                 self.ads.switch_tab(current_tab)
                 sleep(2.5, 3.5)
