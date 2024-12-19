@@ -3,7 +3,7 @@ import re
 import random
 
 from multiprocessing import Pool
-from utils import load_json, zip_to_addresses, sleep, log_error, humanify_number
+from utils import load_json, sleep, log_error, humanify_number
 from utils import logger
 
 from modules.testnet.tools.ads import Ads
@@ -12,6 +12,7 @@ from modules.testnet.mitosis.helpers import (
     DEPOSITS_ASSETS,
     OPT_IN_ASSETS,
     CHROMO_MAIN_ASSET,
+    CHROMO_SECONDARY_ASSET,
     CHROMO_WMITO_ASSET,
     CHROMO_MI_ASSETS,
     CHROMO_ASSETS_TO_TRADE,
@@ -536,15 +537,19 @@ class TestnetMitosis:
             sleep(15, 30)
         logger.success(f"Profile: {self.ads.profile_number} | Chromo | Finished")
 
-        self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_WMITO_ASSET, 50)
-        sleep(15, 30)
-
         if "telo_supply" in self.tasks:
+            self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_WMITO_ASSET, 50)
+            sleep(15, 30)
             supply_asset = random.choice(TELO_ASSETS)
             self.swap_assets(CHROMO_MAIN_ASSET, supply_asset, 50)
             sleep(15, 30)
             self.telo_actions(supply_asset, supply=True)
             logger.success(f"Profile: {self.ads.profile_number} | Telo Supply | Finished")
+        else:
+            self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_WMITO_ASSET, 75)
+            sleep(15, 30)
+            self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_SECONDARY_ASSET, 50)
+            sleep(15, 30)
 
     def execute(self):
         try:
@@ -615,7 +620,7 @@ class TestnetMitosis:
         instructions = load_json("modules/testnet/mitosis/instructions.json")
 
         profiles = instructions["profiles"]
-        passwords = zip_to_addresses(profiles, instructions["passwords"])
+        password = instructions["password"]
         tasks = instructions["tasks"]
         mito_game_time = instructions["mito_game_time"]
         chromo_swaps_count = instructions["chromo_swaps_count"]
@@ -630,7 +635,7 @@ class TestnetMitosis:
                         cls.run_profile,
                         args=(
                             profile,
-                            passwords.get(profile, passwords[profiles[0]]),
+                            password,
                             tasks,
                             mito_game_time,
                             chromo_swaps_count,
@@ -650,7 +655,7 @@ class TestnetMitosis:
             for i, profile in enumerate(profiles):
                 cls(
                     profile,
-                    passwords.get(profile, passwords[profiles[0]]),
+                    password,
                     tasks,
                     mito_game_time,
                     chromo_swaps_count,

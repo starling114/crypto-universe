@@ -1,25 +1,25 @@
 <template>
   <cu-title title="Testnet - Mitosis" />
 
-  <div class="grid grid-cols-2 gap-2">
-    <cu-textarea name="profiles" v-model="profiles" label="ADS profile"
-      placeholder="Enter profile ids each on the new line..."
-      tooltip="Profile ids you want to use in automation (124, 123, ..)" />
-    <cu-textarea name="passwords" v-model="passwords" label="Rabby passwords"
-      tooltip="Rabby passwords corresponding to the specific profile on the left. You could type only one if all the passwords are the same."
-      placeholder="Enter passwords each on the new line..." />
+  <div class="mb-2">
+    <cu-label name="profiles" label="Profiles" tooltip="Choose profiles to run automation." />
+    <VueMultiselect name="profiles" placeholder="Select profiles..." v-model="profiles" :options="availableProfiles"
+      :multiple="true" :close-on-select="false" label="name" track-by="serial_number" />
   </div>
+  <cu-input name="password" v-model="password" label="Rabby password"
+    tooltip="Rabby password. All profiles should have the same rabby password." placeholder="Enter password..." />
 
   <cu-label name="tasks" label="Tasks" tooltip="
     `mito_game` - play MITO game N minutes, 
     `faceuts` - claim faceuts, 
     `make_deposits` - deposit funds from other networks to Mitosis, 
     `opt_in` - wrap assets to mi*,
-    `telo_wrap_mito` - wrap MITO to WMITO for swap volume (leaves min 5 MITO for fee)
+    `telo_wrap_mito` - wrap MITO to WMITO for swap volume (leaves 25 MITO on balance)
     `telo_withdraw` - repay and withdraw Telo LBTC and ETH pools,
-    `chromo_swaps` - swaps all the assets to miETH and then executes N swaps. At the end swaps 50% of funds back to WMITO, 25% leaves in miETH, 25% supplies to Telo pool (ETH, LBTC),
-    `telo_unwrap_mito` - unrap WMITO to MITO" />
-  <cu-horizontal-checkbox-group v-model="tasks" :options="availableTasks" :batchSize=4 />
+    `chromo_swaps` - swaps all the assets to miETH and then executes N swaps. At the end swaps 75% of funds back to WMITO, 17.5% leaves in miETH and 7.5% in miLBTC,
+    `telo_supply` - is this is chosen at the end of chromo_swaps swaps 50% of funds back to WMITO, 25% leaves in miETH, 25% supplies to Telo pool (ETH or LBTC),
+    `telo_unwrap_mito` - unwrap WMITO to MITO" />
+  <cu-horizontal-checkbox-group name="tasks" v-model="tasks" :options="availableTasks" :batchSize=4 />
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
     <div class="mb-2">
@@ -35,13 +35,8 @@
     </div>
     <div v-if="tasks.includes('chromo_swaps')" class="mt-1 grid grid-cols-4 gap-2">
       <cu-input name="chromoSwapsCount" size="small" v-model="chromoSwapsCount" label="Number of chromo swaps"
-        tooltip="Number of chomo swaps from ETH to random asset (LBTC, USDT, USDe, WMITO) and back."
-        placeholder="Enter number..." />
+        tooltip="Number of chomo swaps." placeholder="Enter number..." />
     </div>
-    <!-- <div v-if="tasks.includes('mix_telo_supplies')" class="mt-1 grid grid-cols-4 gap-2">
-      <cu-input name="supplyEverySwap" size="small" v-model="supplyEverySwap" label="Supply every Nth swap"
-        tooltip="Mix in Telo supply every Nth swap." placeholder="Enter number..." />
-    </div> -->
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -54,12 +49,11 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch } from 'vue'
-import { loadModuleData, updateModuleData, startModule, stopModule, beforeUnloadModule, beforeRouteLeaveModule } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
   CuTitle,
-  CuTextarea,
   CuLabel,
   CuHorizontalCheckboxGroup,
   CuInput,
@@ -68,9 +62,11 @@ import {
   CuButton,
   CuLogs
 } from '@/components/cu'
+import VueMultiselect from 'vue-multiselect'
 
-const profiles = ref('')
-const passwords = ref('')
+const availableProfiles = ref([])
+const profiles = ref([])
+const password = ref('')
 
 const availableTasks = ref([])
 const tasks = ref([])
@@ -92,11 +88,15 @@ const handleAppendLogs = async (log) => logs.value.push(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
+  await loadAdsProfiles(proxy, (profiles) => {
+    availableProfiles.value = profiles
+  }, logs)
+
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'profiles')) return
 
-    profiles.value = data.profiles.join('\n')
-    passwords.value = data.passwords.join('\n')
+    profiles.value = availableProfiles.value.filter(item => data.profiles.includes(item.serial_number))
+    password.value = data.password
 
     tasks.value = data.tasks
 
@@ -114,14 +114,15 @@ const loadDefaults = async () => {
 
   }, logs)
 
+  console.log(availableProfiles.value)
 }
 
 const handleExecute = async () => {
   moduleRunning.value = true
 
   await updateModuleData(proxy, module.value, 'instructions', 'python', {
-    profiles: profiles.value.split('\n').filter(Boolean),
-    passwords: passwords.value.split('\n').filter(Boolean),
+    profiles: profiles.value.map(profile => profile.serial_number),
+    password: password.value,
     tasks: tasks.value,
     parallel_execution: parallelExecution.value,
     max_processes: parseInt(maxProcesses.value),
@@ -158,3 +159,42 @@ onBeforeUnmount(() => {
 
 onBeforeRouteLeave(beforeRouteLeaveModule(moduleRunning, handleStop))
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+
+<style>
+.multiselect__tags {
+  @apply bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-gray-600 focus:border-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-white dark:focus:border-white;
+}
+
+.multiselect__tag {
+  @apply bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-700;
+}
+
+.multiselect__tag-icon:after {
+  @apply text-white;
+}
+
+.multiselect__input {
+  @apply bg-white text-sm focus:border-gray-300 focus:ring-gray-600 dark:focus:ring-gray-600 text-gray-900 dark:bg-gray-800 dark:focus:border-gray-600 dark:placeholder-gray-400 dark:text-white;
+}
+
+.multiselect__content-wrapper {
+  @apply bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected:after {
+  @apply bg-gray-200 text-gray-900 dark:text-white dark:bg-gray-800;
+}
+
+.multiselect__option--highlight,
+.multiselect__option--highlight:after {
+  @apply bg-green-600 dark:bg-green-600;
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight:after {
+  @apply bg-orange-600 dark:bg-orange-600;
+}
+</style>

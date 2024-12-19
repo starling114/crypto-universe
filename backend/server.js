@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode } from "./utils.js"
+import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode, adsProfiles } from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -27,6 +27,15 @@ app.use(express.static('./frontend/dist'))
 
 app.get('*', (req, res) => {
   res.sendFile('./frontend/dist/index.html')
+})
+
+apiRoutes.get('/ads_profiles', async (req, res) => {
+  try {
+    const profiles = await adsProfiles()
+    res.json({ profiles: profiles })
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching ADS profiles: ${error.message}` })
+  }
 })
 
 apiRoutes.get('/configs', async (req, res) => {

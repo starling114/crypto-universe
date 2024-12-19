@@ -1,4 +1,5 @@
 from utils import logger, sleep
+from selenium.common import NoSuchWindowException
 
 
 class Rabby:
@@ -28,17 +29,29 @@ class Rabby:
     def sign(self):
         logger.debug(f"Profile: {self.ads.profile_number} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()
+        signed = False
         sleep(2.5, 3.5)
 
         for _ in range(5):
             target_tab = self.ads.find_tab("notification.html", keep_focused=True)
             if target_tab:
-                sleep(1.5, 2.5)
-                self.ads.click_element('//button[span[text()="Sign and Create"]]')
-                sleep(0.5, 1.5)
-                self.ads.click_element('//button[text()="Confirm"]')
                 sleep(2, 3)
-                self.ads.switch_tab(current_tab)
-                sleep(2.5, 3.5)
-                break
+                if not self.ads.click_element('//button[span[text()="Sign and Create"] and not(@disabled)]', 10):
+                    logger.warning(f"Profile: {self.ads.profile_number} | Rabby | Failed to sign")
+                    break
+                sleep(0.5, 1)
+                self.ads.click_element('//button[text()="Confirm"]')
+                sleep(1, 2)
+                try:
+                    if not self.ads.until_present('//span[text()="Transaction created"]', 25):
+                        if self.ads.find_element('//span[text()="Fail to create"]'):
+                            self.ads.click_element('//button[span[text()="Cancel"]]')
+                            logger.warning(f"Profile: {self.ads.profile_number} | Rabby | Failed to create")
+                            break
+                except NoSuchWindowException:
+                    pass
+                signed = True
+            self.ads.switch_tab(current_tab)
             sleep(2, 3)
+
+        return signed
