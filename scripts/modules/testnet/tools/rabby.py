@@ -55,3 +55,31 @@ class Rabby:
             sleep(2, 3)
 
         return signed
+
+    def fast_sign(self):
+        logger.debug(f"Profile: {self.ads.profile_number} | Rabby | Fast Signing transaction")
+        current_tab = self.ads.current_tab()
+        signed = False
+
+        for _ in range(25000):
+            target_tab = self.ads.find_tab("notification.html", keep_focused=True)
+            if target_tab:
+                logger.info(f"Profile: {self.ads.profile_number} | Rabby | Trying to sign")
+                self.ads.hover_element('//span[text()="Normal"] | //span[text()="Fast"] | //span[text()="Instant"]', 25)
+                self.ads.click_element('//div[text()="Instant"]', 25)
+                if self.ads.find_element('//button[span[text()="Sign and Create"]]', 25).get_attribute("disabled"):
+                    if self.ads.find_element('//span[text()="Please process the alert before signing"]', 1):
+                        self.ads.click_element('//span[text()="Ignore all"]', 1)
+
+                self.ads.click_element('//button[span[text()="Sign and Create"] and not(@disabled)]', 25)
+                self.ads.click_element('//button[text()="Confirm" and not(@disabled)]', 25)
+                try:
+                    self.ads.until_present('//span[text()="Transaction created"]', 25)
+                except NoSuchWindowException:
+                    pass
+                logger.success(f"Profile: {self.ads.profile_number} | Rabby | Transaction signed")
+                signed = True
+            self.ads.switch_tab(current_tab)
+            sleep(0.1, 0.2)
+
+        return signed
