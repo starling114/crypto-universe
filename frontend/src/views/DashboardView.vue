@@ -37,7 +37,7 @@ import {
 } from '@/components/cu'
 
 const availableModules = ref([])
-const modules = ref({})
+const modules = ref([])
 
 const module = ref('crypto_universe')
 
@@ -58,7 +58,7 @@ const loadDefaults = async () => {
 }
 
 const moduleEnabled = (module) => {
-  return modules.value[module] ? modules.value[module].enabled : false
+  return modules.value.includes(module)
 }
 
 onMounted(async () => {

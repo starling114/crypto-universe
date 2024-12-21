@@ -6,5 +6,8 @@
     "bridge-hyperlane",
     "transfer",
     "testnet-mitosis"
+  ],
+  "available_premium_modules": [
+    "test"
   ]
 }

@@ -3,7 +3,18 @@ import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode, adsProfiles } from "./utils.js"
+import {
+  readJson,
+  writeJson,
+  parseLogs,
+  moduleDataFilepath,
+  pythonExecutable,
+  checkVersion,
+  debugMode,
+  adsProfiles,
+  premiumMode,
+  addToJson
+} from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -39,7 +50,16 @@ apiRoutes.get('/ads_profiles', async (req, res) => {
 })
 
 apiRoutes.get('/configs', async (req, res) => {
-  res.json({ debug_mode: debugMode(), version_up_to_date: versionUpTodate })
+  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), version_up_to_date: versionUpTodate })
+})
+
+apiRoutes.post('/activate', async (req, res) => {
+  const { lisence_key } = req.body
+
+  // TODO: Add license key validation
+  addToJson('./backend/modules/crypto_universe/instructions.json', { lisence_key: lisence_key })
+
+  res.json({ activated: true })
 })
 
 apiRoutes.get('/balances', async (req, res) => {

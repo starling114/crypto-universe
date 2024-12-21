@@ -17,7 +17,7 @@
   </div>
   <section>
     <cu-sidebar>
-      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" />
+      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" :premium="premiumMode" />
       <cu-sidebar-item tag="router-link" link="/">
         <template #left>
           <ChartPieIcon
@@ -30,6 +30,42 @@
               class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
           </router-link>
         </template>
+      </cu-sidebar-item>
+
+      <cu-sidebar-item v-if="premiumModuleEnabled('test')" mode="premium" tag="router-link" link="/balances">
+        <template #left>
+          <BanknotesIcon
+            class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
+        </template>
+        <template #center>Balances</template>
+        <template #right>
+          <router-link to="/balances/settings">
+            <AdjustmentsHorizontalIcon
+              class="flex-shrink-0 w-6 h-6 text-red-700 hidden hover:text-red-900 group-hover:block transition duration-75 dark:text-red-300 dark:hover:text-red-100" />
+          </router-link>
+        </template>
+      </cu-sidebar-item>
+
+      <cu-sidebar-item v-if="premiumModuleEnabled('test')" mode="premium">
+        <template #left>
+          <RectangleStackIcon
+            class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
+        </template>
+        <template #center>Testnets</template>
+
+        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/testnet-mitosis"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
+              :style="{
+                maskImage: 'url(mitosis.png)',
+                WebkitMaskImage: 'url(mitosis.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Mitosis</template>
+        </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
       <cu-sidebar-item v-if="moduleEnabled('balances')" tag="router-link" link="/balances">
@@ -170,7 +206,7 @@
 
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
-import { loadModuleData } from '@/utils'
+import { loadModuleData, loadConfigs } from '@/utils'
 import { initFlowbite } from 'flowbite'
 import {
   CuSidebar,
@@ -191,9 +227,11 @@ import {
   XMarkIcon
 } from "@heroicons/vue/24/solid"
 
-const modules = ref({})
+const modules = ref([])
+const premiumModules = ref([])
 const versionUpToDate = ref(true)
 const debugMode = ref(false)
+const premiumMode = ref(false)
 const showVersionBanner = ref(true)
 
 const module = ref('crypto_universe')
@@ -201,22 +239,26 @@ const module = ref('crypto_universe')
 const { proxy } = getCurrentInstance()
 
 const loadDefaults = async () => {
+  await loadConfigs(proxy, (data) => {
+    debugMode.value = data.debug_mode
+    premiumMode.value = data.premium_mode
+    versionUpToDate.value = data.version_up_to_date
+  })
+
   await loadModuleData(proxy, module.value, 'instructions', 'js', (data) => {
     if (!Object.hasOwn(data, 'modules')) return
 
     modules.value = data.modules
-  })
-
-  await proxy.$axios.get('/api/configs').then((response) => {
-    if (!Object.hasOwn(response.data, 'debug_mode')) return
-
-    debugMode.value = response.data.debug_mode
-    versionUpToDate.value = response.data.version_up_to_date
+    premiumModules.value = data.premium_modules
   })
 }
 
 const moduleEnabled = (module) => {
-  return modules.value[module] ? modules.value[module].enabled : false
+  return modules.value.includes(module)
+}
+
+const premiumModuleEnabled = (module) => {
+  return premiumMode.value && premiumModules.value.includes(module)
 }
 
 const handleBannderDismiss = () => {

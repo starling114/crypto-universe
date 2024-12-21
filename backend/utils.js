@@ -34,6 +34,12 @@ export function writeJson(filePath, jsonData) {
   fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf-8')
 }
 
+export function addToJson(filePath, jsonData) {
+  const data = readJson(filePath)
+
+  fs.writeFileSync(filePath, JSON.stringify({ ...data, ...jsonData }, null, 2), 'utf-8')
+}
+
 export function parseLogs(log) {
   return log.split('\n').filter(line => line.trim() !== '')
 }
@@ -177,6 +183,12 @@ export async function getTokensPrice(tokens) {
   }
 
   return prices
+}
+
+export function premiumMode() {
+  const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
+
+  return !!instructions.lisence_key
 }
 
 export const multicallAddress = '0xca11bde05977b3631167028862be2a173976ca11'
