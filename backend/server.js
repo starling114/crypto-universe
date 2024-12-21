@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode, adsProfiles } from "./utils.js"
+import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode, adsProfiles, configs } from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -39,7 +39,7 @@ apiRoutes.get('/ads_profiles', async (req, res) => {
 })
 
 apiRoutes.get('/configs', async (req, res) => {
-  res.json({ debug_mode: debugMode(), version_up_to_date: versionUpTodate })
+  res.json({ debug_mode: debugMode(), version_up_to_date: versionUpTodate, configs: configs })
 })
 
 apiRoutes.get('/balances', async (req, res) => {

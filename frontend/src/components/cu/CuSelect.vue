@@ -19,7 +19,7 @@ import { CuLabel } from '@/components/cu'
 
 const props = defineProps({
   name: { type: String, required: true },
-  modelValue: { type: [String, Number], required: true },
+  modelValue: { type: [String, Number, null], required: true },
   label: { type: String },
   tooltip: { type: String },
   placeholder: { type: String },

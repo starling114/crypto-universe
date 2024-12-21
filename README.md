@@ -92,8 +92,14 @@ Currently supports following bridges:
 
 - Transfer funds from one wallet to another using specified addresses.
 - To configure this feature, visit settings page (icon in the Transfer menu item on the right) to enter addresses and their private keys.
+- Hyperlane
 
-### 5. Testnets
+### 5. YT Tokens
+
+- Buy YT tokens via Pendle.
+- To configure this feature, visit settings page (icon in the YT Tokens menu item on the right) to enter addresses and their private keys.
+
+### 6. Testnets
 - Toolkit to run different testnets automations using AdsPower.
 
 Currently supports following testnets:

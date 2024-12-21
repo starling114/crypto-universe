@@ -10,6 +10,7 @@ MODULES = {
     "bridge-relay": BridgeRelay,
     "bridge-hyperlane": BridgeHyperlane,
     "transfer": Transfer,
+    "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,
 }
 

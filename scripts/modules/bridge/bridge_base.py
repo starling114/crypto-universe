@@ -2,6 +2,7 @@ from web3 import Web3
 import random
 
 from utils import (
+    NULL_TOKEN_ADDRESS,
     load_json,
     int_to_wei,
     wei_to_int,
@@ -21,7 +22,6 @@ from utils import logger
 
 MIN_TRANSACTION_AMOUNT = 0.00001
 MAX_TRANSACTION_AMOUNT = 9999999
-NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
 class BridgeBase:

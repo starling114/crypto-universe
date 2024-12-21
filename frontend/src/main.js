@@ -4,6 +4,7 @@ import App from './App.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import axios from 'axios'
 import './assets/tailwind.css'
+import { loadConfigs } from '@/utils'
 import DashboardView from "@/views/DashboardView"
 import SettingsView from '@/views/settings/SettingsView.vue'
 import BalancesView from "@/views/BalancesView"
@@ -17,6 +18,8 @@ import BridgeHyperlaneSettingsView from '@/views/settings/BridgeHyperlaneSetting
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
+import YtTokensView from '@/views/YtTokensView.vue'
+import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
 
 const app = createApp(App)
 
@@ -24,6 +27,7 @@ app.config.globalProperties.$axios = axios.create({
   // baseURL: 'http://' + window.location.host,
   baseURL: 'http://localhost:3000',
 })
+loadConfigs(app.config.globalProperties, (data) => { app.config.globalProperties.$globalConfigs = data })
 
 const routes = [
   {
@@ -97,6 +101,18 @@ const routes = [
     name: 'Transfer Settings',
     component: TransferSettingsView,
     meta: { title: 'CU | Transfer Settings' }
+  },
+  {
+    path: '/yt_tokens',
+    name: 'YT Tokens',
+    component: YtTokensView,
+    meta: { title: 'CU | YT Tokens' }
+  },
+  {
+    path: '/yt_tokens/settings',
+    name: 'YT Tokens Settings',
+    component: YtTokensSettingsView,
+    meta: { title: 'CU | YT Tokens Settings' }
   },
   {
     path: '/testnet-mitosis',

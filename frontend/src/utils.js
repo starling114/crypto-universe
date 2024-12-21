@@ -14,6 +14,12 @@ export const loadModuleData = async (proxy, module, type, moduleType, callback, 
   }
 }
 
+export const loadConfigs = async (proxy, callback) => {
+  await proxy.$axios.get('/api/configs').then((response) => {
+    if (response.data && Object.hasOwn(response.data, 'debug_mode')) callback(response.data)
+  })
+}
+
 export const loadAdsProfiles = async (proxy, callback, logs) => {
   await proxy.$axios.get('/api/ads_profiles').then((response) => {
     if (response.data && response.data.profiles) callback(response.data.profiles)

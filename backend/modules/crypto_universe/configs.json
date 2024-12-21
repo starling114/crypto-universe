@@ -5,6 +5,7 @@
     "bridge-relay",
     "bridge-hyperlane",
     "transfer",
+    "yt_tokens",
     "testnet-mitosis"
   ]
 }

@@ -135,6 +135,27 @@
         </template>
       </cu-sidebar-item>
 
+      <cu-sidebar-item v-if="moduleEnabled('yt_tokens')" tag="router-link" link="/yt_tokens">
+        <template #left>
+          <div
+            class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+            :style="{
+              maskImage: 'url(pendle.png)',
+              WebkitMaskImage: 'url(pendle.png)',
+              maskSize: '100% 100%',
+              WebkitMaskSize: '100% 100%',
+              backgroundColor: 'currentColor'
+            }" />
+        </template>
+        <template #center>YT Tokens</template>
+        <template #right>
+          <router-link to="/yt_tokens/settings">
+            <AdjustmentsHorizontalIcon
+              class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+          </router-link>
+        </template>
+      </cu-sidebar-item>
+
       <cu-sidebar-item v-if="moduleEnabled('testnet-mitosis')">
         <template #left>
           <RectangleStackIcon
@@ -142,7 +163,8 @@
         </template>
         <template #center>Testnets</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/testnet-mitosis"><template #left>
+        <cu-sidebar-sub-item tag="router-link" link="/testnet-mitosis">
+          <template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
               :style="{
@@ -207,12 +229,8 @@ const loadDefaults = async () => {
     modules.value = data.modules
   })
 
-  await proxy.$axios.get('/api/configs').then((response) => {
-    if (!Object.hasOwn(response.data, 'debug_mode')) return
-
-    debugMode.value = response.data.debug_mode
-    versionUpToDate.value = response.data.version_up_to_date
-  })
+  debugMode.value = proxy.$globalConfigs.debug_mode
+  versionUpToDate.value = proxy.$globalConfigs.version_up_to_date
 }
 
 const moduleEnabled = (module) => {

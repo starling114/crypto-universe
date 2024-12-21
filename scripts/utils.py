@@ -7,6 +7,9 @@ import traceback
 import time
 from loguru import logger
 
+NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
+NATIVE_TOKEN_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+
 
 def debug_mode():
     return os.getenv("DEBUG") == "true"
@@ -75,6 +78,14 @@ def wei_to_int(qty, decimals=18):
 
 def post_call(url, data=None, json=None, headers=None):
     response = requests.post(url, data=data, json=json, headers=headers, verify=True)
+    response.raise_for_status()
+
+    return response.json()
+
+
+def get_call(url, params=None, headers=None):
+    response = requests.get(url, params=params, headers=headers)
+    response.raise_for_status()
 
     return response.json()
 
@@ -95,7 +106,11 @@ def get_transactions_count(web3, wallet_address):
 
 
 def get_gas_price(web3):
-    return int(web3.eth.gas_price * 1.2)
+    # Do not multiply gas price for mainnet
+    if web3.eth.chain_id == 1:
+        return int(web3.eth.gas_price)
+    else:
+        return int(web3.eth.gas_price * 1.2)
 
 
 def get_gas_limit(web3, contract_txn):

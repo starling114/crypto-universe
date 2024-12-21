@@ -7,7 +7,6 @@
       "rpcs": [
         "https://eth.llamarpc.com",
         "https://eth-mainnet.public.blastapi.io",
-        "https://eth-pokt.nodies.app",
         "https://ethereum-rpc.publicnode.com",
         "https://ethereum.blockpi.network/v1/rpc/public",
         "https://rpc.ankr.com/eth",

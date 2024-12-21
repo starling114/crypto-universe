@@ -1,6 +1,7 @@
 from modules.bridge.bridge_base import BridgeBase
 
 from utils import (
+    NULL_TOKEN_ADDRESS,
     post_call,
     get_balance,
     get_transactions_count,
@@ -9,7 +10,6 @@ from utils import (
 )
 
 RELAY_MIN_TRANSACTION_AMOUNT = 0.00005
-NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
 class BridgeRelay(BridgeBase):

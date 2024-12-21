@@ -1,6 +1,7 @@
 from web3 import Web3
 import random
 from utils import (
+    NATIVE_TOKEN_ADDRESS,
     load_json,
     humanify_seconds,
     humanify_number,
@@ -23,7 +24,6 @@ from utils import (
 )
 from utils import logger
 
-NATIVE_TOKEN_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 TRANSFER_MIN_TRANSACTION_AMOUNT = 0.00005
 
 
