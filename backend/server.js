@@ -1,9 +1,21 @@
 import express from 'express'
+import basicAuth from 'express-basic-auth'
 import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 import { balancesData } from "./modules/balances/balances.js"
-import { readJson, writeJson, parseLogs, moduleDataFilepath, pythonExecutable, checkVersion, debugMode, adsProfiles, configs } from "./utils.js"
+import {
+  readJson,
+  writeJson,
+  parseLogs,
+  moduleDataFilepath,
+  pythonExecutable,
+  checkVersion,
+  debugMode,
+  adsProfiles,
+  configs,
+  runAuthentication
+} from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
@@ -18,6 +30,13 @@ const ansiToHtml = new AnsiToHtml()
 
 let pythonProcesses = {}
 const versionUpTodate = await checkVersion()
+
+if (runAuthentication()) {
+  app.use(basicAuth({
+    users: { [process.env.BASIC_AUTH_USERNAME]: process.env.BASIC_AUTH_PASSWORD },
+    challenge: true
+  }))
+}
 
 app.use(cors())
 app.use(express.json())

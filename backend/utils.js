@@ -57,6 +57,10 @@ export function debugMode() {
   return process.env.DEBUG === "true"
 }
 
+export function runAuthentication() {
+  return process.env.BASIC_AUTH === "true"
+}
+
 async function fetchRemoteVersion(localVersion) {
   try {
     const response = await axios.get(`https://crypto-universe.starling114.workers.dev?version=${localVersion}`)

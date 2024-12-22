@@ -136,3 +136,21 @@ Additionaly run specified module via:
 ```bash
 python main.py MODULE_NAME
 ```
+
+## VPS Authentication Configuration
+
+To enable basic authentication for the application, follow these steps:
+
+1. Copy `.env.example` file as `.env` in the root directory of the project.
+
+2. Edit the following environment variables in the `.env` file:
+
+  ```plaintext
+  BASIC_AUTH=true
+  BASIC_AUTH_USERNAME=YOUR_USERNAME
+  BASIC_AUTH_PASSWORD=YOUR_PASSWORD
+  ```
+
+3. Start the server or restart if it is already running.
+
+With these steps, basic authentication will be enabled for your application, requiring you to enter the specified username and password to access it.
