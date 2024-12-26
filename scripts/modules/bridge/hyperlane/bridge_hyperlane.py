@@ -3,7 +3,7 @@ from modules.bridge.hyperlane.helpers import (
     HYPERLANE_CONTRACTS,
     HYPERLANE_ABI,
     HYPERLANE_MIN_TRANSACTION_AMOUNT,
-    HYPERLANE_MAX_TRANSACTION_AMOUNT,
+    HYPERLANE_MAX_TRANSACTION_AMOUNTS,
 )
 
 from utils import (
@@ -28,7 +28,7 @@ class BridgeHyperlane(BridgeBase):
             balance,
             amount,
             HYPERLANE_MIN_TRANSACTION_AMOUNT,
-            HYPERLANE_MAX_TRANSACTION_AMOUNT,
+            HYPERLANE_MAX_TRANSACTION_AMOUNTS[self.from_chain],
         )
 
         self.calculated_amount = amount
