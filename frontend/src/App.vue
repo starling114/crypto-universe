@@ -17,7 +17,7 @@
   </div>
   <section>
     <cu-sidebar>
-      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" />
+      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" :premium="premiumMode" />
       <cu-sidebar-item tag="router-link" link="/">
         <template #left>
           <ChartPieIcon
@@ -30,6 +30,28 @@
               class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
           </router-link>
         </template>
+      </cu-sidebar-item>
+
+      <cu-sidebar-item v-if="premiumModuleEnabled('sale-fjord')" mode="premium">
+        <template #left>
+          <RectangleStackIcon
+            class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
+        </template>
+        <template #center>Sale</template>
+
+        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/sale-fjord"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
+              :style="{
+                maskImage: 'url(fjord.png)',
+                WebkitMaskImage: 'url(fjord.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Fjord</template>
+        </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
       <cu-sidebar-item v-if="moduleEnabled('balances')" tag="router-link" link="/balances">
@@ -243,8 +265,10 @@ import {
 } from "@heroicons/vue/24/solid"
 
 const modules = ref([])
+const premiumModules = ref([])
 const versionUpToDate = ref(true)
 const debugMode = ref(false)
+const premiumMode = ref(false)
 const showVersionBanner = ref(true)
 
 const module = ref('crypto_universe')
@@ -256,14 +280,20 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'modules')) return
 
     modules.value = data.modules
+    premiumModules.value = data.premium_modules
   })
 
   debugMode.value = proxy.$globalConfigs.debug_mode
+  premiumMode.value = proxy.$globalConfigs.premium_mode
   versionUpToDate.value = proxy.$globalConfigs.version_up_to_date
 }
 
 const moduleEnabled = (module) => {
   return modules.value.includes(module)
+}
+
+const premiumModuleEnabled = (module) => {
+  return premiumMode.value && premiumModules.value.includes(module)
 }
 
 const handleBannderDismiss = () => {

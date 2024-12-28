@@ -24,6 +24,7 @@
 </template>
 
 <script setup>
+// TODO: Add premium modules section
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { loadModuleData } from '@/utils'
 import { initFlowbite } from 'flowbite'
@@ -37,7 +38,7 @@ import {
 } from '@/components/cu'
 
 const availableModules = ref([])
-const modules = ref({})
+const modules = ref([])
 
 const module = ref('crypto_universe')
 

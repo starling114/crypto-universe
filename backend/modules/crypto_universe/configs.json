@@ -8,5 +8,8 @@
     "bridge-hyperlane",
     "swap-jumper",
     "testnet-mitosis"
+  ],
+  "available_premium_modules": [
+    "sale-fjord"
   ]
 }

@@ -1,7 +1,7 @@
 <template>
   <li v-if="$slots.default">
     <button type="button" @click="toggleSubSection"
-      class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+      :class="['flex items-center w-full p-2 text-base transition duration-75 rounded-lg group', availableModeClasses[props.mode]]">
       <slot name="left" />
       <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
         <slot name="center" />
@@ -14,13 +14,13 @@
     </button>
     <ul v-if="isDropdownOpenned" class="py-2 space-y-2">
       <li>
-        <slot/>
+        <slot />
       </li>
     </ul>
   </li>
   <li v-else>
     <component :is="tag || 'div'" :to="tag === 'router-link' ? link : undefined"
-      class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+      :class="['flex items-center p-2 rounded-lg group', availableModeClasses[props.mode]]">
       <slot name="left" />
       <span class="flex-1 ms-2 whitespace-nowrap">
         <slot name="center" />
@@ -36,8 +36,14 @@ import { defineProps, ref } from 'vue'
 const props = defineProps({
   tag: { type: String, default: null },
   link: { type: String, default: '' },
-  openned: { type: Boolean, default: false }
+  openned: { type: Boolean, default: false },
+  mode: { type: String, default: 'default' }
 })
+
+const availableModeClasses = {
+  default: 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700',
+  premium: 'text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900'
+}
 
 const isDropdownOpenned = ref(props.openned)
 

@@ -9,21 +9,25 @@ from selenium.webdriver.common.by import By
 from selenium.common import NoSuchElementException
 
 from utils import sleep, logger, ExecutionError
-from modules.testnet.tools.rabby import Rabby
+from core.tools.rabby import Rabby
+from core.tools.metamask import Metamask
 
 
 class Ads:
     URL = "http://local.adspower.net:50325/api/v1/browser"
+    WALLET_RABBY = "rabby"
+    WALLET_METAMASK = "metamask"
+    WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
 
-    def __init__(self, profile_number=5, password=None, seed=None):
-        self.profile_number = profile_number
+    def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY):
+        self.profile = profile
         self.driver = self._start_profile()
         self.actions = ActionChains(self.driver)
         self._prepare_browser()
-        self.rabby = Rabby(self, password, seed)
+        self._prepare_wallet(wallet, wallet_password)
 
     def open_url(self, url, xpath=None, timeout=30, track_mouse=False):
-        logger.debug(f"Profile: {self.profile_number} | Openning url: {url}")
+        logger.debug(f"Profile: {self.profile} | Openning url: {url}")
         if url.startswith("chrome-extension"):
             self.driver.get(url)
 
@@ -36,7 +40,7 @@ class Ads:
             self._track_mouse_position()
 
     def click_element(self, xpath, timeout=5, random_place=False):
-        logger.debug(f"Profile: {self.profile_number} | Clicking element: {xpath}")
+        logger.debug(f"Profile: {self.profile} | Clicking element: {xpath}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
 
@@ -56,7 +60,7 @@ class Ads:
             return False
 
     def hover_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile_number} | Hovering element: {xpath}")
+        logger.debug(f"Profile: {self.profile} | Hovering element: {xpath}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             self.actions.move_to_element(web_element).perform()
@@ -65,7 +69,7 @@ class Ads:
             return False
 
     def input_text(self, xpath, text, timeout=5, delay=0.1):
-        logger.debug(f"Profile: {self.profile_number} | Inputting text: {xpath} -> {text}")
+        logger.debug(f"Profile: {self.profile} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             web_element.clear()
@@ -77,7 +81,7 @@ class Ads:
             return False
 
     def find_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile_number} | Finding element: {xpath}")
+        logger.debug(f"Profile: {self.profile} | Finding element: {xpath}")
         for _ in range(timeout):
             try:
                 return self.driver.find_element(By.XPATH, xpath)
@@ -86,7 +90,7 @@ class Ads:
         return None
 
     def while_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile_number} | While present: {xpath}")
+        logger.debug(f"Profile: {self.profile} | While present: {xpath}")
         for _ in range(timeout):
             try:
                 self.driver.find_element(By.XPATH, xpath)
@@ -97,7 +101,7 @@ class Ads:
         return False
 
     def until_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile_number} | Until present: {xpath}")
+        logger.debug(f"Profile: {self.profile} | Until present: {xpath}")
         for _ in range(timeout):
             element = self.find_element(xpath, timeout)
 
@@ -107,7 +111,7 @@ class Ads:
         return False
 
     def scroll(self, direction=None, pixels=None):
-        logger.debug(f"Profile: {self.profile_number} | Scrolling: {direction}")
+        logger.debug(f"Profile: {self.profile} | Scrolling: {direction}")
         if direction == "top":
             self.driver.execute_script("window.scrollTo(0, 0);")
 
@@ -170,26 +174,26 @@ class Ads:
         #   sleep(1)
 
     def close_browser(self):
-        logger.debug(f"Profile: {self.profile_number} | Closing browser")
+        logger.debug(f"Profile: {self.profile} | Closing browser")
         for _ in range(3):
             sleep(5)
             data = self._check_browser()
             if data["data"]["status"] == "Active":
-                parameters = {"serial_number": self.profile_number}
+                parameters = {"serial_number": self.profile}
                 requests.get(f"{Ads.URL}/stop", params=parameters)
             else:
-                logger.success(f"Profile: {self.profile_number} | Closed")
+                logger.success(f"Profile: {self.profile} | Closed")
                 break
 
     def current_tab(self):
         return self.driver.current_window_handle
 
     def switch_tab(self, tab):
-        logger.debug(f"Profile: {self.profile_number} | Switching tab")
+        logger.debug(f"Profile: {self.profile} | Switching tab")
         self.driver.switch_to.window(tab)
 
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
-        logger.debug(f"Profile: {self.profile_number} | Finding tab: {part_of_name}, {part_of_url}")
+        logger.debug(f"Profile: {self.profile} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
         for tab in self._filter_tabs():
             self.switch_tab(tab)
@@ -211,16 +215,16 @@ class Ads:
         return self.driver.execute_script("return {x: window.mouseX, y: window.mouseY};")
 
     def execute_script(self, script):
-        logger.debug(f"Profile: {self.profile_number} | Executing script")
+        logger.debug(f"Profile: {self.profile} | Executing script")
         self.driver.execute_script(script)
 
     def _start_profile(self):
-        logger.debug(f"Profile: {self.profile_number} | Starting profile")
+        logger.debug(f"Profile: {self.profile} | Starting profile")
         profile_data = self._check_browser()
         if profile_data["data"]["status"] != "Active":
             profile_data = self._open_browser()
 
-        logger.success(f"Profile: {self.profile_number} | Started")
+        logger.success(f"Profile: {self.profile} | Started")
 
         chrome_driver = profile_data["data"]["webdriver"]
         selenium_port = profile_data["data"]["ws"]["selenium"]
@@ -236,8 +240,8 @@ class Ads:
 
     def _check_browser(self):
         try:
-            logger.debug(f"Profile: {self.profile_number} | Checking browser")
-            parameters = {"serial_number": self.profile_number}
+            logger.debug(f"Profile: {self.profile} | Checking browser")
+            parameters = {"serial_number": self.profile}
             response = requests.get(f"{Ads.URL}/active", params=parameters)
             response.raise_for_status()
             json_response = response.json()
@@ -249,24 +253,32 @@ class Ads:
             raise ExecutionError(f"Connection to AdsPower failed: {e}")
 
     def _open_browser(self):
-        parameters = {"serial_number": self.profile_number, "open_tabs": 1}
+        parameters = {"serial_number": self.profile, "open_tabs": 1}
         response = requests.get(f"{Ads.URL}/start", params=parameters)
         response.raise_for_status()
         return response.json()
 
     def _prepare_browser(self):
-        logger.debug(f"Profile: {self.profile_number} | Preparing browser")
+        logger.debug(f"Profile: {self.profile} | Preparing browser")
         sleep(3, 4)
         tabs = self._filter_tabs()
 
         if len(tabs) > 1:
             for tab in tabs[1:]:
                 self.switch_tab(tab)
-                logger.debug(f"Profile: {self.profile_number} | Closing `{self.driver.title}` tab")
+                logger.debug(f"Profile: {self.profile} | Closing `{self.driver.title}` tab")
                 self.driver.close()
 
         self.switch_tab(tabs[0])
         self.driver.maximize_window()
+
+    def _prepare_wallet(self, wallet_name, wallet_password):
+        wallet = self.WALLETS.get(wallet_name)
+
+        if wallet:
+            self.wallet = wallet(self, wallet_password)
+        else:
+            raise ExecutionError(f"Invalid wallet: {wallet_name}")
 
     def _track_mouse_position(self):
         self.execute_script(
@@ -283,7 +295,7 @@ class Ads:
         final_tabs = []
         for tab in start_tabs:
             self.switch_tab(tab)
-            logger.debug(f"Profile: {self.profile_number} | Switched to `{self.driver.title}` tab")
+            logger.debug(f"Profile: {self.profile} | Switched to `{self.driver.title}` tab")
             if self.driver.title not in ["Rabby Offscreen Page", "DevTools"]:
                 final_tabs.append(tab)
 

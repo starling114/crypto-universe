@@ -3,7 +3,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv("../.env"))
 import sys
 from modules import *
-from utils import log_error, logger
+from utils import log_error, logger, import_premium_module, run_module, run_premium_module
 
 MODULES = {
     "withdraw-okx": WithdrawOkx,
@@ -14,28 +14,23 @@ MODULES = {
     "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,
 }
-
-
-def extract_from_args():
-    aaarg = sys.argv[1]
-
-    return MODULES.get(aaarg, None)
-
+PREMIUM_MODULES = {
+    "premium/sale-fjord": import_premium_module("sale_fjord", "SaleFjord"),
+}
 
 if __name__ == "__main__":
     try:
-        selected_module = None
-
         if len(sys.argv) <= 1:
             logger.error(
                 "Console mode is not supported, please run via `npm start` from root folder. See details in README.md."
             )
         else:
-            selected_module = extract_from_args()
-            if selected_module:
-                selected_module.run()
+            aaarg = sys.argv[1]
+
+            if "premium/" in aaarg:
+                run_premium_module(aaarg, PREMIUM_MODULES)
             else:
-                print("Invalid choice.")
+                run_module(aaarg, MODULES)
     except KeyboardInterrupt:
         logger.info("Execution stopped.")
     except Exception as e:
