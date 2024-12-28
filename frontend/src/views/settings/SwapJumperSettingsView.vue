@@ -1,10 +1,10 @@
 <template>
-  <cu-title title="Bridge Hyperlane Settings" />
+  <cu-title title="Swap Jumper Settings" />
 
   <div class="grid grid-cols-2 gap-2">
     <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
       placeholder="Enter wallet addresses each on the new line..."
-      tooltip="Wallet addresses to be used in the bridge operations." />
+      tooltip="Wallet addresses to be used in the operations." />
     <cu-textarea name="privateKeys" v-model="privateKeys" label="Private Keys"
       tooltip="Private keys corresponding to the specific wallet address on the left."
       placeholder="Enter private keys each on the new line..." />
@@ -32,7 +32,7 @@ import {
 const addresses = ref('')
 const privateKeys = ref('')
 
-const module = ref('bridge-hyperlane')
+const module = ref('swap-jumper')
 
 const logs = ref([])
 

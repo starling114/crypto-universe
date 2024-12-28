@@ -138,9 +138,7 @@ class YtTokens:
                 return False
 
             if debug_mode():
-                logger.info(
-                    f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
-                )
+                logger.info(f"{get_tx_link(scan, 'DEBUG')}")
                 logger.success(
                     f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(calculated_amount, decimals))} | Swap successful"
                 )

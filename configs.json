@@ -15,7 +15,8 @@
       "tokens": {
         "ETH": "",
         "USDT": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        "USDC": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        "USDC": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "PUFFER": "0x4d1C297d39C5c1277964D0E3f8Aa901493664530"
       }
     },
     "arbitrum": {
@@ -83,13 +84,13 @@
       "native_token": "ETH",
       "scan": "https://scrollscan.com",
       "rpcs": [
-        "https://rpc.scroll.io",
-        "https://1rpc.io/scroll"
+        "https://rpc.scroll.io"
       ],
       "tokens": {
         "ETH": "",
         "USDT": "0xf55bec9cafdbe8730f096aa55dad6d22d44099df",
-        "USDC": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4"
+        "USDC": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4",
+        "SCR": "0xd29687c813d741e2f938f4ac377128810e217b1b"
       }
     },
     "linea": {

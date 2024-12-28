@@ -5,7 +5,7 @@
     <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
       placeholder="Enter wallet addresses each on the new line..."
       tooltip="Source wallet addresses to be used in the transfer operations." />
-    <cu-textarea name="privateKeys" v-model="privateKeys" label="Pravate Keys"
+    <cu-textarea name="privateKeys" v-model="privateKeys" label="Private Keys"
       tooltip="Private keys corresponding to the specific wallet address on the left."
       placeholder="Enter private keys each on the new line..." />
   </div>

@@ -16,7 +16,7 @@
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
     <cu-checkbox name="amountIncludesFee" v-model="amountIncludesFee" label="Amount Includes Fee"
-      tooltip="Deduct fee from the amount entered in `amounts` field. Usefull when you want that exact amount to be withdrawn from OKX otherwise fee will be added to amount." />
+      tooltip="Deduct fee from the amount entered in `amounts` field. Usefull when you want that exact amount to be used in the operation." />
     <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />

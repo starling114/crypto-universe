@@ -15,6 +15,8 @@ import BridgeRelayView from '@/views/BridgeRelayView.vue'
 import BridgeRelaySettingsView from '@/views/settings/BridgeRelaySettingsView.vue'
 import BridgeHyperlaneView from '@/views/BridgeHyperlaneView.vue'
 import BridgeHyperlaneSettingsView from '@/views/settings/BridgeHyperlaneSettingsView.vue'
+import SwapJumperView from '@/views/SwapJumperView.vue'
+import SwapJumperSettingsView from '@/views/settings/SwapJumperSettingsView.vue'
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
@@ -89,6 +91,18 @@ const routes = [
     name: 'Bridge Hyperlane Settings',
     component: BridgeHyperlaneSettingsView,
     meta: { title: 'CU | Bridge Hyperlane Settings' }
+  },
+  {
+    path: '/swap-jumper',
+    name: 'Swap Jumper',
+    component: SwapJumperView,
+    meta: { title: 'CU | Swap Jumper' }
+  },
+  {
+    path: '/swap-jumper/settings',
+    name: 'Swap Jumper Settings',
+    component: SwapJumperSettingsView,
+    meta: { title: 'CU | Swap Jumper Settings' }
   },
   {
     path: '/transfer',

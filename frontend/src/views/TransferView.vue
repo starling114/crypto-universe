@@ -19,18 +19,18 @@
 
   <cu-checkbox name="useCustomAsset" v-model="useCustomAsset" label="Custom Asset"
     tooltip="Use custom asset by specifying its contract address." />
-  <div v-if="useCustomAsset" class="mb-2 mt-1">
-    <cu-input name="customAsset" v-model="customAsset" placeholder="Contract Address..." />
-  </div>
 
   <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': !useCustomAsset }">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" @change="handleChainChange" />
     <cu-select v-if="!useCustomAsset" name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
   </div>
 
+  <div v-if="useCustomAsset" class="mb-2 mt-1">
+    <cu-input name="customAsset" v-model="customAsset" label="Custom Asset" placeholder="Contract Address..." />
+  </div>
+
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <cu-checkbox name="randomize" v-model="randomize" label="Randomize"
-      tooltip="Shuffle addresses during execution." />
+    <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />
     <div v-if="sleep" class="mt-1 grid grid-cols-6 gap-2">

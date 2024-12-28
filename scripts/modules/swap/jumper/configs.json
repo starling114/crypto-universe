@@ -1,0 +1,48 @@
+{
+  "chains": {
+    "ethereum": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC",
+        "PUFFER"
+      ]
+    },
+    "arbitrum": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC"
+      ]
+    },
+    "base": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC"
+      ]
+    },
+    "optimism": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC"
+      ]
+    },
+    "scroll": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC",
+        "SCR"
+      ]
+    },
+    "linea": {
+      "tokens": [
+        "ETH",
+        "USDT",
+        "USDC"
+      ]
+    }
+  }
+}

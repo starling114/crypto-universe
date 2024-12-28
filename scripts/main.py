@@ -9,6 +9,7 @@ MODULES = {
     "withdraw-okx": WithdrawOkx,
     "bridge-relay": BridgeRelay,
     "bridge-hyperlane": BridgeHyperlane,
+    "swap-jumper": SwapJumper,
     "transfer": Transfer,
     "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,

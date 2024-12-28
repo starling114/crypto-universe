@@ -1,7 +1,7 @@
 from web3 import Web3
 import random
 from utils import (
-    NATIVE_TOKEN_ADDRESS,
+    NULL_TOKEN_ADDRESS,
     load_json,
     humanify_seconds,
     humanify_number,
@@ -63,7 +63,7 @@ class Transfer:
             config_address = self.configs["chains"][self.chain]["tokens"][self.symbol]
 
             if config_address == "":
-                address = NATIVE_TOKEN_ADDRESS
+                address = NULL_TOKEN_ADDRESS
                 contract = None
                 decimals = 18
                 symbol = self.symbol
@@ -75,7 +75,7 @@ class Transfer:
     def calculate_amount(self, token_address, token_contract, decimals):
         amount = 0
 
-        if token_address == NATIVE_TOKEN_ADDRESS:
+        if token_address == NULL_TOKEN_ADDRESS:
             balance = get_balance(self.web3, self.source_address)
         else:
             balance = get_balance(self.web3, self.source_address, token_contract)
@@ -109,7 +109,7 @@ class Transfer:
             token_address, token_contract, decimals, symbol = self.calculate_token_data()
             calculated_amount = self.calculate_amount(token_address, token_contract, decimals)
 
-            if token_address == NATIVE_TOKEN_ADDRESS:
+            if token_address == NULL_TOKEN_ADDRESS:
                 contract_txn = {
                     "from": self.web3.to_checksum_address(self.source_address),
                     "nonce": get_transactions_count(self.web3, self.source_address),
@@ -138,14 +138,12 @@ class Transfer:
             contract_txn["gasPrice"] = get_gas_price(self.web3)
 
             # In case of transfer max in native token gas should be deducted from amount
-            if token_address == NATIVE_TOKEN_ADDRESS and self.leave_balance and float(self.leave_balance_amount) == 0:
+            if token_address == NULL_TOKEN_ADDRESS and self.leave_balance and float(self.leave_balance_amount) == 0:
                 gas_estimate = int(contract_txn["gasPrice"] * contract_txn["gas"])
                 contract_txn["value"] = calculated_amount - gas_estimate
 
             if debug_mode():
-                logger.info(
-                    f"{get_tx_link(scan, '0x2c9a0daa5b71d618abc0d275bea252071f705bed8ccbcaa670fc1c0a40d117e2')}"
-                )
+                logger.info(f"{get_tx_link(scan, 'DEBUG')}")
                 logger.success(
                     f"{self.source_address} | {symbol} | {humanify_number(wei_to_int(calculated_amount, decimals))} | Transfer successful"
                 )

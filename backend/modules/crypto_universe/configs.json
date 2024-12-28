@@ -3,6 +3,7 @@
     "balances",
     "withdraw-okx",
     "bridge-relay",
+    "swap-jumper",
     "bridge-hyperlane",
     "transfer",
     "yt_tokens",

@@ -121,6 +121,34 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
+      <cu-sidebar-item v-if="moduleEnabled('swap-jumper')">
+        <template #left>
+          <ArrowsRightLeftIcon
+            class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+        </template>
+        <template #center>Swap</template>
+
+        <cu-sidebar-sub-item v-if="moduleEnabled('swap-jumper')" tag="router-link" link="/swap-jumper">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(jumper.png)',
+                WebkitMaskImage: 'url(jumper.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Jumper</template>
+          <template #right>
+            <router-link to="/swap-jumper/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+            </router-link> </template>
+        </cu-sidebar-sub-item>
+      </cu-sidebar-item>
+
       <cu-sidebar-item v-if="moduleEnabled('transfer')" tag="router-link" link="/transfer">
         <template #left>
           <ArrowUpOnSquareStackIcon
@@ -210,7 +238,8 @@ import {
   ArrowUpOnSquareStackIcon,
   FireIcon,
   RectangleStackIcon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowsRightLeftIcon
 } from "@heroicons/vue/24/solid"
 
 const modules = ref({})

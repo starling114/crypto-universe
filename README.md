@@ -69,37 +69,44 @@ The server will start on [http://localhost:3000](http://localhost:3000). You can
 
 ## Features
 
-### 1. Balances
+### Balances
 
 - Read balances on provided EVM addresses across various networks: Ethereum, Arbitrum, Optimism, Polygon, BSC, Base, and Blast.
 - To configure addresses, visit settings page (icon in the Balances menu item on the right).
 - Specific networks can be enabled or disabled in `backend/modules/balances/configs.js`.
 
-### 2. Withdraw OKX
+### Withdraw OKX
 
 - Withdraw funds from OKX using API integration to specified addresses.
 - To configure this feature, visit settings page (icon in the Withdraw -> OKX menu item on the right).
 
-### 3. Bridge
+### Bridge
 - Bridge funds from one network to another using specified addresses.
 - To configure this feature, visit settings page (icon in the Bridge -> menu item on the right) to enter addresses and their private keys.
 
-Currently supports following bridges:
+Currently supports following platforms:
 - Relay
 - Hyperlane
 
-### 4. Transfer
+### Swap
+- Swap funds in one network using specified addresses.
+- To configure this feature, visit settings page (icon in the Swap -> menu item on the right) to enter addresses and their private keys.
+
+Currently supports following platforms:
+- Jumper
+
+### Transfer
 
 - Transfer funds from one wallet to another using specified addresses.
 - To configure this feature, visit settings page (icon in the Transfer menu item on the right) to enter addresses and their private keys.
 - Hyperlane
 
-### 5. YT Tokens
+### YT Tokens
 
 - Buy YT tokens via Pendle.
 - To configure this feature, visit settings page (icon in the YT Tokens menu item on the right) to enter addresses and their private keys.
 
-### 6. Testnets
+### Testnets
 - Toolkit to run different testnets automations using AdsPower.
 
 Currently supports following testnets:

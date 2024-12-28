@@ -100,11 +100,11 @@ apiRoutes.post('/stop_module', (req, res) => {
   const { module } = req.body
 
   if (pythonProcesses[module]) {
-    logEmitter.emit('log', `Stopping ${module} module...`, module)
+    logEmitter.emit('log', `Stopping '${module}' module...`, module)
     pythonProcesses[module].kill('SIGINT')
     delete pythonProcesses[module]
     res.json(true)
-    logEmitter.emit('log', `Module ${module} was successfuly stopped`, module)
+    logEmitter.emit('log', `Module '${module}' was successfuly stopped`, module)
   } else {
     logEmitter.emit('log', 'No module running', module)
     res.json(false)
@@ -115,11 +115,11 @@ apiRoutes.post('/start_module', (req, res) => {
   const { module } = req.body
 
   if (pythonProcesses[module]) {
-    logEmitter.emit('log', `Module ${module} is running`, module)
+    logEmitter.emit('log', `Module '${module}' is running`, module)
     res.json(false)
   } else {
     try {
-      logEmitter.emit('log', `Starting ${module} module...`, module)
+      logEmitter.emit('log', `Starting '${module}' module...`, module)
       pythonProcesses[module] = spawn(pythonExecutable(), ['main.py', module], { cwd: 'scripts' })
 
       res.json(true)
@@ -137,11 +137,11 @@ apiRoutes.post('/start_module', (req, res) => {
       })
 
       pythonProcesses[module].on('close', (code) => {
-        logEmitter.emit('log', `Module ${module} finished with exit code ${code}`, module)
+        logEmitter.emit('log', `Module '${module}' finished with exit code ${code}`, module)
         delete pythonProcesses[module]
       })
     } catch (error) {
-      logEmitter.emit('log', `Error starting ${module} module: ${error}`, module)
+      logEmitter.emit('log', `Error starting '${module}' module: ${error}`, module)
       res.json(false)
     }
   }

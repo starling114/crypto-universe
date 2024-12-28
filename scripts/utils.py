@@ -8,7 +8,6 @@ import time
 from loguru import logger
 
 NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
-NATIVE_TOKEN_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 
 
 def debug_mode():
@@ -34,6 +33,10 @@ def load_json(file_path):
 
     with open(file_path, "r") as file:
         return json.load(file)
+
+
+CONFIGS = load_json("../configs.json")
+ERC20_ABI = load_json("../erc20abi.json")
 
 
 def humanify_seconds(seconds):
@@ -76,8 +79,8 @@ def wei_to_int(qty, decimals=18):
     return qty / int("".join((["1"] + ["0"] * decimals)))
 
 
-def post_call(url, data=None, json=None, headers=None):
-    response = requests.post(url, data=data, json=json, headers=headers, verify=True)
+def post_call(url, json=None, headers=None):
+    response = requests.post(url, json=json, headers=headers, verify=True)
     response.raise_for_status()
 
     return response.json()
