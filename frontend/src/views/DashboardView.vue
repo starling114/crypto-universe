@@ -58,7 +58,7 @@ const loadDefaults = async () => {
 }
 
 const moduleEnabled = (module) => {
-  return modules.value[module] ? modules.value[module].enabled : false
+  return modules.value.includes(module)
 }
 
 onMounted(async () => {

@@ -13,11 +13,12 @@
 
   <div
     class="mt-2 mb-2 p-5 text-sm font-normal border bg-white rounded-lg border-gray-200 dark:text-white dark:border-gray-700 dark:bg-gray-800">
-    <cu-checkbox name="totalRow" v-model="totalRow" label="Total row" tooltip="Show total row on each page to see the summ of all the columns." />
+    <cu-checkbox name="totalRow" v-model="totalRow" label="Total row"
+      tooltip="Show total row on each page to see the summ of all the columns." />
   </div>
 
   <cu-label label="Networks" />
-  <cu-horizontal-checkbox-group v-model="selectedNetworks" :options="availableNetworks" />
+  <cu-horizontal-checkbox-group name="selectedNetworks" v-model="selectedNetworks" :options="availableNetworks" />
 
   <div class="mt-4 mb-4 flex justify-center">
     <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />

@@ -1,7 +1,10 @@
 <template>
   <cu-title title="Modules Settings" />
 
-  <cu-horizontal-checkbox-group v-model="selectedModules" :options="availableModules" />
+  <div v-for="(modules, group) in groupedModules" :key="group">
+    <cu-horizontal-checkbox-group :label="group !== 'main' ? group : ''" :name="group" v-model="selectedModules"
+      :options="modules" />
+  </div>
 
   <div class="mt-4 mb-4 flex justify-center">
     <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />
@@ -9,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { loadModuleData, updateModuleData } from '@/utils'
 import {
   CuTitle,
@@ -28,9 +31,7 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'js', (data) => {
     if (!Object.hasOwn(data, 'modules')) return
 
-    selectedModules.value = Object.entries(data.modules)
-      .filter(([, config]) => config.enabled)
-      .map(([value]) => value)
+    selectedModules.value = data.modules
   })
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
@@ -42,14 +43,30 @@ const loadDefaults = async () => {
 
 const handleSave = async () => {
   await updateModuleData(proxy, module.value, 'instructions', 'js', {
-    modules: availableModules.value.reduce((acc, module) => {
-      acc[module] = { enabled: selectedModules.value.includes(module) }
-      return acc
-    }, {})
+    modules: selectedModules.value
   })
 
   window.location.reload()
 }
+
+const groupedModules = computed(() => {
+  const groups = { Main: [] }
+
+  availableModules.value.forEach(item => {
+    if (item.includes('-')) {
+      let [prefix] = item.split('-')
+      prefix = prefix.charAt(0).toUpperCase() + prefix.slice(1)
+      if (!groups[prefix]) {
+        groups[prefix] = []
+      }
+      groups[prefix].push(item)
+    } else {
+      groups.Main.push(item)
+    }
+  })
+
+  return groups
+})
 
 onMounted(async () => {
   await loadDefaults()

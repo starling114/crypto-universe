@@ -46,6 +46,41 @@
         </template>
       </cu-sidebar-item>
 
+      <cu-sidebar-item v-if="moduleEnabled('transfer')" tag="router-link" link="/transfer">
+        <template #left>
+          <ArrowUpOnSquareStackIcon
+            class="transform rotate-270 flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+        </template>
+        <template #center>Transfer</template>
+        <template #right>
+          <router-link to="/transfer/settings">
+            <AdjustmentsHorizontalIcon
+              class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+          </router-link>
+        </template>
+      </cu-sidebar-item>
+
+      <cu-sidebar-item v-if="moduleEnabled('yt_tokens')" tag="router-link" link="/yt_tokens">
+        <template #left>
+          <div
+            class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+            :style="{
+              maskImage: 'url(pendle.png)',
+              WebkitMaskImage: 'url(pendle.png)',
+              maskSize: '100% 100%',
+              WebkitMaskSize: '100% 100%',
+              backgroundColor: 'currentColor'
+            }" />
+        </template>
+        <template #center>YT Tokens</template>
+        <template #right>
+          <router-link to="/yt_tokens/settings">
+            <AdjustmentsHorizontalIcon
+              class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+          </router-link>
+        </template>
+      </cu-sidebar-item>
+
       <cu-sidebar-item v-if="moduleEnabled('withdraw-okx')">
         <template #left>
           <ArrowDownOnSquareStackIcon
@@ -149,47 +184,12 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('transfer')" tag="router-link" link="/transfer">
-        <template #left>
-          <ArrowUpOnSquareStackIcon
-            class="transform rotate-270 flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-        </template>
-        <template #center>Transfer</template>
-        <template #right>
-          <router-link to="/transfer/settings">
-            <AdjustmentsHorizontalIcon
-              class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
-          </router-link>
-        </template>
-      </cu-sidebar-item>
-
-      <cu-sidebar-item v-if="moduleEnabled('yt_tokens')" tag="router-link" link="/yt_tokens">
-        <template #left>
-          <div
-            class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-            :style="{
-              maskImage: 'url(pendle.png)',
-              WebkitMaskImage: 'url(pendle.png)',
-              maskSize: '100% 100%',
-              WebkitMaskSize: '100% 100%',
-              backgroundColor: 'currentColor'
-            }" />
-        </template>
-        <template #center>YT Tokens</template>
-        <template #right>
-          <router-link to="/yt_tokens/settings">
-            <AdjustmentsHorizontalIcon
-              class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
-          </router-link>
-        </template>
-      </cu-sidebar-item>
-
       <cu-sidebar-item v-if="moduleEnabled('testnet-mitosis')">
         <template #left>
           <RectangleStackIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
-        <template #center>Testnets</template>
+        <template #center>Testnet</template>
 
         <cu-sidebar-sub-item tag="router-link" link="/testnet-mitosis">
           <template #left>
@@ -242,7 +242,7 @@ import {
   ArrowsRightLeftIcon
 } from "@heroicons/vue/24/solid"
 
-const modules = ref({})
+const modules = ref([])
 const versionUpToDate = ref(true)
 const debugMode = ref(false)
 const showVersionBanner = ref(true)
@@ -263,7 +263,7 @@ const loadDefaults = async () => {
 }
 
 const moduleEnabled = (module) => {
-  return modules.value[module] ? modules.value[module].enabled : false
+  return modules.value.includes(module)
 }
 
 const handleBannderDismiss = () => {

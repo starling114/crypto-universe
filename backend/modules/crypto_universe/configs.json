@@ -1,12 +1,12 @@
 {
   "available_modules": [
     "balances",
-    "withdraw-okx",
-    "bridge-relay",
-    "swap-jumper",
-    "bridge-hyperlane",
     "transfer",
     "yt_tokens",
+    "withdraw-okx",
+    "bridge-relay",
+    "bridge-hyperlane",
+    "swap-jumper",
     "testnet-mitosis"
   ]
 }

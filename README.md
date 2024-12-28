@@ -106,7 +106,7 @@ Currently supports following platforms:
 - Buy YT tokens via Pendle.
 - To configure this feature, visit settings page (icon in the YT Tokens menu item on the right) to enter addresses and their private keys.
 
-### Testnets
+### Testnet
 - Toolkit to run different testnets automations using AdsPower.
 
 Currently supports following testnets:

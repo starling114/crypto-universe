@@ -113,8 +113,6 @@ const loadDefaults = async () => {
     availableTasks.value = data.available_tasks
 
   }, logs)
-
-  console.log(availableProfiles.value)
 }
 
 const handleExecute = async () => {

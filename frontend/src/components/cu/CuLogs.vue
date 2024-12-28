@@ -63,8 +63,7 @@ const startLogStreaming = () => {
     }
   }
 
-  eventSource.value.onerror = (error) => {
-    console.log(error)
+  eventSource.value.onerror = () => {
     emit('append:logs', 'Logs fetching error')
   }
 }
