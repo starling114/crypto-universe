@@ -14,7 +14,8 @@ import {
   debugMode,
   adsProfiles,
   configs,
-  runAuthentication
+  runAuthentication,
+  premiumMode
 } from "./utils.js"
 import { spawn } from 'child_process'
 import { EventEmitter } from 'events'
@@ -58,7 +59,7 @@ apiRoutes.get('/ads_profiles', async (req, res) => {
 })
 
 apiRoutes.get('/configs', async (req, res) => {
-  res.json({ debug_mode: debugMode(), version_up_to_date: versionUpTodate, configs: configs })
+  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), version_up_to_date: versionUpTodate, configs: configs })
 })
 
 apiRoutes.get('/balances', async (req, res) => {

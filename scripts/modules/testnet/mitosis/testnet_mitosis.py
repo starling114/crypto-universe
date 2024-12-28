@@ -6,7 +6,7 @@ from multiprocessing import Pool
 from utils import load_json, sleep, log_error, humanify_number
 from utils import logger
 
-from modules.testnet.tools.ads import Ads
+from core.tools.ads import Ads
 from modules.testnet.mitosis.helpers import (
     MITO_GAME_CELLS,
     DEPOSITS_ASSETS,
@@ -41,12 +41,12 @@ class TestnetMitosis:
 
     def mito_game(self):
         end_time = time.time() + self.mito_game_time * 60
-        logger.info(f"Profile: {self.ads.profile_number} | Mito Game | Started for {self.mito_game_time} minute(s)")
+        logger.info(f"Profile: {self.ads.profile} | Mito Game | Started for {self.mito_game_time} minute(s)")
 
         self.ads.open_url("https://testnet.mitosis.org/", '//button[@class="sc-14c346c2-0 jjElIw"]')
         sleep(1, 2)
         self.ads.click_element('//button[text()="Let\'s Play a Mini Game!"]')
-        self.ads.rabby.sign()
+        self.ads.wallet.sign()
         self.ads.while_present('//button[text()="Drawing lines..."]')
         sleep(5, 10)
 
@@ -72,14 +72,14 @@ class TestnetMitosis:
             if itterations % 7 == 0:
                 remaining_time = max(1, end_time - time.time())
                 logger.info(
-                    f"Profile: {self.ads.profile_number} | Mito Game | {int(remaining_time // 60)} minute(s) and {int(remaining_time % 60)} second(s) left"
+                    f"Profile: {self.ads.profile} | Mito Game | {int(remaining_time // 60)} minute(s) and {int(remaining_time % 60)} second(s) left"
                 )
             sleep(1)
 
-        logger.success(f"Profile: {self.ads.profile_number} | Mito Game | Finished")
+        logger.success(f"Profile: {self.ads.profile} | Mito Game | Finished")
 
     def faucets(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Faceuts | Claim started")
+        logger.info(f"Profile: {self.ads.profile} | Faceuts | Claim started")
 
         self.ads.open_url("https://testnet.mitosis.org/faucet", '//button[@class="sc-14c346c2-0 jjElIw"]')
         sleep(4, 5)
@@ -92,21 +92,21 @@ class TestnetMitosis:
             self.ads.click_element(main_faceut)
             self.ads.while_present(main_faceut)
             sleep(2)
-            logger.success(f"Profile: {self.ads.profile_number} | Faceuts | Claimed Main Faceut")
+            logger.success(f"Profile: {self.ads.profile} | Faceuts | Claimed Main Faceut")
         else:
-            logger.info(f"Profile: {self.ads.profile_number} | Faceuts | Main Faceut already claimed")
+            logger.info(f"Profile: {self.ads.profile} | Faceuts | Main Faceut already claimed")
 
         bonus_faceut = '(//div[@class="sc-3a941f41-0 jbOTHI"])[2]//button[text()="Claim Daily Tokens"]'
         if self.ads.find_element(bonus_faceut):
             self.ads.click_element(bonus_faceut)
             self.ads.while_present(bonus_faceut)
             sleep(1, 2)
-            logger.success(f"Profile: {self.ads.profile_number} | Faceuts | Claimed Bonus Faceut")
+            logger.success(f"Profile: {self.ads.profile} | Faceuts | Claimed Bonus Faceut")
         else:
-            logger.info(f"Profile: {self.ads.profile_number} | Faceuts | Bonus Faceut already claimed")
+            logger.info(f"Profile: {self.ads.profile} | Faceuts | Bonus Faceut already claimed")
 
     def make_deposits(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Deposits | Depositing started")
+        logger.info(f"Profile: {self.ads.profile} | Deposits | Depositing started")
 
         self.ads.open_url("https://testnet.mitosis.org/EOL-vault", '//button[@class="sc-14c346c2-0 jjElIw"]')
         sleep(4, 5)
@@ -130,7 +130,7 @@ class TestnetMitosis:
                 balance_str = self.ads.find_element('//button[text()="Max"]//..//p').text
                 if balance_str == "< 0.0001" or float(balance_str) <= 0:
                     logger.info(
-                        f"Profile: {self.ads.profile_number} | Deposits | Balance is 0 for {asset['name']} in {network}"
+                        f"Profile: {self.ads.profile} | Deposits | Balance is 0 for {asset['name']} in {network}"
                     )
                     continue
 
@@ -139,17 +139,17 @@ class TestnetMitosis:
                 sleep(1, 2)
                 self.ads.click_element('(//button[text()="Deposit" and not(@disabled)])[2]')
                 sleep(1, 2)
-                self.ads.rabby.sign()
+                self.ads.wallet.sign()
                 sleep(1, 2)
-                self.ads.rabby.sign()
+                self.ads.wallet.sign()
                 sleep(1, 2)
                 self.ads.until_present('//button[text()="Deposit" and @disabled]')
                 logger.success(
-                    f"Profile: {self.ads.profile_number} | Deposits | Deposited {balance_str} {asset['name']} from {network}"
+                    f"Profile: {self.ads.profile} | Deposits | Deposited {balance_str} {asset['name']} from {network}"
                 )
 
     def claim_rewards(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Claim Rewards | Started")
+        logger.info(f"Profile: {self.ads.profile} | Claim Rewards | Started")
 
         self.ads.open_url("https://testnet.mitosis.org/EOL-vault", '//button[@class="sc-14c346c2-0 jjElIw"]')
         sleep(4, 5)
@@ -159,7 +159,7 @@ class TestnetMitosis:
         claimable_text = self.ads.find_element('//p[text()="Claimable Rewards"]//..').text
         claimable_balance = self.parse_balance(claimable_text)
         if claimable_balance <= 0:
-            logger.info(f"Profile: {self.ads.profile_number} | Claim Rewards | Nothing to claim")
+            logger.info(f"Profile: {self.ads.profile} | Claim Rewards | Nothing to claim")
             self.ads.click_element('//button[@class="sc-52d2482a-0 iIehYz"]')
             return
         else:
@@ -167,19 +167,19 @@ class TestnetMitosis:
             sleep(2, 3)
             self.ads.click_element('//button[text()="Claim All"]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
             self.ads.while_present('//button[text()="Processing..."]')
             sleep(2, 3)
             self.ads.click_element('//button[@class="sc-52d2482a-0 iIehYz"]')
             logger.success(
-                f"Profile: {self.ads.profile_number} | Claim Rewards | Claimed ${humanify_number(claimable_balance)}"
+                f"Profile: {self.ads.profile} | Claim Rewards | Claimed ${humanify_number(claimable_balance)}"
             )
 
     def craft_cells(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Cells | Crafting started")
+        logger.info(f"Profile: {self.ads.profile} | Cells | Crafting started")
 
         self.ads.open_url("https://testnet.mitosis.org/mypage", '//button[@class="sc-14c346c2-0 jjElIw"]')
         sleep(4, 5)
@@ -187,7 +187,7 @@ class TestnetMitosis:
         sleep(2, 3)
 
         if self.ads.find_element('//p[text()=" cells" and strong[text()="0" or text()="1"]]'):
-            logger.info(f"Profile: {self.ads.profile_number} | Cells | No Cells to Craft")
+            logger.info(f"Profile: {self.ads.profile} | Cells | No Cells to Craft")
             return
 
         self.ads.click_element('//button[text()="Craft"]')
@@ -199,7 +199,7 @@ class TestnetMitosis:
             elapsed_time = time.time() - start_time
 
             if elapsed_time > timeout_duration:
-                logger.warning(f"Profile: {self.ads.profile_number} | Cells | Craft timeout")
+                logger.warning(f"Profile: {self.ads.profile} | Cells | Craft timeout")
                 break
 
             cell_count = int(self.ads.find_element('//div[@class="sc-99846df6-3 omDtY"]').text.split("\n")[1])
@@ -211,7 +211,7 @@ class TestnetMitosis:
 
         self.ads.click_element('//button[@class="sc-52d2482a-0 caWALb sc-99846df6-2 cfTcwy"]')
 
-        logger.success(f"Profile: {self.ads.profile_number} | Cells | Cells crafted")
+        logger.success(f"Profile: {self.ads.profile} | Cells | Cells crafted")
 
     def execute_eol_action(self, asset, action):
         self.ads.open_url("https://testnet.mitosis.org/EOL-vault", '//button[@class="sc-14c346c2-0 jjElIw"]')
@@ -228,45 +228,45 @@ class TestnetMitosis:
             self.ads.click_element('//button[text()="Max"]')
             sleep(2, 3)
             if self.ads.find_element(f'//button[text()="{action}" and @disabled]'):
-                logger.info(f"Profile: {self.ads.profile_number} | {action} | {asset} is 0")
+                logger.info(f"Profile: {self.ads.profile} | {action} | {asset} is 0")
                 self.ads.click_element('//button[@class="sc-52d2482a-0 kbEaGL absolute left-0 top-0 text-fg-subtle"]')
                 sleep(2, 3)
                 return
             amount_str = self.ads.find_element('(//p[text()="Available"]//..//p)[2]').text
             self.ads.click_element(f'//button[text()="{action}"]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
             self.ads.while_present('//button[text()="Processing..."]')
             sleep(1, 2)
             self.ads.click_element('//button[@class="sc-52d2482a-0 kbEaGL absolute left-0 top-0 text-fg-subtle"]')
             sleep(2, 3)
-            logger.success(f"Profile: {self.ads.profile_number} | {action} | {asset} {amount_str}")
+            logger.success(f"Profile: {self.ads.profile} | {action} | {asset} {amount_str}")
         else:
-            logger.info(f"Profile: {self.ads.profile_number} | {action} | {asset} is 0")
+            logger.info(f"Profile: {self.ads.profile} | {action} | {asset} is 0")
         sleep(5, 10)
 
     def opt_in(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Opt In | Started")
+        logger.info(f"Profile: {self.ads.profile} | Opt In | Started")
 
         for asset in OPT_IN_ASSETS:
             self.execute_eol_action(asset, "Opt in")
             sleep(5, 15)
 
-        logger.success(f"Profile: {self.ads.profile_number} | Opt In | Finished")
+        logger.success(f"Profile: {self.ads.profile} | Opt In | Finished")
 
     def telo_withdraw(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Telo Withdraw | Started")
+        logger.info(f"Profile: {self.ads.profile} | Telo Withdraw | Started")
 
         for asset in TELO_ASSETS:
             self.telo_actions(asset, repay=True, withdraw=True)
 
-        logger.success(f"Profile: {self.ads.profile_number} | Telo Withdraw | Finished")
+        logger.success(f"Profile: {self.ads.profile} | Telo Withdraw | Finished")
 
     def telo_wrap_mito(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Telo Wrap | Started")
+        logger.info(f"Profile: {self.ads.profile} | Telo Wrap | Started")
 
         self.ads.open_url("https://app.telo.money/market")
         self.ads.while_present('//div[text()="No data found"]')
@@ -278,27 +278,27 @@ class TestnetMitosis:
         balance = self.parse_balance(balance_text)
         sleep(1, 2)
         if balance <= 25:
-            logger.info(f"Profile: {self.ads.profile_number} | Telo Wrap | Balance is <= 25")
+            logger.info(f"Profile: {self.ads.profile} | Telo Wrap | Balance is <= 25")
         else:
             balance_to_unwrap = int(balance - 20)
             self.ads.input_text('//p[contains(text(), "Balance:")]//..//input', balance_to_unwrap)
             sleep(1, 2)
             self.ads.click_element('//button[text()="Wrap" and not(@disabled)]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
 
             if self.ads.until_present('//p[text()="Wrapped successfully"]', 10):
                 sleep(1, 2)
                 self.ads.click_element('//button[text()="Confirm"]')
-                logger.success(f"Profile: {self.ads.profile_number} | Telo Wrap | Finished")
+                logger.success(f"Profile: {self.ads.profile} | Telo Wrap | Finished")
                 sleep(1, 2)
             else:
-                logger.warning(f"Profile: {self.ads.profile_number} | Telo Wrap | Failed")
+                logger.warning(f"Profile: {self.ads.profile} | Telo Wrap | Failed")
         sleep(5, 10)
 
     def telo_unwrap_mito(self):
-        logger.info(f"Profile: {self.ads.profile_number} | Telo Unwrap | Started")
+        logger.info(f"Profile: {self.ads.profile} | Telo Unwrap | Started")
 
         self.ads.open_url("https://app.telo.money/market")
         self.ads.while_present('//div[text()="No data found"]')
@@ -312,22 +312,22 @@ class TestnetMitosis:
         balance = self.parse_balance(balance_text)
         sleep(1, 2)
         if balance <= 0:
-            logger.info(f"Profile: {self.ads.profile_number} | Telo Unwrap | Balance is <= 0")
+            logger.info(f"Profile: {self.ads.profile} | Telo Unwrap | Balance is <= 0")
         else:
             self.ads.click_element('//button[text()="Max"]')
             sleep(1, 2)
             self.ads.click_element('//button[text()="Unwrap" and not(@disabled)]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
 
             if self.ads.until_present('//p[text()="Unwrapped successfully"]', 10):
                 sleep(1, 2)
                 self.ads.click_element('//button[text()="Confirm"]')
-                logger.success(f"Profile: {self.ads.profile_number} | Telo Unwrap | Finished")
+                logger.success(f"Profile: {self.ads.profile} | Telo Unwrap | Finished")
                 sleep(1, 2)
             else:
-                logger.warning(f"Profile: {self.ads.profile_number} | Telo Unwrap | Failed")
+                logger.warning(f"Profile: {self.ads.profile} | Telo Unwrap | Failed")
         sleep(5, 10)
 
     def make_swap(self, asset_from, asset_to, amount=100):
@@ -338,7 +338,7 @@ class TestnetMitosis:
         if self.ads.find_element(f'//button[text()="Approve [{asset_from}]"]'):
             self.ads.click_element(f'//button[text()="Approve [{asset_from}]"]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
             self.ads.until_present('//button[text()="Swap"]', 10)
             sleep(1, 2)
@@ -351,7 +351,7 @@ class TestnetMitosis:
             while retries < 5:
                 self.ads.click_element('//button[text()="Swap"]')
                 sleep(1, 2)
-                self.ads.rabby.sign()
+                self.ads.wallet.sign()
                 sleep(1, 2)
 
                 if self.ads.until_present('//div[span[text()="Swap successful"]]', 10):
@@ -360,13 +360,13 @@ class TestnetMitosis:
                     swapped_to = self.ads.find_element(f'//span[contains(text(), " {asset_to}")]').text
                     self.ads.click_element('//div[@class="styles_buttonIcon__BR2iu styles_hasClick__62LM_"]')
                     logger.success(
-                        f"Profile: {self.ads.profile_number} | Chromo | {asset_from}->{asset_to} | Swapped {swapped_from} -> {swapped_to}"
+                        f"Profile: {self.ads.profile} | Chromo | {asset_from}->{asset_to} | Swapped {swapped_from} -> {swapped_to}"
                     )
                     sleep(1, 2)
                     break
                 else:
                     logger.warning(
-                        f"Profile: {self.ads.profile_number} | Chromo | {asset_from}->{asset_to} | Retrying swap after failure"
+                        f"Profile: {self.ads.profile} | Chromo | {asset_from}->{asset_to} | Retrying swap after failure"
                     )
                     retries += 1
                     sleep(3, 5)
@@ -376,7 +376,7 @@ class TestnetMitosis:
                 sleep(2)
             else:
                 logger.error(
-                    f"Profile: {self.ads.profile_number} | Chromo | {asset_from}->{asset_to} | Failed after {retries} retries"
+                    f"Profile: {self.ads.profile} | Chromo | {asset_from}->{asset_to} | Failed after {retries} retries"
                 )
 
     def parse_balance(self, text):
@@ -422,7 +422,7 @@ class TestnetMitosis:
             self.make_swap(asset_from, asset_to, amount)
             sleep(2, 3)
         else:
-            logger.info(f"Profile: {self.ads.profile_number} | Chromo | {asset_from}->{asset_to} | Balance is 0")
+            logger.info(f"Profile: {self.ads.profile} | Chromo | {asset_from}->{asset_to} | Balance is 0")
 
         if not swap_back:
             sleep(2, 3)
@@ -444,7 +444,7 @@ class TestnetMitosis:
         retries = 0
         while retries < 5:
             if not self.ads.click_element(f'//button[text()="{action}" and not(@disabled)]'):
-                logger.info(f"Profile: {self.ads.profile_number} | Telo | {asset} | Nothing to {action}")
+                logger.info(f"Profile: {self.ads.profile} | Telo | {asset} | Nothing to {action}")
                 sleep(2, 3)
                 return
 
@@ -457,7 +457,7 @@ class TestnetMitosis:
             ).text
             balance = self.parse_balance(balance_text)
             if balance <= 0:
-                logger.info(f"Profile: {self.ads.profile_number} | Telo | {asset} | Nothing to {action}")
+                logger.info(f"Profile: {self.ads.profile} | Telo | {asset} | Nothing to {action}")
                 sleep(1, 2)
                 self.ads.click_element('//button[span[text()="Close"]]')
                 sleep(2, 3)
@@ -467,19 +467,19 @@ class TestnetMitosis:
             sleep(1, 2)
             self.ads.click_element(f'//button[text()="{action} {asset}" and not(@disabled)]')
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
-            self.ads.rabby.sign()
+            self.ads.wallet.sign()
             sleep(1, 2)
 
             if self.ads.until_present(f'//p[text()="{post_action} successfully"]', 10):
                 sleep(1, 2)
                 self.ads.click_element('//button[text()="Confirm"]')
-                logger.info(f"Profile: {self.ads.profile_number} | Telo | {asset} | {post_action} successfully")
+                logger.info(f"Profile: {self.ads.profile} | Telo | {asset} | {post_action} successfully")
                 sleep(1, 2)
                 break
             else:
-                logger.warning(f"Profile: {self.ads.profile_number} | Telo | {asset} | Retrying {action} after failure")
+                logger.warning(f"Profile: {self.ads.profile} | Telo | {asset} | Retrying {action} after failure")
                 retries += 1
                 sleep(1, 2)
                 self.ads.click_element('//button[text()="Close"]')
@@ -488,13 +488,11 @@ class TestnetMitosis:
                 sleep(1, 2)
             sleep(2, 3)
         else:
-            logger.error(
-                f"Profile: {self.ads.profile_number} | Telo | {asset} | {action} failed after {retries} retries"
-            )
+            logger.error(f"Profile: {self.ads.profile} | Telo | {asset} | {action} failed after {retries} retries")
 
     def telo_actions(self, asset, supply=False, repay=False, withdraw=False):
         logger.info(
-            f"Profile: {self.ads.profile_number} | Telo | {asset} | Started, supply: {supply}, repay: {repay}, withdraw: {withdraw}"
+            f"Profile: {self.ads.profile} | Telo | {asset} | Started, supply: {supply}, repay: {repay}, withdraw: {withdraw}"
         )
 
         self.ads.open_url("https://app.telo.money/market")
@@ -521,7 +519,7 @@ class TestnetMitosis:
 
     def chromo_swaps(self):
         logger.info(
-            f"Profile: {self.ads.profile_number} | Chromo | Chromo {self.chromo_swaps_count} auto-swaps and Telo supply every {self.supply_every_swap} swap started"
+            f"Profile: {self.ads.profile} | Chromo | Chromo {self.chromo_swaps_count} auto-swaps and Telo supply every {self.supply_every_swap} swap started"
         )
 
         for asset in CHROMO_MI_ASSETS:
@@ -533,9 +531,9 @@ class TestnetMitosis:
             i += 1
             swap_asset = random.choice(CHROMO_ASSETS_TO_TRADE)
             self.swap_assets(CHROMO_MAIN_ASSET, swap_asset, swap_back=True)
-            logger.info(f"Profile: {self.ads.profile_number} | Chromo | {i * 2}/{self.chromo_swaps_count} done")
+            logger.info(f"Profile: {self.ads.profile} | Chromo | {i * 2}/{self.chromo_swaps_count} done")
             sleep(15, 30)
-        logger.success(f"Profile: {self.ads.profile_number} | Chromo | Finished")
+        logger.success(f"Profile: {self.ads.profile} | Chromo | Finished")
 
         if "telo_supply" in self.tasks:
             self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_WMITO_ASSET, 50)
@@ -544,7 +542,7 @@ class TestnetMitosis:
             self.swap_assets(CHROMO_MAIN_ASSET, supply_asset, 50)
             sleep(15, 30)
             self.telo_actions(supply_asset, supply=True)
-            logger.success(f"Profile: {self.ads.profile_number} | Telo Supply | Finished")
+            logger.success(f"Profile: {self.ads.profile} | Telo Supply | Finished")
         else:
             self.swap_assets(CHROMO_MAIN_ASSET, CHROMO_WMITO_ASSET, 75)
             sleep(15, 30)
@@ -553,9 +551,9 @@ class TestnetMitosis:
 
     def execute(self):
         try:
-            logger.info(f"Profile: {self.ads.profile_number} | Tasks | {self.tasks}")
+            logger.info(f"Profile: {self.ads.profile} | Tasks | {self.tasks}")
 
-            self.ads.rabby.authenticate()
+            self.ads.wallet.authenticate()
 
             sleep(15, 30)
 

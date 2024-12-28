@@ -6,6 +6,7 @@ import axios from 'axios'
 import './assets/tailwind.css'
 import { loadConfigs } from '@/utils'
 import DashboardView from "@/views/DashboardView"
+import SaleFjordView from "@/views/SaleFjordView"
 import SettingsView from '@/views/settings/SettingsView.vue'
 import BalancesView from "@/views/BalancesView"
 import BalancesSettingsView from '@/views/settings/BalancesSettingsView.vue'
@@ -37,6 +38,12 @@ const routes = [
     name: 'Dashboard',
     component: DashboardView,
     meta: { title: 'CU | Dashboard' }
+  },
+  {
+    path: '/sale-fjord',
+    name: 'Sale Fjord',
+    component: SaleFjordView,
+    meta: { title: 'CU | Sale Fjord' }
   },
   {
     path: '/settings',
