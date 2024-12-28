@@ -31,6 +31,12 @@ export function readJson(filePath) {
 }
 
 export function writeJson(filePath, jsonData) {
+  const dir = path.dirname(filePath)
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+
   fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), 'utf-8')
 }
 
@@ -181,6 +187,12 @@ export async function getTokensPrice(tokens) {
   }
 
   return prices
+}
+
+export function premiumMode() {
+  const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
+
+  return !!instructions.lisence_key
 }
 
 export const multicallAddress = '0xca11bde05977b3631167028862be2a173976ca11'

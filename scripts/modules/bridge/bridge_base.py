@@ -2,7 +2,6 @@ from web3 import Web3
 import random
 
 from utils import (
-    NULL_TOKEN_ADDRESS,
     load_json,
     int_to_wei,
     wei_to_int,

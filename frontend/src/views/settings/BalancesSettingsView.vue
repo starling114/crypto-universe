@@ -17,8 +17,7 @@
       tooltip="Show total row on each page to see the summ of all the columns." />
   </div>
 
-  <cu-label label="Networks" />
-  <cu-horizontal-checkbox-group name="selectedNetworks" v-model="selectedNetworks" :options="availableNetworks" />
+  <cu-horizontal-checkbox-group label="Networks" v-model="selectedNetworks" :options="availableNetworks" />
 
   <div class="mt-4 mb-4 flex justify-center">
     <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />
@@ -36,7 +35,6 @@ import {
   CuTextarea,
   CuInput,
   CuSelect,
-  CuLabel,
   CuHorizontalCheckboxGroup,
   CuButton,
   CuLogs,

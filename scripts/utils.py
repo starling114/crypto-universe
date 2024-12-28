@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import importlib
 import requests
 import random
 import traceback
@@ -196,3 +197,33 @@ def sleep(delay, max_delay=None):
         delay = random.uniform(delay, max_delay)
 
     time.sleep(delay)
+
+
+def import_premium_module(file, name):
+    try:
+        module = importlib.import_module(f"modules.premium.{file}")
+    except ImportError:
+        try:
+            module = importlib.import_module(f"modules.premium.private.{file}")
+        except ImportError:
+            return None
+
+    return getattr(module, name)
+
+
+def run_module(aaarg, modules):
+    module = modules.get(aaarg, None)
+    if module:
+        module.run()
+    else:
+        logger.error(f"Invalid module choice: {aaarg}")
+
+
+def run_premium_module(aaarg, modules):
+    module = modules.get(aaarg, None)
+    if module:
+        location = "/".join(aaarg.split("-"))
+        instructions = load_json(f"modules/{location}/instructions.json")
+        module.run(instructions)
+    else:
+        logger.error(f"Invalid premium module choice: {aaarg}")

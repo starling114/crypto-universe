@@ -1,7 +1,7 @@
 import random
 
 from utils import post_call, load_json, int_to_wei, wei_to_int, log_error, debug_mode, sleep, logger, ExecutionError
-from modules.helpers import (
+from core.helpers import (
     calculate_token_balance,
     calculate_base_amount,
     transaction_data,
@@ -16,7 +16,7 @@ from modules.helpers import (
     prettify_seconds,
     prettify_number,
 )
-from core.helpers import build_token, build_chain, build_web3
+from core.models.helpers import build_token, build_chain, build_web3
 from modules.swap.jumper.helpers import MAX_SLIPPAGE, SIMULATE_AMOUNT
 
 

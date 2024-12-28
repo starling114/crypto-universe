@@ -1,0 +1,3 @@
+[submodule "scripts/modules/premium/private"]
+	path = scripts/modules/premium/private
+	url = git@github-crypto-universe-private:starling114/crypto-universe-private.git
