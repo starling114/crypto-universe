@@ -1,3 +1,4 @@
+from core.helpers import transactions_count, gas_price
 from modules.bridge.bridge_base import BridgeBase
 from modules.bridge.hyperlane.helpers import (
     HYPERLANE_CONTRACTS,
@@ -6,56 +7,65 @@ from modules.bridge.hyperlane.helpers import (
     HYPERLANE_MAX_TRANSACTION_AMOUNTS,
 )
 
-from utils import (
-    get_balance,
-    get_transactions_count,
-    get_gas_price,
-    get_gas_limit,
-)
-
 
 class BridgeHyperlane(BridgeBase):
-    def calculate_amount(self, bridge_contract, to_chain_id):
-        amount = 0
-        balance = get_balance(self.web3, self.address)
-        amount = self.calculate_amount_base(balance)
-
-        bridge_fee_tmp = bridge_contract.functions.quoteBridge(to_chain_id, amount).call()
-        bridge_fee = bridge_contract.functions.quoteBridge(to_chain_id, amount - bridge_fee_tmp).call()
-        amount = amount - bridge_fee
-
-        self.amount_validations(
-            balance,
+    def __init__(
+        self,
+        secrets,
+        leave_balance,
+        leave_balance_amount,
+        amount,
+        address,
+        from_chain,
+        to_chain,
+        web3,
+        token,
+        amount_includes_fee,
+    ):
+        super().__init__(
+            secrets,
+            leave_balance,
+            leave_balance_amount,
             amount,
-            HYPERLANE_MIN_TRANSACTION_AMOUNT,
-            HYPERLANE_MAX_TRANSACTION_AMOUNTS[self.from_chain],
+            address,
+            from_chain,
+            to_chain,
+            web3,
+            token,
+            amount_includes_fee,
+        )
+        self.bridge_contract = self.web3.eth.contract(
+            address=HYPERLANE_CONTRACTS[self.from_chain.name], abi=HYPERLANE_ABI
         )
 
-        self.calculated_amount = amount
+    def calculate_fee(self, base_amount):
+        bridge_fee_tmp = self.bridge_contract.functions.quoteBridge(self.to_chain.chain_id, base_amount).call()
+        bridge_fee = self.bridge_contract.functions.quoteBridge(
+            self.to_chain.chain_id, base_amount - bridge_fee_tmp
+        ).call()
+        return bridge_fee
 
-    def get_contract_txn(self):
-        bridge_contract = self.web3.eth.contract(address=HYPERLANE_CONTRACTS[self.from_chain], abi=HYPERLANE_ABI)
-        to_chain_id = self.configs["chains"][self.to_chain]["chain_id"]
+    def min_transaction_amount(self):
+        return HYPERLANE_MIN_TRANSACTION_AMOUNT
 
-        self.calculate_amount(bridge_contract, to_chain_id)
+    def max_transaction_amount(self):
+        return HYPERLANE_MAX_TRANSACTION_AMOUNTS[self.from_chain.name]
 
-        amount_without_fee = self.calculated_amount
-        fee = bridge_contract.functions.quoteBridge(to_chain_id, amount_without_fee).call()
-        self.calculated_amount = amount_without_fee + fee
+    def get_transaction_data(self):
+        fee = self.bridge_contract.functions.quoteBridge(self.to_chain.chain_id, self.calculated_amount).call()
 
-        contract_txn = bridge_contract.functions.bridgeETH(to_chain_id, amount_without_fee).build_transaction(
+        tx_data = self.bridge_contract.functions.bridgeETH(
+            self.to_chain.chain_id, self.calculated_amount
+        ).build_transaction(
             {
-                "nonce": get_transactions_count(self.web3, self.address),
+                "nonce": transactions_count(self.web3, self.address),
                 "from": self.web3.to_checksum_address(self.address),
-                "value": self.calculated_amount,
-                "gas": 0,
-                "gasPrice": 0,
+                "value": self.calculated_amount + fee,
+                "gasPrice": gas_price(self.web3),
             }
         )
-        contract_txn["gas"] = get_gas_limit(self.web3, contract_txn)
-        contract_txn["gasPrice"] = get_gas_price(self.web3)
 
-        return contract_txn
+        return tx_data
 
     @classmethod
     def run(cls):

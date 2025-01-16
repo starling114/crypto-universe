@@ -1,114 +1,97 @@
-from web3 import Web3
 import random
 
-from utils import (
-    load_json,
-    int_to_wei,
-    wei_to_int,
-    sign_tx,
-    zip_to_addresses,
-    humanify_seconds,
-    humanify_number,
+from utils import load_json, wei_to_int, log_error, debug_mode, sleep, logger
+from core.helpers import (
+    calculate_token_balance,
+    calculate_base_amount,
+    send_transaction,
+    verify_transaction,
+    execute_amount_validations,
     get_private_key,
-    get_tx_link,
-    wait_tx_completion,
-    log_error,
-    debug_mode,
-    sleep,
-    ExecutionError,
+    get_transaction_link,
+    zip_to_addresses,
+    prettify_seconds,
+    prettify_number,
 )
-from utils import logger
-
-MIN_TRANSACTION_AMOUNT = 0.00001
-MAX_TRANSACTION_AMOUNT = 9999999
+from core.models.helpers import build_token, build_chain, build_web3
 
 
 class BridgeBase:
+    MIN_TRANSACTION_AMOUNT = 0.0000001
+    MAX_TRANSACTION_AMOUNT = 1000
+
     def __init__(
         self,
         secrets,
-        configs,
         leave_balance,
         leave_balance_amount,
         amount,
         address,
         from_chain,
         to_chain,
-        symbol,
         web3,
+        token,
+        amount_includes_fee,
     ):
         self.secrets = secrets
-        self.configs = configs
         self.leave_balance = leave_balance
         self.leave_balance_amount = leave_balance_amount
         self.amount = amount
-        self.calculated_amount = None
         self.address = address
         self.from_chain = from_chain
         self.to_chain = to_chain
-        self.symbol = symbol
         self.web3 = web3
+        self.token = token
+        self.amount_includes_fee = amount_includes_fee
 
-    def amount_validations(
-        self,
-        balance,
-        amount,
-        min_transaction_amount=MIN_TRANSACTION_AMOUNT,
-        max_transaction_amount=MAX_TRANSACTION_AMOUNT,
-    ):
-        min_amount = int_to_wei(min_transaction_amount)
-        max_amount = int_to_wei(max_transaction_amount)
-        if amount > balance:
-            raise ExecutionError(
-                f"Not enough balance. Amount > Balance ({humanify_number(wei_to_int(amount))} > {humanify_number(wei_to_int(balance))})"
-            )
-        elif amount > max_amount:
-            raise ExecutionError(f"Max transaction amount {humanify_number(wei_to_int(max_amount))}")
-        elif amount < min_amount:
-            raise ExecutionError(f"Min transaction amount {humanify_number(wei_to_int(min_amount))}")
+    def calculate_fee(self, _):
+        raise NotImplementedError
 
-    def calculate_amount_base(self, balance):
-        if self.leave_balance:
-            if balance < int_to_wei(float(self.leave_balance_amount)):
-                raise ExecutionError(
-                    f"Not enough balance. Balance < Leave Balance ({humanify_number(wei_to_int(balance))} < {self.leave_balance_amount})"
-                )
-            else:
-                amount = balance - int_to_wei(float(self.leave_balance_amount))
-        else:
-            amount = int_to_wei(float(self.amount))
+    def min_transaction_amount(self):
+        return self.MIN_TRANSACTION_AMOUNT
+
+    def max_transaction_amount(self):
+        return self.MAX_TRANSACTION_AMOUNT
+
+    def calculate_amount(self):
+        balance = calculate_token_balance(self.web3, self.address, self.token)
+        amount = calculate_base_amount(balance, self.amount, self.leave_balance, self.leave_balance_amount)
+
+        if self.amount_includes_fee and self.token.is_native():
+            amount = amount - self.calculate_fee(amount)
+
+        execute_amount_validations(balance, amount, self.min_transaction_amount(), self.max_transaction_amount())
 
         return amount
 
-    def get_contract_txn(self):
+    def get_transaction_data(self):
         raise NotImplementedError
 
     def bridge(self):
         try:
-            scan = self.configs["chains"][self.from_chain]["scan"]
-
-            contract_txn = self.get_contract_txn()
+            self.calculated_amount = self.calculate_amount()
 
             if debug_mode():
-                logger.info(f"{get_tx_link(scan, 'DEBUG')}")
+                logger.info(f"{get_transaction_link(self.from_chain, 'DEBUG')}")
                 logger.success(
-                    f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
+                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
                 )
                 return True
 
-            private_key = get_private_key(self.web3, self.secrets, self.address)
-            tx_hash = sign_tx(self.web3, contract_txn, private_key)
+            self.private_key = get_private_key(self.web3, self.secrets, self.address)
+            tx_data = self.get_transaction_data()
+            tx_hash = send_transaction(self.web3, tx_data, self.private_key)
 
-            logger.info(f"{get_tx_link(scan, tx_hash)}")
+            logger.info(f"{get_transaction_link(self.from_chain, tx_hash)}")
 
-            if wait_tx_completion(self.web3, tx_hash):
+            if verify_transaction(self.web3, tx_hash):
                 logger.success(
-                    f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
+                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
                 )
                 return True
             else:
                 logger.error(
-                    f"{self.address} | {self.symbol} | {humanify_number(wei_to_int(self.calculated_amount))} | Bridge unsuccessful"
+                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge unsuccessful"
                 )
                 return False
         except Exception as e:
@@ -120,31 +103,32 @@ class BridgeBase:
     def run(cls, bridge):
         instructions = load_json(f"modules/bridge/{bridge}/instructions.json")
         secrets = load_json(f"modules/bridge/{bridge}/secrets.json")
-        configs = load_json("../configs.json")
 
         addresses = instructions["addresses"]
         amounts = zip_to_addresses(addresses, instructions["amounts"])
 
-        rpc = random.choice(configs["chains"][instructions["from_chain"]]["rpcs"])
-        web3 = Web3(Web3.HTTPProvider(rpc))
-
         if instructions["randomize"]:
             random.shuffle(addresses)
+
+        from_chain = build_chain(instructions["from_chain"])
+        to_chain = build_chain(instructions["to_chain"])
+        web3 = build_web3(from_chain)
+        token = build_token(web3, chain=from_chain, symbol=instructions["symbol"])
 
         last_address = len(addresses) - 1
         for index, address in enumerate(addresses):
             amount = None if instructions["leave_balance"] else amounts[address]
             result = cls(
                 secrets,
-                configs,
                 instructions["leave_balance"],
                 instructions["leave_balance_amount"],
                 amount,
                 address,
-                instructions["from_chain"],
-                instructions["to_chain"],
-                instructions["symbol"],
+                from_chain,
+                to_chain,
                 web3,
+                token,
+                instructions["amount_includes_fee"],
             ).bridge()
 
             if index != last_address and instructions["sleep"] and result:
@@ -152,5 +136,5 @@ class BridgeBase:
                     int(instructions["sleep_delays"][0]),
                     int(instructions["sleep_delays"][1]),
                 )
-                logger.info(f"Sleeping for {humanify_seconds(sleep_time)}")
+                logger.info(f"Sleeping for {prettify_seconds(sleep_time)}")
                 sleep(sleep_time)

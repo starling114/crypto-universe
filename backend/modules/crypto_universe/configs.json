@@ -4,6 +4,7 @@
     "transfer",
     "yt_tokens",
     "withdraw-okx",
+    "bridge-jumper",
     "bridge-relay",
     "bridge-hyperlane",
     "swap-jumper",

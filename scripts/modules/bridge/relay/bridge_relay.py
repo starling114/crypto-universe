@@ -1,28 +1,20 @@
+from utils import post_call
+from core.helpers import transaction_data
 from modules.bridge.bridge_base import BridgeBase
-
-from utils import (
-    NULL_TOKEN_ADDRESS,
-    post_call,
-    get_balance,
-    get_transactions_count,
-    get_gas_price,
-    get_gas_limit,
-)
-
-RELAY_MIN_TRANSACTION_AMOUNT = 0.00005
+from modules.bridge.relay.helpers import RELAY_MIN_TRANSACTION_AMOUNT
 
 
 class BridgeRelay(BridgeBase):
-    def get_data(self):
-        # TODO: Change NULL_TOKEN_ADDRESS to symbol address to support other tokens
+
+    def get_remote_data(self, amount):
         params = {
             "user": self.address,
             "recipient": self.address,
-            "originChainId": self.configs["chains"][self.from_chain]["chain_id"],
-            "destinationChainId": self.configs["chains"][self.to_chain]["chain_id"],
-            "originCurrency": NULL_TOKEN_ADDRESS,
-            "destinationCurrency": NULL_TOKEN_ADDRESS,
-            "amount": str(self.calculated_amount),
+            "originChainId": self.from_chain.chain_id,
+            "destinationChainId": self.to_chain.chain_id,
+            "originCurrency": self.token.address,
+            "destinationCurrency": self.token.address,
+            "amount": str(amount),
             "tradeType": "EXACT_INPUT",
             "referrer": "relay.link/swap",
             "useExternalLiquidity": False,
@@ -30,35 +22,27 @@ class BridgeRelay(BridgeBase):
 
         return post_call("https://api.relay.link/quote", json=params)
 
-    def calculate_amount(self):
-        amount = 0
-        balance = get_balance(self.web3, self.address)
-        amount = self.calculate_amount_base(balance)
+    def calculate_fee(self, base_amount):
+        remote_data = self.get_remote_data(base_amount)
 
-        self.amount_validations(balance, amount, RELAY_MIN_TRANSACTION_AMOUNT)
+        currency_in_amount = int(remote_data["details"]["currencyIn"]["amount"])
+        currency_out_amount = int(remote_data["details"]["currencyOut"]["amount"])
 
-        self.calculated_amount = amount
+        return currency_in_amount - currency_out_amount
 
-    def get_contract_txn(self):
-        self.calculate_amount()
+    def min_transaction_amount(self):
+        return RELAY_MIN_TRANSACTION_AMOUNT
 
-        tx_data = self.get_data()
-        transaction_data = tx_data["steps"][0]["items"][0]["data"]
+    def get_transaction_data(self):
+        remote_data = self.get_remote_data(self.calculated_amount)["steps"][0]["items"][0]["data"]
 
-        contract_txn = {
-            "from": self.web3.to_checksum_address(transaction_data["from"]),
-            "nonce": get_transactions_count(self.web3, self.address),
-            "value": int(transaction_data["value"]),
-            "to": self.web3.to_checksum_address(transaction_data["to"]),
-            "data": transaction_data["data"],
-            "chainId": transaction_data["chainId"],
-            "gas": 0,
-            "gasPrice": 0,
-        }
-        contract_txn["gas"] = get_gas_limit(self.web3, contract_txn)
-        contract_txn["gasPrice"] = get_gas_price(self.web3)
-
-        return contract_txn
+        return transaction_data(
+            self.web3,
+            from_address=remote_data["from"],
+            to_address=remote_data["to"],
+            data=remote_data["data"],
+            value=int(remote_data["value"]),
+        )
 
     @classmethod
     def run(cls):

@@ -1,12 +1,22 @@
+import sys
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv("../.env"))
-import sys
-from modules import *
+from modules.withdraw.okx.withdraw_okx import WithdrawOkx
+from modules.bridge.jumper.bridge_jumper import BridgeJumper
+from modules.bridge.relay.bridge_relay import BridgeRelay
+from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
+from modules.swap.jumper.swap_jumper import SwapJumper
+from modules.transfer.transfer import Transfer
+from modules.yt_tokens.yt_tokens import YtTokens
+from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
+
 from utils import log_error, logger, import_premium_module, run_module, run_premium_module
+
+load_dotenv(find_dotenv("../.env"))
 
 MODULES = {
     "withdraw-okx": WithdrawOkx,
+    "bridge-jumper": BridgeJumper,
     "bridge-relay": BridgeRelay,
     "bridge-hyperlane": BridgeHyperlane,
     "swap-jumper": SwapJumper,

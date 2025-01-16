@@ -1,0 +1,29 @@
+{
+  "chains": {
+    "arbitrum": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "base": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "optimism": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "scroll": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "linea": {
+      "tokens": [
+        "ETH"
+      ]
+    }
+  }
+}

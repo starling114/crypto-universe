@@ -12,6 +12,8 @@ import BalancesView from "@/views/BalancesView"
 import BalancesSettingsView from '@/views/settings/BalancesSettingsView.vue'
 import WithdrawOkxView from '@/views/WithdrawOkxView.vue'
 import WithdrawOkxSettingsView from '@/views/settings/WithdrawOkxSettingsView.vue'
+import BridgeJumperView from '@/views/BridgeJumperView.vue'
+import BridgeJumperSettingsView from '@/views/settings/BridgeJumperSettingsView.vue'
 import BridgeRelayView from '@/views/BridgeRelayView.vue'
 import BridgeRelaySettingsView from '@/views/settings/BridgeRelaySettingsView.vue'
 import BridgeHyperlaneView from '@/views/BridgeHyperlaneView.vue'
@@ -74,6 +76,18 @@ const routes = [
     name: 'Withdraw OKX Settings',
     component: WithdrawOkxSettingsView,
     meta: { title: 'CU | Withdraw OKX Settings' }
+  },
+  {
+    path: '/bridge-jumper',
+    name: 'Bridge Jumper',
+    component: BridgeJumperView,
+    meta: { title: 'CU | Bridge Jumper' }
+  },
+  {
+    path: '/bridge-jumper/settings',
+    name: 'Bridge Jumper Settings',
+    component: BridgeJumperSettingsView,
+    meta: { title: 'CU | Bridge Jumper Settings' }
   },
   {
     path: '/bridge-relay',

@@ -8,10 +8,10 @@ def transaction_data(web3, from_address, to_address, data=None, value=None):
 
     tx_data = {
         "chainId": web3.eth.chain_id,
-        "nonce": _transactions_count(web3, from_address),
+        "nonce": transactions_count(web3, from_address),
         "from": from_address,
         "to": to_address,
-        "gasPrice": _gas_price(web3),
+        "gasPrice": gas_price(web3),
     }
 
     if value is not None:
@@ -21,6 +21,14 @@ def transaction_data(web3, from_address, to_address, data=None, value=None):
         tx_data["data"] = data
 
     return tx_data
+
+
+def transactions_count(web3, wallet_address):
+    return int(web3.eth.get_transaction_count(wallet_address))
+
+
+def gas_price(web3):
+    return int(web3.eth.gas_price * 1.2)
 
 
 def estimate_gas(web3, tx_data):
@@ -177,14 +185,3 @@ def execute_amount_validations(
         raise ExecutionError(
             f"Not enough balance. Amount > Max transaction amount ({prettify_number(wei_to_int(amount))} > {prettify_number(wei_to_int(max_amount))})"
         )
-
-
-# Hidden functions
-
-
-def _transactions_count(web3, wallet_address):
-    return int(web3.eth.get_transaction_count(wallet_address))
-
-
-def _gas_price(web3):
-    return int(web3.eth.gas_price * 1.2)

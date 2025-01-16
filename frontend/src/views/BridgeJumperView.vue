@@ -1,5 +1,5 @@
 <template>
-  <cu-title title="Bridge Relay" />
+  <cu-title title="Bridge Jumper" />
 
   <cu-checkbox name="leaveBalance" v-model="leaveBalance" label="Leave Balance Amount"
     tooltip="Leave this amount on the balance and withdraw everything else." />
@@ -82,7 +82,7 @@ const chains = ref({})
 const logs = ref([])
 const moduleRunning = ref(false)
 
-const module = ref('bridge-relay')
+const module = ref('bridge-jumper')
 
 const { proxy } = getCurrentInstance()
 
@@ -138,7 +138,7 @@ const handleExecute = async () => {
     amount_includes_fee: amountIncludesFee.value,
     randomize: randomize.value,
     sleep: sleep.value,
-    sleep_delays: sleepDelays.value
+    sleep_delays: sleepDelays.value,
   }, logs)
 
   await startModule(proxy, module.value, logs)

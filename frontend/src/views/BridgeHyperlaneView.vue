@@ -25,6 +25,8 @@
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
+    <cu-checkbox name="amountIncludesFee" v-model="amountIncludesFee" label="Amount Includes Fee"
+      tooltip="Deduct fee from the amount entered in `amounts` field. Usefull when you want that exact amount to be used in the operation." />
     <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />
@@ -70,6 +72,7 @@ const previousToChain = ref(null)
 const availableSymbols = ref([])
 const symbol = ref(null)
 
+const amountIncludesFee = ref(true)
 const randomize = ref(true)
 const sleep = ref(true)
 const sleepDelays = ref(['120', '240'])
@@ -88,7 +91,7 @@ const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
-    if (!Object.hasOwn(data, 'randomize')) return
+    if (!Object.hasOwn(data, 'leave_balance')) return
 
     leaveBalance.value = data.leave_balance
     leaveBalanceAmount.value = data.leave_balance_amount
@@ -100,6 +103,7 @@ const loadDefaults = async () => {
     toChain.value = data.to_chain
     symbol.value = data.symbol
 
+    amountIncludesFee.value = data.amount_includes_fee
     randomize.value = data.randomize
     sleep.value = data.sleep
     sleepDelays.value = data.sleep_delays
@@ -124,16 +128,17 @@ const handleExecute = async () => {
   moduleRunning.value = true
 
   await updateModuleData(proxy, module.value, 'instructions', 'python', {
-    randomize: randomize.value,
-    sleep: sleep.value,
-    sleep_delays: sleepDelays.value,
     leave_balance: leaveBalance.value,
     leave_balance_amount: leaveBalanceAmount.value,
+    addresses: addresses.value.split('\n').filter(Boolean),
+    amounts: amounts.value.split('\n').filter(Boolean),
     from_chain: fromChain.value,
     to_chain: toChain.value,
     symbol: symbol.value,
-    addresses: addresses.value.split('\n').filter(Boolean),
-    amounts: amounts.value.split('\n').filter(Boolean)
+    amount_includes_fee: amountIncludesFee.value,
+    randomize: randomize.value,
+    sleep: sleep.value,
+    sleep_delays: sleepDelays.value
   }, logs)
 
   await startModule(proxy, module.value, logs)
