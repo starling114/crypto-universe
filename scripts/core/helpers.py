@@ -1,5 +1,5 @@
 import random
-from utils import int_to_wei, wei_to_int, round_number, ExecutionError
+from utils import SECRETS, int_to_wei, wei_to_int, round_number, ExecutionError
 
 
 def transaction_data(web3, from_address, to_address, data=None, value=None):
@@ -87,8 +87,14 @@ def verify_transaction(web3, tx_hash):
 # Support functions
 
 
-def get_private_key(web3, secrets, address):
-    private_key = secrets["private_keys"][address]
+def get_private_key(web3, secrets, address, local_secrets=True):
+    private_key = secrets["private_keys"].get(address, None)
+
+    if local_secrets and private_key is None:
+        private_key = get_private_key(web3, SECRETS, address, False)
+
+    if private_key is None:
+        raise ExecutionError("Private key was not found")
 
     if web3.eth.account.from_key(private_key).address != web3.to_checksum_address(address):
         raise ExecutionError("Wrong private key for address")

@@ -21,12 +21,10 @@
       label="Source Network" />
     <cu-select name="toChain" v-model="toChain" :options="availableChains" @change="handleToChainChange"
       label="Destination Network" />
-    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
+    <cu-select name="fromSymbol" v-model="fromSymbol" :options="availableFromSymbols" label="Token" />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <cu-checkbox name="amountIncludesFee" v-model="amountIncludesFee" label="Amount Includes Fee"
-      tooltip="Deduct fee from the amount entered in `amounts` field. Usefull when you want that exact amount to be used in the operation." />
     <cu-checkbox name="randomize" v-model="randomize" label="Randomize" tooltip="Shuffle addresses during execution." />
     <cu-checkbox name="sleep" v-model="sleep" label="Sleep"
       tooltip="Sleep between each execution, random delay is seconds based on min and max sleep is chosen." />
@@ -69,10 +67,9 @@ const fromChain = ref(null)
 const toChain = ref(null)
 const previousFromChain = ref(null)
 const previousToChain = ref(null)
-const availableSymbols = ref([])
-const symbol = ref(null)
+const availableFromSymbols = ref([])
+const fromSymbol = ref(null)
 
-const amountIncludesFee = ref(true)
 const randomize = ref(true)
 const sleep = ref(true)
 const sleepDelays = ref(['120', '240'])
@@ -101,9 +98,8 @@ const loadDefaults = async () => {
 
     fromChain.value = data.from_chain
     toChain.value = data.to_chain
-    symbol.value = data.symbol
+    fromSymbol.value = data.from_symbol
 
-    amountIncludesFee.value = data.amount_includes_fee
     randomize.value = data.randomize
     sleep.value = data.sleep
     sleepDelays.value = data.sleep_delays
@@ -120,8 +116,8 @@ const loadDefaults = async () => {
   previousFromChain.value = fromChain.value
   toChain.value = toChain.value || availableChains.value[1]
   previousToChain.value = toChain.value
-  availableSymbols.value = chainSymbols(fromChain.value)
-  symbol.value = symbol.value || availableSymbols.value[0]
+  availableFromSymbols.value = chainSymbols(fromChain.value)
+  fromSymbol.value = fromSymbol.value || availableFromSymbols.value[0]
 }
 
 const handleExecute = async () => {
@@ -134,8 +130,7 @@ const handleExecute = async () => {
     amounts: amounts.value.split('\n').filter(Boolean),
     from_chain: fromChain.value,
     to_chain: toChain.value,
-    symbol: symbol.value,
-    amount_includes_fee: amountIncludesFee.value,
+    from_symbol: fromSymbol.value,
     randomize: randomize.value,
     sleep: sleep.value,
     sleep_delays: sleepDelays.value
@@ -159,8 +154,8 @@ const handleFromChainChange = async () => {
     previousToChain.value = toChain.value
   }
 
-  availableSymbols.value = chainSymbols(fromChain.value)
-  symbol.value = availableSymbols.value[0]
+  availableFromSymbols.value = chainSymbols(fromChain.value)
+  fromSymbol.value = availableFromSymbols.value[0]
 }
 
 const handleToChainChange = async () => {

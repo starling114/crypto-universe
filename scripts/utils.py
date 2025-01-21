@@ -36,6 +36,7 @@ def load_json(file_path):
         return json.load(file)
 
 
+SECRETS = load_json("../backend/modules/crypto_universe/secrets.json")
 CONFIGS = load_json("../configs.json")
 ERC20_ABI = load_json("../erc20abi.json")
 

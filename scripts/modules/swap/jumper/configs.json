@@ -29,6 +29,13 @@
         "USDC"
       ]
     },
+    "mantle": {
+      "tokens": [
+        "MNT",
+        "cmETH",
+        "WETH"
+      ]
+    },
     "scroll": {
       "tokens": [
         "ETH",

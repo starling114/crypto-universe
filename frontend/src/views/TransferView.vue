@@ -17,16 +17,16 @@
       placeholder="Enter addresses each on the new line..." tooltip="Addresses you want to transfer  funds to." />
   </div>
 
-  <cu-checkbox name="useCustomAsset" v-model="useCustomAsset" label="Custom Asset"
+  <cu-checkbox name="useCustomAsset" v-model="useCustomAsset" label="Custom Token"
     tooltip="Use custom asset by specifying its contract address." />
 
   <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': !useCustomAsset }">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" @change="handleChainChange" />
-    <cu-select v-if="!useCustomAsset" name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
+    <cu-select v-if="!useCustomAsset" name="symbol" v-model="symbol" :options="availableSymbols" label="Token" />
   </div>
 
   <div v-if="useCustomAsset" class="mb-2 mt-1">
-    <cu-input name="customAsset" v-model="customAsset" label="Custom Asset" placeholder="Contract Address..." />
+    <cu-input name="customAsset" v-model="customAsset" label="Custom Token" placeholder="Contract Address..." />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">

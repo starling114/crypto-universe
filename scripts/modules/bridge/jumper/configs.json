@@ -1,5 +1,10 @@
 {
   "chains": {
+    "ethereum": {
+      "tokens": [
+        "ETH"
+      ]
+    },
     "arbitrum": {
       "tokens": [
         "ETH"
@@ -13,6 +18,11 @@
     "optimism": {
       "tokens": [
         "ETH"
+      ]
+    },
+    "mantle": {
+      "tokens": [
+        "WETH"
       ]
     },
     "scroll": {

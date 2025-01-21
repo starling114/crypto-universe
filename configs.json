@@ -107,6 +107,19 @@
         "USDC": "0x176211869cA2b568f2A7D4EE941E073a821EE1ff"
       }
     },
+    "mantle": {
+      "chain_id": 5000,
+      "native_token": "MNT",
+      "scan": "https://mantlescan.xyz",
+      "rpcs": [
+        "https://rpc.mantle.xyz"
+      ],
+      "tokens": {
+        "MNT": "",
+        "cmETH": "0xE6829d9a7eE3040e1276Fa75293Bde931859e8fA",
+        "WETH": "0xdeaddeaddeaddeaddeaddeaddeaddeaddead1111"
+      }
+    },
     "blast": {
       "chain_id": 81457,
       "native_token": "ETH",

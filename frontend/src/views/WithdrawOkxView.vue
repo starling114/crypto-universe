@@ -11,7 +11,7 @@
 
   <div class="grid grid-cols-2 gap-2">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
-    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
+    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Token" />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">

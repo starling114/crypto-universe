@@ -12,7 +12,21 @@
     <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />
   </div>
 
-  <cu-collapsible-section name="premium" title="Premium">
+  <cu-collapsible-section name="privateKeys" title="Wallets and Private Keys" class="mb-2">
+    <div class="grid grid-cols-2 gap-2">
+      <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
+        placeholder="Enter wallet addresses each on the new line..."
+        tooltip="Add wallet addresses here and they will be shared across all the modules." />
+      <cu-textarea name="privateKeys" v-model="privateKeys" label="Private Keys"
+        tooltip="Add private keys here and they will be shared across all the modules."
+        placeholder="Enter private keys each on the new line..." />
+    </div>
+    <div class="mt-4 mb-4 flex justify-center">
+      <cu-button class="w-1/3" color="green" label="Save" @click="handlePrivateKeysSave" />
+    </div>
+  </cu-collapsible-section>
+
+  <cu-collapsible-section v-if="debugMode" name="premium" title="Premium">
     <cu-label label="License Key"></cu-label>
     <div>
       <input type="text" id="licenseKey" v-model="lisenceKey" placeholder="Enter license..."
@@ -31,14 +45,20 @@ import {
   CuHorizontalCheckboxGroup,
   CuLabel,
   CuCollapsibleSection,
-  CuButton
+  CuButton,
+  CuTextarea,
 } from '@/components/cu'
 
 const availableModules = ref([])
 const modules = ref([])
+
+const addresses = ref('')
+const privateKeys = ref('')
+
 const availablePremiumModules = ref([])
 const premiumModules = ref([])
 const premiumMode = ref(false)
+const debugMode = ref(false)
 const lisenceKey = ref('')
 const lisenceKeyValidationError = ref(false)
 
@@ -55,6 +75,13 @@ const loadDefaults = async () => {
     lisenceKey.value = data.lisence_key
   })
 
+  await loadModuleData(proxy, module.value, 'secrets', 'js', (data) => {
+    if (!Object.hasOwn(data, 'private_keys')) return
+
+    addresses.value = Object.keys(data.private_keys).join('\n')
+    privateKeys.value = Object.values(data.private_keys).join('\n')
+  })
+
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
     if (!Object.hasOwn(data, 'available_modules')) return
 
@@ -63,6 +90,7 @@ const loadDefaults = async () => {
   })
 
   premiumMode.value = proxy.$globalConfigs.premium_mode
+  debugMode.value = proxy.$globalConfigs.debug_mode
 }
 
 const handleSave = async () => {
@@ -76,6 +104,20 @@ const handleSave = async () => {
     modules: modules.value,
     premium_modules: premiumModules.value,
     lisence_key: lisenceKey.value
+  })
+
+  window.location.reload()
+}
+
+const handlePrivateKeysSave = async () => {
+  const formattedAddresses = addresses.value.split('\n').filter(Boolean)
+  const formattedPrivateKeys = privateKeys.value.split('\n').filter(Boolean)
+
+  await updateModuleData(proxy, module.value, 'secrets', 'js', {
+    private_keys: formattedAddresses.reduce((acc, address, index) => {
+      acc[address] = formattedPrivateKeys[index]
+      return acc
+    }, {})
   })
 
   window.location.reload()

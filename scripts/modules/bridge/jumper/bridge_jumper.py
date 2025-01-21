@@ -1,4 +1,4 @@
-from utils import post_call, ExecutionError
+from utils import post_call, ExecutionError, sleep
 from core.helpers import transaction_data, approve_token, estimate_gas
 from modules.bridge.bridge_base import BridgeBase
 from modules.bridge.jumper.helpers import MAX_SLIPPAGE
@@ -12,10 +12,10 @@ class BridgeJumper(BridgeBase):
             "fromAddress": self.address,
             "fromAmount": str(amount),
             "fromChainId": self.from_chain.chain_id,
-            "fromTokenAddress": self.token.address,
+            "fromTokenAddress": self.from_token.address,
             "toAddress": self.address,
             "toChainId": self.to_chain.chain_id,
-            "toTokenAddress": self.token.address,
+            "toTokenAddress": self.to_token.address,
             "options": {
                 "integrator": "jumper.exchange",
                 "order": "CHEAPEST",
@@ -50,7 +50,11 @@ class BridgeJumper(BridgeBase):
         remote_data = self.get_remote_data(self.calculated_amount)
         remote_value = int(remote_data["value"], 16)
 
-        approve_token(self.web3, self.token, self.calculated_amount, remote_data["to"], self.address, self.private_key)
+        approve_token(
+            self.web3, self.from_token, self.calculated_amount, remote_data["to"], self.address, self.private_key
+        )
+
+        sleep(2)
 
         return transaction_data(
             self.web3,

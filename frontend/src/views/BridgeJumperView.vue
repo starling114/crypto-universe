@@ -16,12 +16,17 @@
       placeholder="Enter amounts each on the new line..." />
   </div>
 
-  <div class="grid grid-cols-3 gap-3">
+  <cu-checkbox name="multiSymbol" v-model="multiSymbol" label="Multi Symbol"
+    tooltip="Choose this option if destination token is different from source token. Note: Check smaller amounts first, there might be some issues on Jumper side." />
+
+  <div class="mt-2" :class="multiSymbol ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-3 gap-3'">
     <cu-select name="fromChain" v-model="fromChain" :options="availableChains" @change="handleFromChainChange"
       label="Source Network" />
     <cu-select name="toChain" v-model="toChain" :options="availableChains" @change="handleToChainChange"
       label="Destination Network" />
-    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
+    <cu-select name="fromSymbol" v-model="fromSymbol" :options="availableFromSymbols"
+      :label="multiSymbol ? 'From Token' : 'Token'" />
+    <cu-select v-if="multiSymbol" name="toSymbol" v-model="toSymbol" :options="availableToSymbols" label="To Token" />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
@@ -64,13 +69,18 @@ const leaveBalance = ref(false)
 const leaveBalanceAmount = ref('0.0005')
 const addresses = ref('')
 const amounts = ref('')
+const multiSymbol = ref(false)
+
 const availableChains = ref([])
 const fromChain = ref(null)
 const toChain = ref(null)
 const previousFromChain = ref(null)
 const previousToChain = ref(null)
-const availableSymbols = ref([])
-const symbol = ref(null)
+
+const availableFromSymbols = ref([])
+const fromSymbol = ref(null)
+const availableToSymbols = ref([])
+const toSymbol = ref(null)
 
 const amountIncludesFee = ref(true)
 const randomize = ref(true)
@@ -99,9 +109,11 @@ const loadDefaults = async () => {
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
 
+    multiSymbol.value = data.multi_symbol
     fromChain.value = data.from_chain
     toChain.value = data.to_chain
-    symbol.value = data.symbol
+    fromSymbol.value = data.from_symbol
+    toSymbol.value = data.to_symbol
 
     amountIncludesFee.value = data.amount_includes_fee
     randomize.value = data.randomize
@@ -120,8 +132,10 @@ const loadDefaults = async () => {
   previousFromChain.value = fromChain.value
   toChain.value = toChain.value || availableChains.value[1]
   previousToChain.value = toChain.value
-  availableSymbols.value = chainSymbols(fromChain.value)
-  symbol.value = symbol.value || availableSymbols.value[0]
+  availableFromSymbols.value = chainSymbols(fromChain.value)
+  fromSymbol.value = fromSymbol.value || availableFromSymbols.value[0]
+  availableToSymbols.value = chainSymbols(toChain.value)
+  toSymbol.value = toSymbol.value || availableToSymbols.value[0]
 }
 
 const handleExecute = async () => {
@@ -132,9 +146,11 @@ const handleExecute = async () => {
     leave_balance_amount: leaveBalanceAmount.value,
     addresses: addresses.value.split('\n').filter(Boolean),
     amounts: amounts.value.split('\n').filter(Boolean),
+    multi_symbol: multiSymbol.value,
     from_chain: fromChain.value,
     to_chain: toChain.value,
-    symbol: symbol.value,
+    from_symbol: fromSymbol.value,
+    to_symbol: toSymbol.value,
     amount_includes_fee: amountIncludesFee.value,
     randomize: randomize.value,
     sleep: sleep.value,
@@ -159,8 +175,10 @@ const handleFromChainChange = async () => {
     previousToChain.value = toChain.value
   }
 
-  availableSymbols.value = chainSymbols(fromChain.value)
-  symbol.value = availableSymbols.value[0]
+  availableFromSymbols.value = chainSymbols(fromChain.value)
+  fromSymbol.value = availableFromSymbols.value[0]
+  availableToSymbols.value = chainSymbols(toChain.value)
+  toSymbol.value = availableToSymbols.value[0]
 }
 
 const handleToChainChange = async () => {
@@ -172,6 +190,11 @@ const handleToChainChange = async () => {
     fromChain.value = oldToChain
     previousFromChain.value = fromChain.value
   }
+
+  availableFromSymbols.value = chainSymbols(fromChain.value)
+  fromSymbol.value = availableFromSymbols.value[0]
+  availableToSymbols.value = chainSymbols(toChain.value)
+  toSymbol.value = availableToSymbols.value[0]
 }
 
 const chainSymbols = (chain) => {

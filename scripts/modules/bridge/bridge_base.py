@@ -29,9 +29,10 @@ class BridgeBase:
         address,
         from_chain,
         to_chain,
-        web3,
-        token,
+        from_token,
+        to_token,
         amount_includes_fee,
+        web3,
     ):
         self.secrets = secrets
         self.leave_balance = leave_balance
@@ -40,9 +41,11 @@ class BridgeBase:
         self.address = address
         self.from_chain = from_chain
         self.to_chain = to_chain
-        self.web3 = web3
-        self.token = token
+        self.from_token = from_token
+        self.to_token = to_token
         self.amount_includes_fee = amount_includes_fee
+        self.web3 = web3
+        self._log_prefix = None
 
     def calculate_fee(self, _):
         raise NotImplementedError
@@ -54,10 +57,10 @@ class BridgeBase:
         return self.MAX_TRANSACTION_AMOUNT
 
     def calculate_amount(self):
-        balance = calculate_token_balance(self.web3, self.address, self.token)
+        balance = calculate_token_balance(self.web3, self.address, self.from_token)
         amount = calculate_base_amount(balance, self.amount, self.leave_balance, self.leave_balance_amount)
 
-        if self.amount_includes_fee and self.token.is_native():
+        if self.amount_includes_fee and self.from_token.is_native():
             amount = amount - self.calculate_fee(amount)
 
         execute_amount_validations(balance, amount, self.min_transaction_amount(), self.max_transaction_amount())
@@ -67,32 +70,37 @@ class BridgeBase:
     def get_transaction_data(self):
         raise NotImplementedError
 
+    def log_prefix(self):
+        if self._log_prefix is None:
+            if self.from_token.symbol == self.to_token.symbol:
+                self._log_prefix = (
+                    f"{self.address} | {self.from_token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))}"
+                )
+            else:
+                self._log_prefix = f"{self.address} | {self.from_token.symbol} -> {self.to_token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))}"
+        return self._log_prefix
+
     def bridge(self):
         try:
             self.calculated_amount = self.calculate_amount()
 
-            if debug_mode():
-                logger.info(f"{get_transaction_link(self.from_chain, 'DEBUG')}")
-                logger.success(
-                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
-                )
-                return True
-
             self.private_key = get_private_key(self.web3, self.secrets, self.address)
             tx_data = self.get_transaction_data()
+
+            if debug_mode():
+                logger.info(f"{get_transaction_link(self.from_chain, 'DEBUG')}")
+                logger.success(f"{self.log_prefix()} | Bridge successful")
+                return True
+
             tx_hash = send_transaction(self.web3, tx_data, self.private_key)
 
             logger.info(f"{get_transaction_link(self.from_chain, tx_hash)}")
 
             if verify_transaction(self.web3, tx_hash):
-                logger.success(
-                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge successful"
-                )
+                logger.success(f"{self.log_prefix()} | Bridge successful")
                 return True
             else:
-                logger.error(
-                    f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(self.calculated_amount))} | Bridge unsuccessful"
-                )
+                logger.error(f"{self.log_prefix()} | Bridge unsuccessful")
                 return False
         except Exception as e:
             log_error(e, self.address)
@@ -113,7 +121,12 @@ class BridgeBase:
         from_chain = build_chain(instructions["from_chain"])
         to_chain = build_chain(instructions["to_chain"])
         web3 = build_web3(from_chain)
-        token = build_token(web3, chain=from_chain, symbol=instructions["symbol"])
+        from_token = build_token(web3, chain=from_chain, symbol=instructions["from_symbol"])
+
+        if instructions.get("multi_symbol", False):
+            to_token = build_token(web3, chain=to_chain, symbol=instructions["to_symbol"])
+        else:
+            to_token = build_token(web3, chain=to_chain, symbol=instructions["from_symbol"])
 
         last_address = len(addresses) - 1
         for index, address in enumerate(addresses):
@@ -126,9 +139,10 @@ class BridgeBase:
                 address,
                 from_chain,
                 to_chain,
+                from_token,
+                to_token,
+                instructions.get("amount_includes_fee", False),
                 web3,
-                token,
-                instructions["amount_includes_fee"],
             ).bridge()
 
             if index != last_address and instructions["sleep"] and result:

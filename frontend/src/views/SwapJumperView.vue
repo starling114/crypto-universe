@@ -21,16 +21,16 @@
   <div class="mt-2" :class="{ 'grid grid-cols-3 gap-2': !useCustomSymbols }">
     <cu-select name=" chain" v-model="chain" :options="availableChains" @change="handleChainChange" label="Network" />
     <cu-select v-if="!useCustomSymbols" name="fromSymbol" v-model="fromSymbol" :options="availableSymbols"
-      @change="handleFromSymbolChange" label="From Symbol" />
+      @change="handleFromSymbolChange" label="From Token" />
     <cu-select v-if="!useCustomSymbols" name="toSymbol" v-model="toSymbol" :options="availableSymbols"
-      @change="handleToSymbolChange" label="To Symbol" />
+      @change="handleToSymbolChange" label="To Token" />
   </div>
 
   <div v-if="useCustomSymbols" class="mb-2 mt-1 grid grid-cols-2 gap-2">
-    <cu-input name="customFromSymbol" v-model="customFromSymbol" label="Custom From Symbol"
+    <cu-input name="customFromSymbol" v-model="customFromSymbol" label="Custom From Token"
       placeholder="Contract Address..."
       tooltip="Enter `0x0000000000000000000000000000000000000000` for native token." />
-    <cu-input name="customToSymbol" v-model="customToSymbol" label="Custom To Symbol" placeholder="Contract Address..."
+    <cu-input name="customToSymbol" v-model="customToSymbol" label="Custom To Token" placeholder="Contract Address..."
       tooltip="Enter `0x0000000000000000000000000000000000000000` for native token." />
   </div>
 

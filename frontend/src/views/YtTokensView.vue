@@ -3,8 +3,8 @@
 
   <div class="mt-2 grid grid-cols-2 gap-2">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" @change="handleChainChange" />
-    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Asset"
-      tooltip="Asset used to swap to YT token" />
+    <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Token"
+      tooltip="Token used to swap to YT token" />
   </div>
 
   <div class="mb-2">

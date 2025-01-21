@@ -18,9 +18,10 @@ class BridgeHyperlane(BridgeBase):
         address,
         from_chain,
         to_chain,
-        web3,
-        token,
+        from_token,
+        to_token,
         amount_includes_fee,
+        web3,
     ):
         super().__init__(
             secrets,
@@ -30,9 +31,10 @@ class BridgeHyperlane(BridgeBase):
             address,
             from_chain,
             to_chain,
-            web3,
-            token,
+            from_token,
+            to_token,
             amount_includes_fee,
+            web3,
         )
         self.bridge_contract = self.web3.eth.contract(
             address=HYPERLANE_CONTRACTS[self.from_chain.name], abi=HYPERLANE_ABI
