@@ -1,17 +1,8 @@
 import ccxt
 import random
 
-from utils import (
-    load_json,
-    humanify_seconds,
-    humanify_number,
-    round_number,
-    zip_to_addresses,
-    log_error,
-    debug_mode,
-    sleep,
-)
-from utils import logger
+from utils import load_json, log_error, round_number, debug_mode, sleep, logger
+from core.helpers import zip_to_addresses, prettify_seconds, prettify_number
 
 
 class WithdrawBase:
@@ -20,62 +11,62 @@ class WithdrawBase:
         cex,
         secrets,
         address,
-        network,
+        chain,
         symbol,
         amount_includes_fee,
         amount,
     ):
         self.secrets = secrets
         self.address = address
-        self.network = network
+        self.chain = chain
         self.symbol = symbol
         self.amount_includes_fee = amount_includes_fee
         self.amount = amount
-        self.exchange = self.get_ccxt(cex)
+        self.exchange = ccxt.__dict__[cex](self.cex_details())
+        self._withdraw_params = None
 
-    def get_ccxt(self, cex):
-        cex_details = {
+    def cex_details(self):
+        return {
             "apiKey": self.secrets["api_key"],
             "secret": self.secrets["api_secret"],
             "enableRateLimit": True,
             "options": {"defaultType": "spot"},
         }
 
-        if cex in ["okx"]:
-            cex_details["password"] = self.secrets["password"]
+    def withdraw_params(self):
+        raise NotImplementedError
 
-        return ccxt.__dict__[cex](cex_details)
+    def calculate_fee(self):
+        raise NotImplementedError
 
-    def params(self):
-        return {"network": self.network}
+    def calculate_amount(self):
+        amount = float(self.amount)
 
-    def calculate_amount(self, fee):
         if self.amount_includes_fee:
-            return round_number(float(self.amount) - float(fee))
-        else:
-            return round_number(float(self.amount))
+            amount = amount - float(self.calculate_fee())
+
+        return round_number(amount)
 
     def withdraw(self):
         try:
-            params = self.params()
-            calculated_amount = self.calculate_amount(params["fee"])
+            self.calculated_amount = self.calculate_amount()
 
             if debug_mode():
                 logger.success(
-                    f"{self.address} | {self.symbol} | {humanify_number(calculated_amount)} | Withdrawal successful"
+                    f"{self.address} | {self.symbol} | {prettify_number(self.calculated_amount)} | Withdrawal successful"
                 )
                 return True
 
             self.exchange.withdraw(
                 code=self.symbol,
-                amount=calculated_amount,
+                amount=self.calculated_amount,
                 address=self.address,
                 tag=None,
-                params=params,
+                params=self.withdraw_params(),
             )
 
             logger.success(
-                f"{self.address} | {self.symbol} | {humanify_number(calculated_amount)} | Withdrawal successful"
+                f"{self.address} | {self.symbol} | {prettify_number(self.calculated_amount)} | Withdrawal successful"
             )
 
             return True
@@ -112,5 +103,5 @@ class WithdrawBase:
                     int(instructions["sleep_delays"][0]),
                     int(instructions["sleep_delays"][1]),
                 )
-                logger.info(f"Sleeping for {humanify_seconds(sleep_time)}")
+                logger.info(f"Sleeping for {prettify_seconds(sleep_time)}")
                 sleep(sleep_time)

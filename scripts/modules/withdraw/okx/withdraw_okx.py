@@ -1,36 +1,29 @@
 from modules.withdraw.withdraw_base import WithdrawBase
-
-OKX_CHAIN_MAPPING = {
-    "ethereum": "ERC20",
-    "arbitrum": "Arbitrum One",
-    "base": "Base",
-    "optimism": "Optimism",
-    "linea": "Linea",
-}
+from modules.withdraw.okx.helpers import OKX_CHAINS_MAPPING
 
 
 class WithdrawOkx(WithdrawBase):
-    def __init__(self, cex, secrets, address, chain, symbol, amount_includes_fee, amount):
-        super().__init__(
-            cex,
-            secrets,
-            address,
-            OKX_CHAIN_MAPPING[chain],
-            symbol,
-            amount_includes_fee,
-            amount,
-        )
+    def calculate_fee(self):
+        return self.withdraw_params()["fee"]
 
-    def params(self):
-        params = super().params()
+    def cex_details(self):
+        details = super().cex_details()
+        details["password"] = self.secrets["password"]
 
-        self.exchange.load_markets()
-        networks = self.exchange.currencies[self.symbol]["networks"]
+        return details
 
-        params["fee"] = networks[self.network]["fee"]
-        params["pwd"] = self.secrets["password"]
+    def withdraw_params(self):
+        if self._withdraw_params is None:
+            self.exchange.load_markets()
+            network = OKX_CHAINS_MAPPING[self.chain]
 
-        return params
+            self._withdraw_params = {
+                "network": network,
+                "fee": self.exchange.currencies[self.symbol]["networks"][network]["fee"],
+                "pwd": self.secrets["password"],
+            }
+
+        return self._withdraw_params
 
     @classmethod
     def run(cls):
