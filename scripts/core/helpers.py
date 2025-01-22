@@ -152,13 +152,13 @@ def prettify_number(value):
 # Calculate helper functions
 
 
-def calculate_token_balance(web3, wallet_address, token):
+def calculate_token_balance(web3, wallet_address, token, check_balance=True):
     if token.is_native():
         balance = web3.eth.get_balance(web3.to_checksum_address(wallet_address))
     else:
         balance = token.contract.functions.balanceOf(web3.to_checksum_address(wallet_address)).call()
 
-    if balance <= 0:
+    if check_balance and balance <= 0:
         raise ExecutionError("Not enough balance. Balance <= 0")
 
     return int(balance)

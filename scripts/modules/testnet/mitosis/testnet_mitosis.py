@@ -3,7 +3,7 @@ import re
 import random
 
 from multiprocessing import Pool
-from utils import load_json, sleep, log_error, humanify_number
+from utils import load_json, sleep, log_error
 from utils import logger
 
 from core.tools.ads import Ads
@@ -174,9 +174,7 @@ class TestnetMitosis:
             self.ads.while_present('//button[text()="Processing..."]')
             sleep(2, 3)
             self.ads.click_element('//button[@class="sc-52d2482a-0 iIehYz"]')
-            logger.success(
-                f"Profile: {self.ads.profile} | Claim Rewards | Claimed ${humanify_number(claimable_balance)}"
-            )
+            logger.success(f"Profile: {self.ads.profile} | Claim Rewards | Claimed ${claimable_balance}")
 
     def craft_cells(self):
         logger.info(f"Profile: {self.ads.profile} | Cells | Crafting started")
