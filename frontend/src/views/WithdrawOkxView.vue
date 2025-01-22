@@ -79,20 +79,20 @@ const loadDefaults = async () => {
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
 
-    chain.value = data.chain
-    symbol.value = data.symbol
+    chain.value = data.chain ?? chain.value
+    symbol.value = data.symbol ?? symbol.value
 
-    amountIncludesFee.value = data.amount_includes_fee
-    randomize.value = data.randomize
-    sleep.value = data.sleep
-    sleepDelays.value = data.sleep_delays
+    amountIncludesFee.value = data.amount_includes_fee ?? amountIncludesFee.value
+    randomize.value = data.randomize ?? randomize.value
+    sleep.value = data.sleep ?? sleep.value
+    sleepDelays.value = data.sleep_delays ?? sleepDelays.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'available_chains')) return
 
-    availableChains.value = data.available_chains
-    availableSymbols.value = data.available_symbols
+    availableChains.value = data.available_chains ?? availableChains.value
+    availableSymbols.value = data.available_symbols ?? availableSymbols.value
   }, logs)
 
   chain.value = chain.value || availableChains.value[0]

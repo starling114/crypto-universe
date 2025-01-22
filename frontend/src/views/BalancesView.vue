@@ -91,21 +91,21 @@ const { proxy } = getCurrentInstance()
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, '', 'configs', 'global', (data) => {
-    configs.value = data
+    configs.value = data ?? configs.value
   })
 
   await loadModuleData(proxy, module.value, 'instructions', 'js', (data) => {
     if (!Object.hasOwn(data, 'addresses')) return
 
     minBalanceHighlight.value = parseFloat(data.min_balance_highlight)
-    networks.value = data.networks
-    totalRow.value = data.total_row
+    networks.value = data.networks ?? networks.value
+    totalRow.value = data.total_row ?? totalRow.value
   })
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
     if (!Object.hasOwn(data, 'available_networks')) return
 
-    availableNetworks.value = data.available_networks
+    availableNetworks.value = data.available_networks ?? availableNetworks.value
   })
 
   activeNetwork.value = activeNetwork.value || enabledNetworks.value[0]

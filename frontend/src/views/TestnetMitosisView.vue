@@ -96,22 +96,21 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'profiles')) return
 
     profiles.value = availableProfiles.value.filter(item => data.profiles.includes(item.serial_number))
-    password.value = data.password
+    password.value = data.password ?? password.value
 
-    tasks.value = data.tasks
+    tasks.value = data.tasks ?? tasks.value
 
-    parallelExecution.value = data.parallel_execution
-    maxProcesses.value = data.max_processes
-    mitoGameTime.value = data.mito_game_time
-    chromoSwapsCount.value = data.chromo_swaps_count
-    supplyEverySwap.value = data.supply_every_swap
+    parallelExecution.value = data.parallel_execution ?? parallelExecution.value
+    maxProcesses.value = data.max_processes ?? maxProcesses.value
+    mitoGameTime.value = data.mito_game_time ?? mitoGameTime.value
+    chromoSwapsCount.value = data.chromo_swaps_count ?? chromoSwapsCount.value
+    supplyEverySwap.value = data.supply_every_swap ?? supplyEverySwap.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'available_tasks')) return
 
-    availableTasks.value = data.available_tasks
-
+    availableTasks.value = data.available_tasks ?? availableTasks.value
   }, logs)
 }
 

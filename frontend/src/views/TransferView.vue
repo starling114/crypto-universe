@@ -17,16 +17,16 @@
       placeholder="Enter addresses each on the new line..." tooltip="Addresses you want to transfer  funds to." />
   </div>
 
-  <cu-checkbox name="useCustomAsset" v-model="useCustomAsset" label="Custom Token"
+  <cu-checkbox name="useCustomSymbol" v-model="useCustomSymbol" label="Custom Asset"
     tooltip="Use custom asset by specifying its contract address." />
 
-  <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': !useCustomAsset }">
+  <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': !useCustomSymbol }">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" @change="handleChainChange" />
-    <cu-select v-if="!useCustomAsset" name="symbol" v-model="symbol" :options="availableSymbols" label="Token" />
+    <cu-select v-if="!useCustomSymbol" name="symbol" v-model="symbol" :options="availableSymbols" label="Asset" />
   </div>
 
-  <div v-if="useCustomAsset" class="mb-2 mt-1">
-    <cu-input name="customAsset" v-model="customAsset" label="Custom Token" placeholder="Contract Address..." />
+  <div v-if="useCustomSymbol" class="mb-2 mt-1">
+    <cu-input name="customSymbol" v-model="customSymbol" label="Custom Asset" placeholder="Contract Address..." />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
@@ -70,8 +70,8 @@ const sourceAddresses = ref('')
 const amounts = ref('')
 const destinationAddresses = ref('')
 
-const useCustomAsset = ref(false)
-const customAsset = ref('')
+const useCustomSymbol = ref(false)
+const customSymbol = ref('')
 const availableChains = ref([])
 const chain = ref(null)
 const availableSymbols = ref([])
@@ -97,27 +97,27 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'leave_balance')) return
 
-    leaveBalance.value = data.leave_balance
-    leaveBalanceAmount.value = data.leave_balance_amount
+    leaveBalance.value = data.leave_balance ?? leaveBalance.value
+    leaveBalanceAmount.value = data.leave_balance_amount ?? leaveBalanceAmount.value
 
     sourceAddresses.value = data.source_addresses.join('\n')
     amounts.value = data.amounts.join('\n')
     destinationAddresses.value = data.destinaion_addresses.join('\n')
 
-    useCustomAsset.value = data.use_custom_asset
-    customAsset.value = data.custom_asset
-    chain.value = data.chain
-    symbol.value = data.symbol
+    useCustomSymbol.value = data.use_custom_symbol ?? useCustomSymbol.value
+    customSymbol.value = data.custom_symbol ?? customSymbol.value
+    chain.value = data.chain ?? chain.value
+    symbol.value = data.symbol ?? symbol.value
 
-    randomize.value = data.randomize
-    sleep.value = data.sleep
-    sleepDelays.value = data.sleep_delays
+    randomize.value = data.randomize ?? randomize.value
+    sleep.value = data.sleep ?? sleep.value
+    sleepDelays.value = data.sleep_delays ?? sleepDelays.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'chains')) return
 
-    chains.value = data.chains
+    chains.value = data.chains ?? chains.value
     availableChains.value = Object.keys(data.chains)
   }, logs)
 
@@ -135,8 +135,8 @@ const handleExecute = async () => {
     source_addresses: sourceAddresses.value.split('\n').filter(Boolean),
     amounts: amounts.value.split('\n').filter(Boolean),
     destinaion_addresses: destinationAddresses.value.split('\n').filter(Boolean),
-    use_custom_asset: useCustomAsset.value,
-    custom_asset: customAsset.value,
+    use_custom_symbol: useCustomSymbol.value,
+    custom_symbol: customSymbol.value,
     chain: chain.value,
     symbol: symbol.value,
     randomize: randomize.value,

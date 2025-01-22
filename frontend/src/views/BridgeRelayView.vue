@@ -90,25 +90,25 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'leave_balance')) return
 
-    leaveBalance.value = data.leave_balance
-    leaveBalanceAmount.value = data.leave_balance_amount
+    leaveBalance.value = data.leave_balance ?? leaveBalance.value
+    leaveBalanceAmount.value = data.leave_balance_amount ?? leaveBalanceAmount.value
 
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
 
-    fromChain.value = data.from_chain
-    toChain.value = data.to_chain
-    fromSymbol.value = data.from_symbol
+    fromChain.value = data.from_chain ?? fromChain.value
+    toChain.value = data.to_chain ?? toChain.value
+    fromSymbol.value = data.from_symbol ?? fromSymbol.value
 
-    randomize.value = data.randomize
-    sleep.value = data.sleep
-    sleepDelays.value = data.sleep_delays
+    randomize.value = data.randomize ?? randomize.value
+    sleep.value = data.sleep ?? sleep.value
+    sleepDelays.value = data.sleep_delays ?? sleepDelays.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'chains')) return
 
-    chains.value = data.chains
+    chains.value = data.chains ?? chains.value
     availableChains.value = Object.keys(data.chains)
   }, logs)
 

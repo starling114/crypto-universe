@@ -108,29 +108,29 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'leave_balance')) return
 
-    leaveBalance.value = data.leave_balance
-    leaveBalanceAmount.value = data.leave_balance_amount
+    leaveBalance.value = data.leave_balance ?? leaveBalance.value
+    leaveBalanceAmount.value = data.leave_balance_amount ?? leaveBalanceAmount.value
 
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
 
-    chain.value = data.chain
-    useCustomSymbols.value = data.use_custom_symbols
-    customFromSymbol.value = data.custom_from_symbol
-    customToSymbol.value = data.custom_to_symbol
-    fromSymbol.value = data.from_symbol
-    toSymbol.value = data.to_symbol
+    chain.value = data.chain ?? chain.value
+    useCustomSymbols.value = data.use_custom_symbols ?? useCustomSymbols.value
+    customFromSymbol.value = data.custom_from_symbol ?? customFromSymbol.value
+    customToSymbol.value = data.custom_to_symbol ?? customToSymbol.value
+    fromSymbol.value = data.from_symbol ?? fromSymbol.value
+    toSymbol.value = data.to_symbol ?? toSymbol.value
 
-    amountIncludesFee.value = data.amount_includes_fee
-    randomize.value = data.randomize
-    sleep.value = data.sleep
-    sleepDelays.value = data.sleep_delays
+    amountIncludesFee.value = data.amount_includes_fee ?? amountIncludesFee.value
+    randomize.value = data.randomize ?? randomize.value
+    sleep.value = data.sleep ?? sleep.value
+    sleepDelays.value = data.sleep_delays ?? sleepDelays.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'chains')) return
 
-    chains.value = data.chains
+    chains.value = data.chains ?? chains.value
     availableChains.value = Object.keys(data.chains)
   }, logs)
 

@@ -65,10 +65,10 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'profiles')) return
 
     profiles.value = availableProfiles.value.filter(item => data.profiles.includes(item.serial_number))
-    password.value = data.password
-    tokenContractAddress.value = data.token_contract_address
-    saleTime.value = data.sale_time
-    moveHours.value = data.move_hours
+    password.value = data.password ?? password.value
+    tokenContractAddress.value = data.token_contract_address ?? tokenContractAddress.value
+    saleTime.value = data.sale_time ?? saleTime.value
+    moveHours.value = data.move_hours ?? moveHours.value
   }, logs)
 }
 

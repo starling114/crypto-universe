@@ -64,7 +64,7 @@ const loadDefaults = async () => {
     addresses.value = data.addresses.join('\n')
     minBalanceHighlight.value = data.min_balance_highlight
     namingStrategy.value = data.naming_strategy
-    totalRow.value = data.total_row
+    totalRow.value = data.total_row ?? totalRow.value
 
     selectedNetworks.value = Object.entries(data.networks)
       .filter(([, config]) => config.enabled)
@@ -74,8 +74,8 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
     if (!Object.hasOwn(data, 'available_networks')) return
 
-    availableNetworks.value = data.available_networks
-    availableNamingStrategies.value = data.available_naming_strategies
+    availableNetworks.value = data.available_networks ?? availableNetworks.value
+    availableNamingStrategies.value = data.available_naming_strategies ?? availableNamingStrategies.value
   }, logs)
 }
 

@@ -92,22 +92,22 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'chain')) return
 
-    chain.value = data.chain
-    symbol.value = data.symbol
-    ytToken.value = data.yt_token
+    chain.value = data.chain ?? chain.value
+    symbol.value = data.symbol ?? symbol.value
+    ytToken.value = data.yt_token ?? ytToken.value
     addresses.value = data.addresses.join('\n')
     amounts.value = data.amounts.join('\n')
-    maxEthereumGasPrice.value = data.max_ethereum_gas_price
+    maxEthereumGasPrice.value = data.max_ethereum_gas_price ?? maxEthereumGasPrice.value
 
-    randomize.value = data.randomize
-    sleep.value = data.sleep
-    sleepDelays.value = data.sleep_delays
+    randomize.value = data.randomize ?? randomize.value
+    sleep.value = data.sleep ?? sleep.value
+    sleepDelays.value = data.sleep_delays ?? sleepDelays.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'chains')) return
 
-    chains.value = data.chains
+    chains.value = data.chains ?? chains.value
     availableChains.value = Object.keys(data.chains)
   }, logs)
 

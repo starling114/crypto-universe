@@ -1,5 +1,5 @@
 import random
-from utils import SECRETS, int_to_wei, wei_to_int, round_number, ExecutionError
+from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
 
 
 def transaction_data(web3, from_address, to_address, data=None, value=None):
@@ -28,14 +28,25 @@ def transactions_count(web3, wallet_address):
 
 
 def gas_price(web3):
-    return int(web3.eth.gas_price * 1.2)
+    price = web3.eth.gas_price
+
+    multiplier = 1.2
+
+    if web3.eth.chain_id == CONFIGS["chains"]["linea"]["chain_id"]:
+        multiplier = 1.5
+
+    return int(price * multiplier)
 
 
 def estimate_gas(web3, tx_data):
     gas = web3.eth.estimate_gas(tx_data)
 
-    multipliers = [1.1, 1.2]
-    return int(gas * random.uniform(multipliers[0], multipliers[1]))
+    multiplier = random.uniform(1.1, 1.2)
+
+    if web3.eth.chain_id == CONFIGS["chains"]["scroll"]["chain_id"]:
+        multiplier = 1.5
+
+    return int(gas * multiplier)
 
 
 def token_allowance(token, spender_address, wallet_address):

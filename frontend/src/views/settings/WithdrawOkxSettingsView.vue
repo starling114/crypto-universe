@@ -44,9 +44,9 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'secrets', 'python', (data) => {
     if (!Object.hasOwn(data, 'api_key')) return
 
-    apiKey.value = data.api_key
-    apiSecret.value = data.api_secret
-    password.value = data.password
+    apiKey.value = data.api_key ?? apiKey.value
+    apiSecret.value = data.api_secret ?? apiSecret.value
+    password.value = data.password ?? password.value
   }, logs)
 }
 
