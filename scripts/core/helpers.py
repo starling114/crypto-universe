@@ -34,6 +34,8 @@ def gas_price(web3):
 
     if web3.eth.chain_id == CONFIGS["chains"]["linea"]["chain_id"]:
         multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
+        multiplier = 1.1
 
     return int(price * multiplier)
 
@@ -45,6 +47,8 @@ def estimate_gas(web3, tx_data):
 
     if web3.eth.chain_id == CONFIGS["chains"]["scroll"]["chain_id"]:
         multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
+        multiplier = 1.1
 
     return int(gas * multiplier)
 
@@ -195,10 +199,10 @@ def execute_amount_validations(
 
     if amount < min_amount:
         raise ExecutionError(
-            f"Not enough balance. Amount < Min transaction amount ({prettify_number(wei_to_int(amount))} < {prettify_number(wei_to_int(min_amount))})"
+            f"Amount < Min transaction amount ({prettify_number(wei_to_int(amount))} < {prettify_number(wei_to_int(min_amount))})"
         )
 
     if amount > max_amount:
         raise ExecutionError(
-            f"Not enough balance. Amount > Max transaction amount ({prettify_number(wei_to_int(amount))} > {prettify_number(wei_to_int(max_amount))})"
+            f"Amount > Max transaction amount ({prettify_number(wei_to_int(amount))} > {prettify_number(wei_to_int(max_amount))})"
         )

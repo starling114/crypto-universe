@@ -25,15 +25,7 @@
       "scan": "https://arbiscan.io",
       "rpcs": [
         "https://arbitrum.llamarpc.com",
-        "https://1rpc.io/arb",
-        "https://arbitrum-one.public.blastapi.io",
-        "https://arb1.arbitrum.io/rpc",
-        "https://rpc.ankr.com/arbitrum",
-        "https://arbitrum.meowrpc.com",
-        "https://arbitrum-one-rpc.publicnode.com",
-        "https://arb-pokt.nodies.app",
-        "https://arbitrum.drpc.org",
-        "https://arbitrum.blockpi.network/v1/rpc/public"
+        "https://1rpc.io/arb"
       ],
       "tokens": {
         "ETH": "",
@@ -135,6 +127,60 @@
         "USDB": "0x4300000000000000000000000000000000000003"
       }
     },
+    "mode": {
+      "chain_id": 34443,
+      "native_token": "ETH",
+      "scan": "https://explorer.mode.network",
+      "rpcs": [
+        "https://1rpc.io/mode",
+        "https://mode.drpc.org"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0xf0F161fDA2712DB8b566946122a5af183995e2eD",
+        "USDC": "0xd988097fb8612cc24eeC14542bC03424c656005f"
+      }
+    },
+    "zora": {
+      "chain_id": 7777777,
+      "native_token": "ETH",
+      "scan": "https://zora.superscan.network",
+      "rpcs": [
+        "https://rpc.zora.energy",
+        "https://zora.drpc.org"
+      ],
+      "tokens": {
+        "ETH": ""
+      }
+    },
+    "taiko": {
+      "chain_id": 167000,
+      "native_token": "ETH",
+      "scan": "https://taikoscan.io",
+      "rpcs": [
+        "https://taiko.drpc.org",
+        "https://taiko-rpc.publicnode.com",
+        "https://rpc.taiko.xyz"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0x2DEF195713CF4a606B49D07E520e22C17899a736",
+        "USDC": "0x07d83526730c7438048d55a4fc0b850e2aab6f0b"
+      }
+    },
+    "zircuit": {
+      "chain_id": 48900,
+      "native_token": "ETH",
+      "scan": "https://explorer.zircuit.com",
+      "rpcs": [
+        "https://zircuit-mainnet.drpc.org"
+      ],
+      "tokens": {
+        "ETH": "",
+        "USDT": "0x46dDa6a5a559d861c06EC9a95Fb395f5C3Db0742",
+        "USDC": "0x3b952c8C9C44e8Fe201e2b26F6B2200203214cfF"
+      }
+    },
     "polygon": {
       "chain_id": 137,
       "native_token": "MATIC",
@@ -174,16 +220,6 @@
         "https://bsc.drpc.org"
       ]
     },
-    "taiko": {
-      "chain_id": 167000,
-      "native_token": "ETH",
-      "scan": "https://taikoscan.io",
-      "rpcs": [
-        "https://taiko-rpc.publicnode.com",
-        "https://rpc.taiko.tools",
-        "https://rpc.ankr.com/taiko"
-      ]
-    },
     "avalanche": {
       "chain_id": 43114,
       "tnative_oken": "AVAX",
@@ -210,22 +246,6 @@
         "https://rpc.ankr.com/fantom",
         "https://rpc2.fantom.network",
         "https://rpc3.fantom.network"
-      ]
-    },
-    "zora": {
-      "chain_id": 7777777,
-      "native_token": "ETH",
-      "scan": "https://zora.superscan.network",
-      "rpcs": [
-        "https://zora.rpc.thirdweb.com"
-      ]
-    },
-    "mode": {
-      "chain_id": 34443,
-      "native_token": "ETH",
-      "scan": "https://explorer.mode.network",
-      "rpcs": [
-        "https://1rpc.io/mode"
       ]
     }
   }

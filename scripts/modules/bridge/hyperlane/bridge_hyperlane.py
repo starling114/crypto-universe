@@ -1,10 +1,11 @@
-from core.helpers import transactions_count, gas_price
+from core.helpers import transactions_count, gas_price, logger
 from modules.bridge.bridge_base import BridgeBase
 from modules.bridge.hyperlane.helpers import (
     HYPERLANE_CONTRACTS,
     HYPERLANE_ABI,
     HYPERLANE_MIN_TRANSACTION_AMOUNT,
     HYPERLANE_MAX_TRANSACTION_AMOUNTS,
+    HYPERLANE_MAX_DEFAULT_TRANSACTION_AMOUNT,
 )
 
 
@@ -51,7 +52,7 @@ class BridgeHyperlane(BridgeBase):
         return HYPERLANE_MIN_TRANSACTION_AMOUNT
 
     def max_transaction_amount(self):
-        return HYPERLANE_MAX_TRANSACTION_AMOUNTS[self.from_chain.name]
+        return HYPERLANE_MAX_TRANSACTION_AMOUNTS.get(self.from_chain.name, HYPERLANE_MAX_DEFAULT_TRANSACTION_AMOUNT)
 
     def get_transaction_data(self):
         fee = self.bridge_contract.functions.quoteBridge(self.to_chain.chain_id, self.calculated_amount).call()
