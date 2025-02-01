@@ -9,6 +9,7 @@ from modules.swap.jumper.swap_jumper import SwapJumper
 from modules.transfer.transfer import Transfer
 from modules.yt_tokens.yt_tokens import YtTokens
 from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
+from modules.activity.treehouse_prize.treehouse_prize import TreehousePrize
 
 from utils import log_error, logger, import_premium_module, run_module, run_premium_module
 
@@ -23,6 +24,7 @@ MODULES = {
     "transfer": Transfer,
     "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,
+    "activity-treehouse_prize": TreehousePrize,
 }
 PREMIUM_MODULES = {
     "premium/sale-fjord": import_premium_module("sale_fjord", "SaleFjord"),

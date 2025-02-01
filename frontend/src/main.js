@@ -25,6 +25,7 @@ import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
 import YtTokensView from '@/views/YtTokensView.vue'
 import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
+import ActivityTreehousePrizeView from '@/views/ActivityTreehousePrizeView.vue'
 
 const app = createApp(App)
 
@@ -153,7 +154,13 @@ const routes = [
     path: '/testnet-mitosis',
     name: 'Testnet Mitosis',
     component: TestnetMitosisView,
-    meta: { title: 'CU | Testnet Mitosis' }
+    meta: { title: 'CU | Testnet - Mitosis' }
+  },
+  {
+    path: '/activity-treehouse_prize',
+    name: 'Activity Treehouse Prize',
+    component: ActivityTreehousePrizeView,
+    meta: { title: 'CU | Activity - Treehouse Prize' }
   }
 ]
 

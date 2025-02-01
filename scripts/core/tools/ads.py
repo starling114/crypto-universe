@@ -1,5 +1,6 @@
 import requests
 import random
+import os
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -8,7 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common import NoSuchElementException
 
-from utils import sleep, logger, ExecutionError
+from utils import sleep, logger, debug_mode, ExecutionError
 from core.tools.rabby import Rabby
 from core.tools.metamask import Metamask
 
@@ -18,6 +19,7 @@ class Ads:
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
+    SYSTEM_TABS = ["Rabby Offscreen Page", "DevTools"]
 
     def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY):
         self.profile = profile
@@ -110,21 +112,32 @@ class Ads:
 
         return False
 
-    def scroll(self, direction=None, pixels=None):
+    def scroll(self, direction, pixels=None, xpath=None):
         logger.debug(f"Profile: {self.profile} | Scrolling: {direction}")
-        if direction == "top":
-            self.driver.execute_script("window.scrollTo(0, 0);")
-
-        elif direction == "bottom":
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-        elif direction == "middle":
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
-
-        elif pixels is not None:
-            self.driver.execute_script(f"window.scrollBy(0, {pixels});")
+        if xpath is not None:
+            element = self.find_element(xpath)
+            if element is not None:
+                if direction == "top":
+                    self.driver.execute_script("arguments[0].scrollTop = 0;", element)
+                elif direction == "bottom":
+                    self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", element)
+                elif direction == "middle":
+                    self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight / 2;", element)
+                elif pixels is not None:
+                    self.driver.execute_script(f"arguments[0].scrollBy(0, {pixels});", element)
+                else:
+                    raise Exception("Invalid direction or missing pixels argument for scrolling the element.")
         else:
-            Exception("Invalid direction or missing pixels argument for scroll.")
+            if direction == "top":
+                self.driver.execute_script("window.scrollTo(0, 0);")
+            elif direction == "bottom":
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            elif direction == "middle":
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
+            elif pixels is not None:
+                self.driver.execute_script(f"window.scrollBy(0, {pixels});")
+            else:
+                Exception("Invalid direction or missing pixels argument for scroll.")
 
         # TODO: Implement move mouse events
         # def move_mouse(self, element, duration=2, steps=3):
@@ -185,30 +198,43 @@ class Ads:
                 logger.success(f"Profile: {self.profile} | Closed")
                 break
 
+    def send_key(self, key):
+        self.actions.send_keys(key).perform()
+
+    def screenshot(self, folder):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        self.driver.save_screenshot(f"{folder}/{self.profile}.png")
+
     def current_tab(self):
         return self.driver.current_window_handle
 
     def switch_tab(self, tab):
-        logger.debug(f"Profile: {self.profile} | Switching tab")
+        logger.debug(f"Profile: {self.profile} | Switching tab: {tab}")
         self.driver.switch_to.window(tab)
 
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
         logger.debug(f"Profile: {self.profile} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
-        for tab in self._filter_tabs():
+        tabs = self.driver.window_handles
+        for tab in reversed(tabs):
             self.switch_tab(tab)
-            if part_of_url is not None:
-                if part_of_url in self.driver.current_url:
-                    target_tab = self.current_tab()
-                    if not keep_focused:
-                        self.switch_tab(current_tab)
-                    return target_tab
-            if part_of_name is not None:
-                if part_of_name in self.driver.title:
-                    target_tab = self.current_tab()
-                    if not keep_focused:
-                        self.switch_tab(current_tab)
-                    return target_tab
+            if self.driver.title not in self.SYSTEM_TABS:
+                logger.debug(f"Profile: {self.profile} | Switched to `{self.driver.title}` tab, checking...")
+                if part_of_url is not None:
+                    logger.debug(f"Profile: {self.profile} | Checking part of url: {self.driver.current_url}")
+                    if part_of_url in self.driver.current_url:
+                        target_tab = self.current_tab()
+                        if not keep_focused:
+                            self.switch_tab(current_tab)
+                        return target_tab
+                if part_of_name is not None:
+                    logger.debug(f"Profile: {self.profile} | Checking part of name: {self.driver.title}")
+                    if part_of_name in self.driver.title:
+                        target_tab = self.current_tab()
+                        if not keep_focused:
+                            self.switch_tab(current_tab)
+                        return target_tab
         return None
 
     def mouse_position(self):
@@ -216,7 +242,7 @@ class Ads:
 
     def execute_script(self, script):
         logger.debug(f"Profile: {self.profile} | Executing script")
-        self.driver.execute_script(script)
+        return self.driver.execute_script(script)
 
     def _start_profile(self):
         logger.debug(f"Profile: {self.profile} | Starting profile")
@@ -270,7 +296,8 @@ class Ads:
                 self.driver.close()
 
         self.switch_tab(tabs[0])
-        self.driver.maximize_window()
+        if not debug_mode():
+            self.driver.maximize_window()
 
     def _prepare_wallet(self, wallet_name, wallet_password):
         wallet = self.WALLETS.get(wallet_name)
@@ -296,7 +323,7 @@ class Ads:
         for tab in start_tabs:
             self.switch_tab(tab)
             logger.debug(f"Profile: {self.profile} | Switched to `{self.driver.title}` tab")
-            if self.driver.title not in ["Rabby Offscreen Page", "DevTools"]:
+            if self.driver.title not in self.SYSTEM_TABS:
                 final_tabs.append(tab)
 
         return final_tabs

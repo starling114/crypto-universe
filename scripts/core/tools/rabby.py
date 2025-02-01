@@ -25,6 +25,28 @@ class Rabby:
             raise Exception("Rabby auth failed")
         logger.success(f"Profile: {self.ads.profile} | Rabby | Authenticated")
 
+    def connect(self):
+        logger.debug(f"Profile: {self.ads.profile} | Rabby | Connecting")
+        current_tab = self.ads.current_tab()
+        connected = False
+        sleep(3, 5)
+
+        for _ in range(1):
+            target_tab = self.ads.find_tab("notification.html#/approval", keep_focused=True)
+            if target_tab:
+                sleep(2, 3)
+                if not self.ads.click_element('//button[span[text()="Connect"]]', 10):
+                    logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to sign")
+                    break
+                sleep(0.5, 1)
+                connected = True
+            sleep(1, 2)
+
+        self.ads.switch_tab(current_tab)
+        sleep(2, 3)
+
+        return connected
+
     def sign(self):
         logger.debug(f"Profile: {self.ads.profile} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()

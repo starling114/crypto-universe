@@ -99,7 +99,7 @@ class SwapJumper:
 
     def swap(self):
         try:
-            logger.info(f"{self.address} | {self.from_token.symbol}->{self.to_token.symbol} | Swap statred")
+            logger.info(f"{self.address} | {self.from_token.symbol}->{self.to_token.symbol} | Swap started")
 
             calculated_amount = self.calculate_amount()
             remote_data = self.get_remote_data(calculated_amount)

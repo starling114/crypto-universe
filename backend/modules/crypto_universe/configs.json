@@ -8,7 +8,8 @@
     "bridge-relay",
     "bridge-hyperlane",
     "swap-jumper",
-    "testnet-mitosis"
+    "testnet-mitosis",
+    "activity-treehouse_prize"
   ],
   "available_premium_modules": [
     "sale-fjord"

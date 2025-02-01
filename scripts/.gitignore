@@ -1,6 +1,7 @@
 myenv/
 **/instructions.json
 **/secrets.json
+**/screenshots/
 **/tmp
 !**/.keep
 
