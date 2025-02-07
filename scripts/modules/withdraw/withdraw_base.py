@@ -2,7 +2,7 @@ import ccxt
 import random
 
 from utils import load_json, log_error, round_number, debug_mode, sleep, logger
-from core.helpers import zip_to_addresses, prettify_seconds, prettify_number
+from core.helpers import zip_to_objects, prettify_seconds, prettify_number
 
 
 class WithdrawBase:
@@ -81,7 +81,7 @@ class WithdrawBase:
         secrets = load_json(f"modules/withdraw/{cex}/secrets.json")
 
         addresses = instructions["addresses"]
-        amounts = zip_to_addresses(addresses, instructions["amounts"])
+        amounts = zip_to_objects(addresses, instructions["amounts"])
 
         if instructions["randomize"]:
             random.shuffle(addresses)

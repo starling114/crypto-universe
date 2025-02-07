@@ -9,7 +9,7 @@ from core.helpers import (
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
-    zip_to_addresses,
+    zip_to_objects,
     prettify_seconds,
     prettify_number,
 )
@@ -113,7 +113,7 @@ class BridgeBase:
         secrets = load_json(f"modules/bridge/{bridge}/secrets.json")
 
         addresses = instructions["addresses"]
-        amounts = zip_to_addresses(addresses, instructions["amounts"])
+        amounts = zip_to_objects(addresses, instructions["amounts"])
 
         if instructions["randomize"]:
             random.shuffle(addresses)

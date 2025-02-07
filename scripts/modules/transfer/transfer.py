@@ -13,7 +13,7 @@ from core.helpers import (
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
-    zip_to_addresses,
+    zip_to_objects,
     prettify_seconds,
     prettify_number,
 )
@@ -122,8 +122,8 @@ class Transfer:
         secrets = load_json("modules/transfer/secrets.json")
 
         source_addresses = instructions["source_addresses"]
-        amounts = zip_to_addresses(source_addresses, instructions["amounts"])
-        destinaion_addresses = zip_to_addresses(source_addresses, instructions["destinaion_addresses"])
+        amounts = zip_to_objects(source_addresses, instructions["amounts"])
+        destinaion_addresses = zip_to_objects(source_addresses, instructions["destinaion_addresses"])
 
         if instructions["randomize"]:
             random.shuffle(source_addresses)

@@ -2,17 +2,18 @@ import random
 from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
 
 
-def transaction_data(web3, from_address, to_address, data=None, value=None):
+def transaction_data(web3, from_address, to_address=None, data=None, value=None):
     from_address = web3.to_checksum_address(from_address)
-    to_address = web3.to_checksum_address(to_address)
 
     tx_data = {
         "chainId": web3.eth.chain_id,
         "nonce": transactions_count(web3, from_address),
         "from": from_address,
-        "to": to_address,
         "gasPrice": gas_price(web3),
     }
+
+    if to_address is not None:
+        tx_data["to"] = web3.to_checksum_address(to_address)
 
     if value is not None:
         tx_data["value"] = value
@@ -24,7 +25,7 @@ def transaction_data(web3, from_address, to_address, data=None, value=None):
 
 
 def transactions_count(web3, wallet_address):
-    return int(web3.eth.get_transaction_count(wallet_address))
+    return int(web3.eth.get_transaction_count(web3.to_checksum_address(wallet_address)))
 
 
 def gas_price(web3):
@@ -121,8 +122,8 @@ def get_transaction_link(chain, tx_hash):
     return f"{chain.scan}/tx/{tx_hash}"
 
 
-def zip_to_addresses(addresses, to_zip):
-    return {address: amount for address, amount in zip(addresses, to_zip)}
+def zip_to_objects(objects, to_zip):
+    return {object: value for object, value in zip(objects, to_zip)}
 
 
 def prettify_seconds(seconds):

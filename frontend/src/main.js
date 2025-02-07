@@ -26,6 +26,7 @@ import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
 import YtTokensView from '@/views/YtTokensView.vue'
 import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
 import ActivityTreehousePrizeView from '@/views/ActivityTreehousePrizeView.vue'
+import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 
 const app = createApp(App)
 
@@ -161,6 +162,12 @@ const routes = [
     name: 'Activity Treehouse Prize',
     component: ActivityTreehousePrizeView,
     meta: { title: 'CU | Activity - Treehouse Prize' }
+  },
+  {
+    path: '/chore-rabby_import',
+    name: 'Chore Rabby Import',
+    component: ChoreRabbyImportView,
+    meta: { title: 'CU | Chore - Rabby Import' }
   }
 ]
 

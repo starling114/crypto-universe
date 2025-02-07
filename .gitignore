@@ -1,5 +1,5 @@
 **/instructions.json
-**/secrets.json
+**/secrets*.json
 **/tmp
 !**/.keep
 

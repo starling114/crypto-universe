@@ -240,9 +240,12 @@ class Ads:
     def mouse_position(self):
         return self.driver.execute_script("return {x: window.mouseX, y: window.mouseY};")
 
-    def execute_script(self, script):
+    def execute_script(self, script, element=None):
         logger.debug(f"Profile: {self.profile} | Executing script")
-        return self.driver.execute_script(script)
+        if element is not None:
+            return self.driver.execute_script(script, element)
+        else:
+            return self.driver.execute_script(script)
 
     def _start_profile(self):
         logger.debug(f"Profile: {self.profile} | Starting profile")

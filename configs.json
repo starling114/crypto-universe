@@ -19,6 +19,19 @@
         "PUFFER": "0x4d1C297d39C5c1277964D0E3f8Aa901493664530"
       }
     },
+    "berachain": {
+      "chain_id": 80094,
+      "native_token": "BERA",
+      "scan": "https://beratrail.io",
+      "rpcs": [
+        "https://rpc.berachain.com"
+      ],
+      "tokens": {
+        "BERA": "",
+        "WETH": "0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590",
+        "HONEY": "0xFCBD14DC51f0A4d49d5E53C2E0950e0bC26d0Dce"
+      }
+    },
     "arbitrum": {
       "chain_id": 42161,
       "native_token": "ETH",

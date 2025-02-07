@@ -1,9 +1,10 @@
-from utils import logger, sleep
+from utils import logger, sleep, ExecutionError
 from selenium.common import NoSuchWindowException
 
 
 class Rabby:
-    URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/popup.html"
+    URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html"
+    UNLOCK_URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html#/unlock"
 
     def __init__(self, ads, password):
         self.ads = ads
@@ -13,7 +14,7 @@ class Rabby:
         self.ads.open_url(Rabby.URL)
 
     def authenticate(self) -> None:
-        self.open()
+        self.ads.open_url(Rabby.UNLOCK_URL)
 
         if not self.ads.find_element('//button[span[text()="Unlock"]]', 2):
             logger.info(f"Profile: {self.ads.profile} | Rabby | Already authenticated")
@@ -22,30 +23,8 @@ class Rabby:
         self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
         self.ads.click_element('//button[span[text()="Unlock"]]')
         if not self.ads.find_element('//div[@class="gasprice"]', 15):
-            raise Exception("Rabby auth failed")
+            raise ExecutionError("Rabby auth failed")
         logger.success(f"Profile: {self.ads.profile} | Rabby | Authenticated")
-
-    def connect(self):
-        logger.debug(f"Profile: {self.ads.profile} | Rabby | Connecting")
-        current_tab = self.ads.current_tab()
-        connected = False
-        sleep(3, 5)
-
-        for _ in range(1):
-            target_tab = self.ads.find_tab("notification.html#/approval", keep_focused=True)
-            if target_tab:
-                sleep(2, 3)
-                if not self.ads.click_element('//button[span[text()="Connect"]]', 10):
-                    logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to sign")
-                    break
-                sleep(0.5, 1)
-                connected = True
-            sleep(1, 2)
-
-        self.ads.switch_tab(current_tab)
-        sleep(2, 3)
-
-        return connected
 
     def sign(self):
         logger.debug(f"Profile: {self.ads.profile} | Rabby | Signing transaction")
@@ -107,3 +86,58 @@ class Rabby:
             sleep(0.1, 0.2)
 
         return signed
+
+    def connect(self):
+        logger.debug(f"Profile: {self.ads.profile} | Rabby | Connecting")
+        current_tab = self.ads.current_tab()
+        connected = False
+        sleep(3, 5)
+
+        for _ in range(1):
+            target_tab = self.ads.find_tab("notification.html#/approval", keep_focused=True)
+            if target_tab:
+                sleep(2, 3)
+                if not self.ads.click_element('//button[span[text()="Connect"]]', 10):
+                    logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to sign")
+                    break
+                sleep(0.5, 1)
+                connected = True
+            sleep(1, 2)
+
+        self.ads.switch_tab(current_tab)
+        sleep(2, 3)
+
+        return connected
+
+    def import_new(self, label, address, password, private_key):
+        self.ads.open_url(Rabby.URL)
+        sleep(1, 2)
+
+        self.ads.click_element('//button[span[text()="Next"]]', 1)
+        self.ads.click_element('//button[span[text()="Get Started"]]', 1)
+
+        self.ads.click_element('//div[text()="Import Private Key"]', 1)
+        self.ads.click_element('//button[span[text()="Get Started"]]', 1)
+
+        self.ads.click_element('//div[text()="Import Private Key"]', 1)
+        self.ads.input_text('//input[@placeholder="Password must be at least 8 characters long"]', password)
+        self.ads.input_text('//input[@placeholder="Confirm password"]', password)
+        self.ads.click_element('//button[span[text()="Next"]]')
+
+        self.ads.input_text('//input[@placeholder="Enter your Private key"]', private_key)
+        self.ads.click_element('//button[span[text()="Confirm"]]')
+
+        import_address = self.ads.find_element('//div[@class="address-viewer-text subtitle"]').text
+
+        if import_address != address:
+            raise ExecutionError("Address is not matching the one uner private key.")
+
+        self.ads.open_url(Rabby.URL)
+        self.ads.click_element('//button[@class="ant-modal-close"]', 2)
+        self.ads.click_element('//div[@class="current-address"]', 1)
+        self.ads.click_element('//div[@class="rabby-address-item-title"]', 1)
+        self.ads.click_element('//div[text()="Address Note"]//..//img', 1)
+        sleep(1, 2)
+        self.ads.click_element('//span[@class="anticon anticon-close-circle ant-input-clear-icon"]')
+        self.ads.input_text('//input[@placeholder="Please input address note"]', label)
+        self.ads.click_element('//button[span[text()="Confirm"]]')

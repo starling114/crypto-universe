@@ -10,6 +10,7 @@ from modules.transfer.transfer import Transfer
 from modules.yt_tokens.yt_tokens import YtTokens
 from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
 from modules.activity.treehouse_prize.treehouse_prize import TreehousePrize
+from modules.chore.rabby_import.rabby_import import RabbyImport
 
 from utils import log_error, logger, import_premium_module, run_module, run_premium_module
 
@@ -25,9 +26,12 @@ MODULES = {
     "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,
     "activity-treehouse_prize": TreehousePrize,
+    "chore-rabby_import": RabbyImport,
 }
 PREMIUM_MODULES = {
-    "premium/sale-fjord": import_premium_module("sale_fjord", "SaleFjord"),
+    "premium/sale-fjord": import_premium_module("sale-fjord-sale_fjord", "SaleFjord"),
+    "premium/mint-kingdomly": import_premium_module("mint-kingdomly-mint_kingdomly", "MintKingdomly"),
+    "premium/mint-magiceden": import_premium_module("mint-magiceden-mint_magiceden", "MintMagiceden"),
 }
 
 if __name__ == "__main__":

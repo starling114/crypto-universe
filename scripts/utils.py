@@ -88,11 +88,12 @@ def sleep(delay, max_delay=None):
 
 
 def import_premium_module(file, name):
+    location = ".".join(file.split("-"))
     try:
-        module = importlib.import_module(f"modules.premium.{file}")
+        module = importlib.import_module(f"modules.premium.{location}")
     except ImportError:
         try:
-            module = importlib.import_module(f"modules.premium.private.{file}")
+            module = importlib.import_module(f"modules.premium.private.{location}")
         except ImportError:
             return None
 

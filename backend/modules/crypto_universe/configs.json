@@ -9,7 +9,8 @@
     "bridge-hyperlane",
     "swap-jumper",
     "testnet-mitosis",
-    "activity-treehouse_prize"
+    "activity-treehouse_prize",
+    "chore-rabby_import"
   ],
   "available_premium_modules": [
     "sale-fjord"
