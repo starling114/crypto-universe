@@ -5,8 +5,6 @@ from core.helpers import (
     calculate_token_balance,
     calculate_base_amount,
     transaction_data,
-    transactions_count,
-    gas_price,
     send_transaction,
     verify_transaction,
     estimate_gas,
@@ -71,23 +69,18 @@ class Transfer:
                 value=amount,
             )
         else:
+            tx_pre_data = transaction_data(self.web3, from_address=self.source_address)
             tx_data = self.token.contract.functions.transfer(
                 self.web3.to_checksum_address(self.source_address),
                 amount,
-            ).build_transaction(
-                {
-                    "nonce": transactions_count(self.web3, self.source_address),
-                    "from": self.web3.to_checksum_address(self.source_address),
-                    "gasPrice": gas_price(self.web3),
-                }
-            )
+            ).build_transaction(tx_pre_data)
 
             return tx_data
 
     def transfer(self):
         try:
             calculated_amount = self.calculate_amount()
-            private_key = get_private_key(self.web3, self.secrets, self.source_address)
+            private_key = get_private_key(self.web3, self.source_address, self.secrets)
             tx_data = self.get_transaction_data(calculated_amount)
 
             if debug_mode():

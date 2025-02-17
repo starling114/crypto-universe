@@ -7,9 +7,9 @@ def transaction_data(web3, from_address, to_address=None, data=None, value=None)
 
     tx_data = {
         "chainId": web3.eth.chain_id,
-        "nonce": transactions_count(web3, from_address),
+        "nonce": web3.eth.get_transaction_count(from_address),
         "from": from_address,
-        "gasPrice": gas_price(web3),
+        **gas_fees(web3),
     }
 
     if to_address is not None:
@@ -28,25 +28,27 @@ def transactions_count(web3, wallet_address):
     return int(web3.eth.get_transaction_count(web3.to_checksum_address(wallet_address)))
 
 
-def gas_price(web3):
-    price = web3.eth.gas_price
+def gas_fees(web3):
+    base_fee = web3.eth.gas_price
+    max_priority_fee_per_gas = web3.eth.max_priority_fee
 
     multiplier = 1.2
-
-    if web3.eth.chain_id == CONFIGS["chains"]["linea"]["chain_id"]:
+    if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
         multiplier = 1.5
     elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
         multiplier = 1.1
 
-    return int(price * multiplier)
+    return {
+        "maxPriorityFeePerGas": max_priority_fee_per_gas,
+        "maxFeePerGas": int((base_fee + max_priority_fee_per_gas) * multiplier),
+    }
 
 
 def estimate_gas(web3, tx_data):
     gas = web3.eth.estimate_gas(tx_data)
 
-    multiplier = random.uniform(1.1, 1.2)
-
-    if web3.eth.chain_id == CONFIGS["chains"]["scroll"]["chain_id"]:
+    multiplier = 1.2
+    if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
         multiplier = 1.5
     elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
         multiplier = 1.1
@@ -103,11 +105,14 @@ def verify_transaction(web3, tx_hash):
 # Support functions
 
 
-def get_private_key(web3, secrets, address, local_secrets=True):
-    private_key = secrets["private_keys"].get(address, None)
+def get_private_key(web3, address, secrets=None):
+    private_key = None
 
-    if local_secrets and private_key is None:
-        private_key = get_private_key(web3, SECRETS, address, False)
+    if secrets is not None:
+        private_key = secrets["private_keys"].get(address, None)
+
+    if private_key is None:
+        private_key = SECRETS["private_keys"].get(address, None)
 
     if private_key is None:
         raise ExecutionError("Private key was not found")

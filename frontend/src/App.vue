@@ -32,25 +32,25 @@
         </template>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="premiumModuleEnabled('sale-fjord')" mode="premium">
+      <cu-sidebar-item v-if="premiumModuleEnabled('mint-kingdomly')" mode="premium">
         <template #left>
           <RectangleStackIcon
             class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
         </template>
-        <template #center>Sale</template>
+        <template #center>Mint</template>
 
-        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/sale-fjord"><template #left>
+        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/mint-kingdomly"><template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
               :style="{
-                maskImage: 'url(fjord.png)',
-                WebkitMaskImage: 'url(fjord.png)',
+                maskImage: 'url(kingdomly.png)',
+                WebkitMaskImage: 'url(kingdomly.png)',
                 maskSize: '100% 100%',
                 WebkitMaskSize: '100% 100%',
                 backgroundColor: 'currentColor'
               }" />
           </template>
-          <template #center>Fjord</template>
+          <template #center>Kingdomly</template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 

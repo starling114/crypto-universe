@@ -43,7 +43,6 @@ class RabbyImport:
 
         profiles = instructions["profiles"]
 
-        # TODO: Rename zip_to_objects to zip_to_objects
         labels = zip_to_objects(profiles, instructions["labels"])
         addresses = zip_to_objects(profiles, instructions["addresses"])
         passwords = zip_to_objects(profiles, instructions["passwords"])

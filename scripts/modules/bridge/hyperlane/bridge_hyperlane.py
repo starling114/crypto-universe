@@ -1,4 +1,4 @@
-from core.helpers import transactions_count, gas_price, logger
+from core.helpers import transaction_data
 from modules.bridge.bridge_base import BridgeBase
 from modules.bridge.hyperlane.helpers import (
     HYPERLANE_CONTRACTS,
@@ -57,16 +57,10 @@ class BridgeHyperlane(BridgeBase):
     def get_transaction_data(self):
         fee = self.bridge_contract.functions.quoteBridge(self.to_chain.chain_id, self.calculated_amount).call()
 
+        tx_pre_data = transaction_data(self.web3, from_address=self.address, value=self.calculated_amount + fee)
         tx_data = self.bridge_contract.functions.bridgeETH(
             self.to_chain.chain_id, self.calculated_amount
-        ).build_transaction(
-            {
-                "nonce": transactions_count(self.web3, self.address),
-                "from": self.web3.to_checksum_address(self.address),
-                "value": self.calculated_amount + fee,
-                "gasPrice": gas_price(self.web3),
-            }
-        )
+        ).build_transaction(tx_pre_data)
 
         return tx_data
 

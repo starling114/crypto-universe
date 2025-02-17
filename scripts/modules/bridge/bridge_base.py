@@ -84,7 +84,7 @@ class BridgeBase:
         try:
             self.calculated_amount = self.calculate_amount()
 
-            self.private_key = get_private_key(self.web3, self.secrets, self.address)
+            self.private_key = get_private_key(self.web3, self.address, self.secrets)
             tx_data = self.get_transaction_data()
 
             if debug_mode():

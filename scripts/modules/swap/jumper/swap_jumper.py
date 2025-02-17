@@ -112,7 +112,7 @@ class SwapJumper:
                 )
                 return True
 
-            private_key = get_private_key(self.web3, self.secrets, self.address)
+            private_key = get_private_key(self.web3, self.address, self.secrets)
 
             approve_token(self.web3, self.from_token, calculated_amount, remote_data["to"], self.address, private_key)
 

@@ -12,7 +12,7 @@ def build_token(web3, chain=None, symbol=None, token_address=None):
         return Token(symbol, NULL_TOKEN_ADDRESS, None, 18)
     else:
         address = web3.to_checksum_address(address)
-        token_contract = web3.eth.contract(address=address, abi=ERC20_ABI)
+        token_contract = build_contract(web3, address, ERC20_ABI)
         token_decimals = token_contract.functions.decimals().call()
         token_symbol = token_contract.functions.symbol().call()
 
@@ -27,3 +27,7 @@ def build_chain(chain):
 
 def build_web3(chain):
     return Web3(Web3.HTTPProvider(chain.random_rpc()))
+
+
+def build_contract(web3, address, abi):
+    return web3.eth.contract(address=web3.to_checksum_address(address), abi=abi)

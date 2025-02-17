@@ -81,7 +81,7 @@ class YtTokens:
 
             remote_tx_data = self.get_remote_data(calculated_amount)["tx"]
 
-            private_key = get_private_key(self.web3, self.secrets, self.address)
+            private_key = get_private_key(self.web3, self.address, self.secrets)
             tx_data = transaction_data(
                 self.web3,
                 from_address=remote_tx_data["from"],
