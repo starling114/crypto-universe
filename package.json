@@ -1,6 +1,6 @@
 {
   "name": "crypto-universe",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "scripts": {
     "start": "node backend/index.js"
   },

@@ -7,6 +7,12 @@
         "USDC"
       ]
     },
+    "berachain": {
+      "tokens": [
+        "BERA",
+        "HONEY"
+      ]
+    },
     "arbitrum": {
       "tokens": [
         "ETH",

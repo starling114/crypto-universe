@@ -4,4 +4,5 @@ OKX_CHAINS_MAPPING = {
     "base": "Base",
     "optimism": "Optimism",
     "linea": "Linea",
+    "berachain": "Berachain",
 }

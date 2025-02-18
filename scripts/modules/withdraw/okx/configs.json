@@ -1,14 +1,34 @@
 {
-  "available_chains": [
-    "ethereum",
-    "arbitrum",
-    "base",
-    "optimism",
-    "linea"
-  ],
-  "available_symbols": [
-    "ETH",
-    "USDT",
-    "USDC"
-  ]
+  "chains": {
+    "ethereum": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "arbitrum": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "base": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "optimism": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "linea": {
+      "tokens": [
+        "ETH"
+      ]
+    },
+    "berachain": {
+      "tokens": [
+        "BERA"
+      ]
+    }
+  }
 }

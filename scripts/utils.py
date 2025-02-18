@@ -28,15 +28,18 @@ class ExecutionError(Exception):
     pass
 
 
-def load_json(file_path):
+def load_json(file_path, check_existance=True):
     if not os.path.exists(file_path):
-        raise FileNotFoundError(f"File not found: {file_path}")
+        if check_existance:
+            raise FileNotFoundError(f"File not found: {file_path}")
+        else:
+            return {}
 
     with open(file_path, "r") as file:
         return json.load(file)
 
 
-SECRETS = load_json("../backend/modules/crypto_universe/secrets.json")
+SECRETS = load_json("../backend/modules/crypto_universe/secrets.json", check_existance=False)
 CONFIGS = load_json("../configs.json")
 ERC20_ABI = load_json("../erc20abi.json")
 

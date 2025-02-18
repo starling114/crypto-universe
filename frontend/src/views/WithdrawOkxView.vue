@@ -10,7 +10,7 @@
   </div>
 
   <div class="grid grid-cols-2 gap-2">
-    <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
+    <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" @change="handleChainChange" />
     <cu-select name="symbol" v-model="symbol" :options="availableSymbols" label="Token" />
   </div>
 
@@ -52,6 +52,8 @@ import {
 
 const addresses = ref('')
 const amounts = ref('')
+
+const chains = ref({})
 const availableChains = ref([])
 const chain = ref(null)
 const availableSymbols = ref([])
@@ -89,13 +91,14 @@ const loadDefaults = async () => {
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
-    if (!Object.hasOwn(data, 'available_chains')) return
+    if (!Object.hasOwn(data, 'chains')) return
 
-    availableChains.value = data.available_chains ?? availableChains.value
-    availableSymbols.value = data.available_symbols ?? availableSymbols.value
+    chains.value = data.chains ?? chains.value
+    availableChains.value = Object.keys(data.chains)
   }, logs)
 
   chain.value = chain.value || availableChains.value[0]
+  availableSymbols.value = chainSymbols(chain.value)
   symbol.value = symbol.value || availableSymbols.value[0]
 }
 
@@ -119,6 +122,15 @@ const handleExecute = async () => {
 const handleStop = async () => {
   await stopModule(proxy, module.value)
   moduleRunning.value = false
+}
+
+const handleChainChange = async () => {
+  availableSymbols.value = chainSymbols(chain.value)
+  symbol.value = availableSymbols.value[0]
+}
+
+const chainSymbols = (chain) => {
+  return chains.value[chain] ? chains.value[chain].tokens : []
 }
 
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)
