@@ -32,7 +32,8 @@
         </template>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="premiumModuleEnabled('mint-kingdomly')" mode="premium">
+      <cu-sidebar-item v-if="premiumModuleEnabled('mint-kingdomly') || premiumModuleEnabled('mint-magiceden')"
+        mode="premium">
         <template #left>
           <RectangleStackIcon
             class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
@@ -51,6 +52,20 @@
               }" />
           </template>
           <template #center>Kingdomly</template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/mint-magiceden"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
+              :style="{
+                maskImage: 'url(magiceden.png)',
+                WebkitMaskImage: 'url(magiceden.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Magiceden</template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 

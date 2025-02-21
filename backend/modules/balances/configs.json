@@ -1,6 +1,7 @@
 {
   "available_networks": [
     "ethereum",
+    "berachain",
     "arbitrum",
     "base",
     "optimism",

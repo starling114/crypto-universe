@@ -1,18 +1,16 @@
 <template>
-  <cu-title title="Mint - Kingdomly" />
+  <cu-title title="Mint - Magiceden" />
 
   <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
     placeholder="Enter wallet addresses each on the new line..." />
   <div class="mt-2 grid gap-2 grid-cols-6">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
-    <cu-input name="mintId" v-model="mintId" label="Mint ID" placeholder="Enter mint id..." />
+    <cu-input name="launchSymbol" v-model="launchSymbol" label="Launch Symbol" placeholder="Enter launch symbol..." />
+    <cu-input name="stage" v-model="stage" label="Stage" placeholder="Enter stage number..." />
     <cu-input name="quantity" v-model="quantity" label="Quantity" placeholder="Enter quantity..." />
-    <cu-input name="contractAddress" v-model="contractAddress" label="Contract Address"
-      placeholder="Enter contract address..." />
     <cu-input name="maxFee" v-model="maxFee" label="Max Fee" placeholder="Enter max fee..." />
     <cu-input name="mintTime" v-model="mintTime" label="Mint Time"
       tooltip="Time of mint in format `HH:MM:SS` (e.g. 12:00:00)" placeholder="Enter mint time..." />
-
   </div>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -42,16 +40,16 @@ const addresses = ref('')
 const availableChains = ref([])
 const chain = ref(null)
 
-const mintId = ref('')
+const stage = ref('')
 const quantity = ref('')
-const contractAddress = ref('')
+const launchSymbol = ref('')
 const maxFee = ref(0.2)
 const mintTime = ref('10:00:00')
 
 const logs = ref([])
 const moduleRunning = ref(false)
 
-const module = ref('premium/mint-kingdomly')
+const module = ref('premium/mint-magiceden')
 
 const { proxy } = getCurrentInstance()
 
@@ -60,9 +58,9 @@ const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
-    if (!Object.hasOwn(data, 'available_chains')) return
+    if (!Object.hasOwn(data, 'chains')) return
 
-    availableChains.value = data.available_chains ?? availableChains.value
+    availableChains.value = data.chains ?? availableChains.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
@@ -70,10 +68,10 @@ const loadDefaults = async () => {
 
     addresses.value = data.addresses?.join('\n') ?? addresses.value
     chain.value = data.chain ?? chain.value
-    mintId.value = data.mint_id ?? mintId.value
+    stage.value = data.stage ?? stage.value
     quantity.value = data.quantity ?? quantity.value
     maxFee.value = data.max_fee ?? maxFee.value
-    contractAddress.value = data.contract_address ?? contractAddress.value
+    launchSymbol.value = data.launch_symbol ?? launchSymbol.value
     mintTime.value = data.mint_time ?? mintTime.value
   }, logs)
   chain.value = chain.value || availableChains.value[0]
@@ -85,10 +83,10 @@ const handleExecute = async () => {
   await updateModuleData(proxy, module.value, 'instructions', 'python', {
     addresses: addresses.value.split('\n').filter(Boolean),
     chain: chain.value,
-    mint_id: mintId.value,
+    stage: stage.value,
     quantity: quantity.value,
     max_fee: maxFee.value,
-    contract_address: contractAddress.value,
+    launch_symbol: launchSymbol.value,
     mint_time: mintTime.value
   }, logs)
 

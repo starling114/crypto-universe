@@ -24,7 +24,9 @@
       "native_token": "BERA",
       "scan": "https://beratrail.io",
       "rpcs": [
-        "https://rpc.berachain.com"
+        "https://rpc.berachain.com",
+        "https://berachain.drpc.org",
+        "https://berachain-rpc.publicnode.com"
       ],
       "tokens": {
         "BERA": "",

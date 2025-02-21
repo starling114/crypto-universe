@@ -2,15 +2,19 @@ import random
 from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
 
 
-def transaction_data(web3, from_address, to_address=None, data=None, value=None):
+def transaction_data(web3, from_address, to_address=None, data=None, value=None, include_fees=True):
     from_address = web3.to_checksum_address(from_address)
 
     tx_data = {
         "chainId": web3.eth.chain_id,
         "nonce": web3.eth.get_transaction_count(from_address),
         "from": from_address,
-        **gas_fees(web3),
     }
+
+    if include_fees:
+        fees = gas_fees(web3)
+        tx_data["maxFeePerGas"] = fees["maxFeePerGas"]
+        tx_data["maxPriorityFeePerGas"] = fees["maxPriorityFeePerGas"]
 
     if to_address is not None:
         tx_data["to"] = web3.to_checksum_address(to_address)
@@ -31,6 +35,7 @@ def transactions_count(web3, wallet_address):
 def gas_fees(web3):
     base_fee = web3.eth.gas_price
     max_priority_fee_per_gas = web3.eth.max_priority_fee
+    max_fee_per_gas = base_fee + max_priority_fee_per_gas
 
     multiplier = 1.2
     if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
@@ -40,7 +45,17 @@ def gas_fees(web3):
 
     return {
         "maxPriorityFeePerGas": max_priority_fee_per_gas,
-        "maxFeePerGas": int((base_fee + max_priority_fee_per_gas) * multiplier),
+        "maxFeePerGas": int(max_fee_per_gas * multiplier),
+    }
+
+
+def manual_gas_fees(web3, tx_gas, max_tx_cost):
+    max_fee_per_gas = int(max_tx_cost / tx_gas)
+    max_priority_fee_per_gas = web3.eth.max_priority_fee * 100
+
+    return {
+        "maxPriorityFeePerGas": max_priority_fee_per_gas,
+        "maxFeePerGas": max_fee_per_gas,
     }
 
 
@@ -77,7 +92,8 @@ def approve_token(web3, token, amount, spender_address, wallet_address, private_
 
 
 def send_transaction(web3, tx_data, private_key):
-    tx_data["gas"] = estimate_gas(web3, tx_data)
+    if tx_data.get("gas", None) is None:
+        tx_data["gas"] = estimate_gas(web3, tx_data)
 
     signed_tx = web3.eth.account.sign_transaction(tx_data, private_key)
 

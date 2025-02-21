@@ -9,19 +9,8 @@ import {
   readJson
 } from "../../utils.js"
 import { createPublicClient, http, formatEther } from 'viem'
-import { mainnet, arbitrum, base, optimism, scroll, blast, bsc, polygon } from "viem/chains"
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const viem_chains = {
-  'ethereum': mainnet,
-  'arbitrum': arbitrum,
-  'base': base,
-  'optimism': optimism,
-  'scroll': scroll,
-  'blast': blast,
-  'polygon': polygon,
-  'bsc': bsc
-}
 
 let walletsData = []
 
@@ -37,7 +26,7 @@ async function fetchWallets(network) {
 
   while (!isSuccess) {
     const rpc = getRps(network)
-    const client = createPublicClient({ chain: viem_chains[network], transport: http(rpc), batch: { multicall: true } })
+    const client = createPublicClient({ transport: http(rpc), batch: { multicall: true } })
 
     try {
       const promises = wallets.map(wallet => client.getTransactionCount({ address: wallet }))

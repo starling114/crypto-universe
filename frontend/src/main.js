@@ -7,6 +7,7 @@ import './assets/tailwind.css'
 import { loadConfigs } from '@/utils'
 import DashboardView from "@/views/DashboardView"
 import MintKingdomlyView from "@/views/premium/MintKingdomlyView"
+import MintMagicedenView from "@/views/premium/MintMagicedenView"
 import SettingsView from '@/views/settings/SettingsView.vue'
 import BalancesView from "@/views/BalancesView"
 import BalancesSettingsView from '@/views/settings/BalancesSettingsView.vue'
@@ -48,6 +49,12 @@ const routes = [
     name: 'Mint Kingdomly',
     component: MintKingdomlyView,
     meta: { title: 'CU | Mint Kingdomly' }
+  },
+  {
+    path: '/mint-magiceden',
+    name: 'Mint Magiceden',
+    component: MintMagicedenView,
+    meta: { title: 'CU | Mint Magiceden' }
   },
   {
     path: '/settings',

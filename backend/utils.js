@@ -7,7 +7,7 @@ export const wait = ms => new Promise(r => setTimeout(r, ms))
 export const sleep = async (millis) => new Promise(resolve => setTimeout(resolve, millis))
 export const configs = readJson('./configs.json')
 
-const prices = await getTokensPrice('ETH,MATIC,BNB')
+const prices = await getTokensPrice()
 
 export function random(min, max) {
   min = Math.ceil(min)
@@ -168,7 +168,13 @@ export function getNativeTokenPriceInUsd(chain) {
   return prices[nativeToken] ? prices[nativeToken].USD : 0
 }
 
-export async function getTokensPrice(tokens) {
+export async function getTokensPrice() {
+  const nativeTokens = new Set()
+  for (const chain in configs.chains) {
+    nativeTokens.add(configs.chains[chain].native_token)
+  }
+
+  let tokens = Array.from(nativeTokens).join(',')
   let prices = {}
   let isFetched = false
   let retry = 0
