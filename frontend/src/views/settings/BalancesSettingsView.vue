@@ -72,10 +72,10 @@ const loadDefaults = async () => {
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
-    if (!Object.hasOwn(data, 'available_networks')) return
+    if (!Object.hasOwn(data, 'networks')) return
 
-    availableNetworks.value = data.available_networks ?? availableNetworks.value
-    availableNamingStrategies.value = data.available_naming_strategies ?? availableNamingStrategies.value
+    availableNetworks.value = data.networks ?? availableNetworks.value
+    availableNamingStrategies.value = data.naming_strategies ?? availableNamingStrategies.value
   }, logs)
 }
 

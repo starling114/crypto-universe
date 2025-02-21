@@ -1,5 +1,5 @@
 {
-  "available_modules": [
+  "modules": [
     "balances",
     "transfer",
     "yt_tokens",
@@ -12,8 +12,8 @@
     "activity-treehouse_prize",
     "chore-rabby_import"
   ],
-  "available_premium_modules": [
-    "mint-kingdomly",
-    "mint-magiceden"
+  "premium_modules": [
+    "mint-magiceden",
+    "mint-kingdomly"
   ]
 }

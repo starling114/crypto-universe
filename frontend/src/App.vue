@@ -32,7 +32,7 @@
         </template>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="premiumModuleEnabled('mint-kingdomly') || premiumModuleEnabled('mint-magiceden')"
+      <cu-sidebar-item v-if="premiumModuleEnabled('mint-magiceden') || premiumModuleEnabled('mint-kingdomly')"
         mode="premium">
         <template #left>
           <RectangleStackIcon
@@ -40,21 +40,8 @@
         </template>
         <template #center>Mint</template>
 
-        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/mint-kingdomly"><template #left>
-            <div
-              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
-              :style="{
-                maskImage: 'url(kingdomly.png)',
-                WebkitMaskImage: 'url(kingdomly.png)',
-                maskSize: '100% 100%',
-                WebkitMaskSize: '100% 100%',
-                backgroundColor: 'currentColor'
-              }" />
-          </template>
-          <template #center>Kingdomly</template>
-        </cu-sidebar-sub-item>
-
-        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/mint-magiceden"><template #left>
+        <cu-sidebar-sub-item v-if="premiumModuleEnabled('mint-magiceden')" mode="premium" tag="router-link"
+          link="/mint-magiceden"><template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
               :style="{
@@ -66,6 +53,33 @@
               }" />
           </template>
           <template #center>Magiceden</template>
+          <template #right>
+            <router-link to="/mint-magiceden/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-red-700 hidden hover:text-red-900 group-hover:block transition duration-75 dark:text-red-400 dark:hover:text-white" />
+            </router-link>
+          </template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item v-if="premiumModuleEnabled('mint-kingdomly')" mode="premium" tag="router-link"
+          link="/mint-kingdomly"><template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
+              :style="{
+                maskImage: 'url(kingdomly.png)',
+                WebkitMaskImage: 'url(kingdomly.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Kingdomly</template>
+          <template #right>
+            <router-link to="/mint-kingdomly/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-red-700 hidden hover:text-red-900 group-hover:block transition duration-75 dark:text-red-400 dark:hover:text-white" />
+            </router-link>
+          </template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 

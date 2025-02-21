@@ -108,9 +108,9 @@ const loadDefaults = async () => {
   }, logs)
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
-    if (!Object.hasOwn(data, 'available_tasks')) return
+    if (!Object.hasOwn(data, 'tasks')) return
 
-    availableTasks.value = data.available_tasks ?? availableTasks.value
+    availableTasks.value = data.tasks ?? availableTasks.value
   }, logs)
 }
 

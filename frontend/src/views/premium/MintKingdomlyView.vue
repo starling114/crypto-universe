@@ -3,16 +3,14 @@
 
   <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
     placeholder="Enter wallet addresses each on the new line..." />
-  <div class="mt-2 grid gap-2 grid-cols-6">
+  <div class="mt-2 grid gap-2 grid-cols-1 md:grid-cols-3 sm:grid-cols-2">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
-    <cu-input name="mintId" v-model="mintId" label="Mint ID" placeholder="Enter mint id..." />
-    <cu-input name="quantity" v-model="quantity" label="Quantity" placeholder="Enter quantity..." />
     <cu-input name="contractAddress" v-model="contractAddress" label="Contract Address"
       placeholder="Enter contract address..." />
-    <cu-input name="maxFee" v-model="maxFee" label="Max Fee" placeholder="Enter max fee..." />
+    <cu-input name="mintId" v-model="mintId" label="Mint ID" placeholder="Enter mint id..." />
+    <cu-input name="quantity" v-model="quantity" label="Quantity" placeholder="Enter quantity..." />
     <cu-input name="mintTime" v-model="mintTime" label="Mint Time"
       tooltip="Time of mint in format `HH:MM:SS` (e.g. 12:00:00)" placeholder="Enter mint time..." />
-
   </div>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -45,7 +43,6 @@ const chain = ref(null)
 const mintId = ref('')
 const quantity = ref('')
 const contractAddress = ref('')
-const maxFee = ref(0.2)
 const mintTime = ref('10:00:00')
 
 const logs = ref([])
@@ -60,9 +57,9 @@ const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
-    if (!Object.hasOwn(data, 'available_chains')) return
+    if (!Object.hasOwn(data, 'chains')) return
 
-    availableChains.value = data.available_chains ?? availableChains.value
+    availableChains.value = data.chains ?? availableChains.value
   }, logs)
 
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
@@ -72,7 +69,6 @@ const loadDefaults = async () => {
     chain.value = data.chain ?? chain.value
     mintId.value = data.mint_id ?? mintId.value
     quantity.value = data.quantity ?? quantity.value
-    maxFee.value = data.max_fee ?? maxFee.value
     contractAddress.value = data.contract_address ?? contractAddress.value
     mintTime.value = data.mint_time ?? mintTime.value
   }, logs)
@@ -87,7 +83,6 @@ const handleExecute = async () => {
     chain: chain.value,
     mint_id: mintId.value,
     quantity: quantity.value,
-    max_fee: maxFee.value,
     contract_address: contractAddress.value,
     mint_time: mintTime.value
   }, logs)

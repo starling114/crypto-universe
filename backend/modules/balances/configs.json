@@ -1,5 +1,5 @@
 {
-  "available_networks": [
+  "networks": [
     "ethereum",
     "berachain",
     "arbitrum",
@@ -16,7 +16,7 @@
     "zora",
     "mode"
   ],
-  "available_naming_strategies": [
+  "naming_strategies": [
     "indexes",
     "alphabet_batches"
   ]

@@ -103,9 +103,9 @@ const loadDefaults = async () => {
   })
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
-    if (!Object.hasOwn(data, 'available_networks')) return
+    if (!Object.hasOwn(data, 'networks')) return
 
-    availableNetworks.value = data.available_networks ?? availableNetworks.value
+    availableNetworks.value = data.networks ?? availableNetworks.value
   })
 
   activeNetwork.value = activeNetwork.value || enabledNetworks.value[0]

@@ -2,7 +2,7 @@ from web3 import Web3
 
 from core.models.token import Token
 from core.models.chain import Chain
-from utils import CONFIGS, ERC20_ABI, NULL_TOKEN_ADDRESS
+from utils import CONFIGS, PRIVATE_CONFIGS, ERC20_ABI, NULL_TOKEN_ADDRESS
 
 
 def build_token(web3, chain=None, symbol=None, token_address=None):
@@ -21,12 +21,21 @@ def build_token(web3, chain=None, symbol=None, token_address=None):
 
 def build_chain(chain):
     config = CONFIGS["chains"][chain]
+    private_rpcs = PRIVATE_CONFIGS.get("chains", {}).get(chain, {}).get("rpcs", [])
 
-    return Chain(chain, config["chain_id"], config["native_token"], config["tokens"], config["scan"], config["rpcs"])
+    return Chain(
+        chain,
+        config["chain_id"],
+        config["native_token"],
+        config["tokens"],
+        config["scan"],
+        config["rpcs"],
+        private_rpcs,
+    )
 
 
-def build_web3(chain):
-    return Web3(Web3.HTTPProvider(chain.random_rpc()))
+def build_web3(chain, private_rpc=False):
+    return Web3(Web3.HTTPProvider(chain.random_rpc(private_rpc)))
 
 
 def build_contract(web3, address, abi):

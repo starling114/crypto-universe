@@ -81,10 +81,10 @@ const loadDefaults = async () => {
   })
 
   await loadModuleData(proxy, module.value, 'configs', 'js', (data) => {
-    if (!Object.hasOwn(data, 'available_modules')) return
+    if (!Object.hasOwn(data, 'modules')) return
 
-    availableModules.value = data.available_modules ?? availableModules.value
-    availablePremiumModules.value = data.available_premium_modules ?? availablePremiumModules.value
+    availableModules.value = data.modules ?? availableModules.value
+    availablePremiumModules.value = data.premium_modules ?? availablePremiumModules.value
   })
 
   premiumMode.value = proxy.$globalConfigs.premium_mode

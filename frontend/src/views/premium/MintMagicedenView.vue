@@ -3,12 +3,11 @@
 
   <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
     placeholder="Enter wallet addresses each on the new line..." />
-  <div class="mt-2 grid gap-2 grid-cols-6">
+  <div class="mt-2 grid gap-2 grid-cols-1 md:grid-cols-3 sm:grid-cols-2">
     <cu-select name="chain" v-model="chain" :options="availableChains" label="Network" />
     <cu-input name="launchSymbol" v-model="launchSymbol" label="Launch Symbol" placeholder="Enter launch symbol..." />
     <cu-input name="stage" v-model="stage" label="Stage" placeholder="Enter stage number..." />
     <cu-input name="quantity" v-model="quantity" label="Quantity" placeholder="Enter quantity..." />
-    <cu-input name="maxFee" v-model="maxFee" label="Max Fee" placeholder="Enter max fee..." />
     <cu-input name="mintTime" v-model="mintTime" label="Mint Time"
       tooltip="Time of mint in format `HH:MM:SS` (e.g. 12:00:00)" placeholder="Enter mint time..." />
   </div>
@@ -43,7 +42,6 @@ const chain = ref(null)
 const stage = ref('')
 const quantity = ref('')
 const launchSymbol = ref('')
-const maxFee = ref(0.2)
 const mintTime = ref('10:00:00')
 
 const logs = ref([])
@@ -70,7 +68,6 @@ const loadDefaults = async () => {
     chain.value = data.chain ?? chain.value
     stage.value = data.stage ?? stage.value
     quantity.value = data.quantity ?? quantity.value
-    maxFee.value = data.max_fee ?? maxFee.value
     launchSymbol.value = data.launch_symbol ?? launchSymbol.value
     mintTime.value = data.mint_time ?? mintTime.value
   }, logs)
@@ -85,7 +82,6 @@ const handleExecute = async () => {
     chain: chain.value,
     stage: stage.value,
     quantity: quantity.value,
-    max_fee: maxFee.value,
     launch_symbol: launchSymbol.value,
     mint_time: mintTime.value
   }, logs)

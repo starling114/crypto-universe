@@ -1,4 +1,3 @@
-import random
 from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
 
 
@@ -13,8 +12,7 @@ def transaction_data(web3, from_address, to_address=None, data=None, value=None,
 
     if include_fees:
         fees = gas_fees(web3)
-        tx_data["maxFeePerGas"] = fees["maxFeePerGas"]
-        tx_data["maxPriorityFeePerGas"] = fees["maxPriorityFeePerGas"]
+        tx_data = {**tx_data, **fees}
 
     if to_address is not None:
         tx_data["to"] = web3.to_checksum_address(to_address)
@@ -46,16 +44,26 @@ def gas_fees(web3):
     return {
         "maxPriorityFeePerGas": max_priority_fee_per_gas,
         "maxFeePerGas": int(max_fee_per_gas * multiplier),
+        "type": 2,
     }
 
 
-def manual_gas_fees(web3, tx_gas, max_tx_cost):
+def calculate_gas_fees(web3, tx_gas, max_tx_cost):
     max_fee_per_gas = int(max_tx_cost / tx_gas)
     max_priority_fee_per_gas = web3.eth.max_priority_fee * 100
 
     return {
         "maxPriorityFeePerGas": max_priority_fee_per_gas,
         "maxFeePerGas": max_fee_per_gas,
+        "type": 2,
+    }
+
+
+def manual_gas_fees(max_fee_per_gas, max_priority_fee_per_gas):
+    return {
+        "maxPriorityFeePerGas": max_priority_fee_per_gas,
+        "maxFeePerGas": max_fee_per_gas,
+        "type": 2,
     }
 
 

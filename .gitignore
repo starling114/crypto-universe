@@ -2,6 +2,7 @@
 **/secrets*.json
 **/tmp
 !**/.keep
+private_configs.json
 
 
 .DS_Store
