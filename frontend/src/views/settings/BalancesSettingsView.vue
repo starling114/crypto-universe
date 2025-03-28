@@ -1,8 +1,12 @@
 <template>
   <cu-title title="Balances Settings" />
 
-  <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
-    placeholder="Enter addresses each on the new line..." />
+  <div class="mt-2" :class="{ 'grid grid-cols-2 gap-2': namingStrategyType('labels') }">
+    <cu-textarea v-if="namingStrategyType('labels')" name="labels" v-model="labels" label="Labels"
+      placeholder="Enter labels each on the new line..." />
+    <cu-textarea name="addresses" v-model="addresses" label="Wallet Addresses"
+      placeholder="Enter addresses each on the new line..." />
+  </div>
 
   <cu-input name="minBalanceHighlight" v-model="minBalanceHighlight" label="Highlight balance threshold"
     tooltip="Highlight balance with red color if it is lower than this value." />
@@ -42,6 +46,7 @@ import {
 } from '@/components/cu'
 
 const addresses = ref('')
+const labels = ref('')
 const minBalanceHighlight = ref('')
 const availableNamingStrategies = ref([])
 const namingStrategy = ref('')
@@ -62,6 +67,7 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'addresses')) return
 
     addresses.value = data.addresses.join('\n')
+    labels.value = data.labels ? data.labels.join('\n') : labels.value
     minBalanceHighlight.value = data.min_balance_highlight
     namingStrategy.value = data.naming_strategy
     totalRow.value = data.total_row ?? totalRow.value
@@ -82,6 +88,7 @@ const loadDefaults = async () => {
 const handleSave = async () => {
   updateModuleData(proxy, module.value, 'instructions', 'js', {
     addresses: addresses.value.split('\n').filter(Boolean),
+    labels: labels.value.split('\n').filter(Boolean),
     min_balance_highlight: minBalanceHighlight.value.toString(),
     naming_strategy: namingStrategy.value,
     total_row: totalRow.value,
@@ -90,6 +97,10 @@ const handleSave = async () => {
       return acc
     }, {})
   }, logs)
+}
+
+const namingStrategyType = (strategy) => {
+  return namingStrategy.value == strategy
 }
 
 onMounted(async () => {

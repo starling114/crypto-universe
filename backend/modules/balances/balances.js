@@ -78,6 +78,9 @@ async function fetchWallets(network) {
         let batchIndex = (index % 5) + 1;
         formattedIndex = letter + batchIndex
         break
+      case 'labels':
+        formattedIndex = instructions.labels[index]
+        break
     }
 
     return {

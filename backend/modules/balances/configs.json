@@ -18,6 +18,7 @@
   ],
   "naming_strategies": [
     "indexes",
-    "alphabet_batches"
+    "alphabet_batches",
+    "labels"
   ]
 }
