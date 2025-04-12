@@ -1,7 +1,7 @@
 from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
 
 
-def transaction_data(web3, from_address, to_address=None, data=None, value=None, include_fees=True):
+def transaction_data(web3, from_address, to_address=None, data=None, value=None):
     from_address = web3.to_checksum_address(from_address)
 
     tx_data = {
@@ -9,10 +9,6 @@ def transaction_data(web3, from_address, to_address=None, data=None, value=None,
         "nonce": web3.eth.get_transaction_count(from_address),
         "from": from_address,
     }
-
-    if include_fees:
-        fees = gas_fees(web3)
-        tx_data = {**tx_data, **fees}
 
     if to_address is not None:
         tx_data["to"] = web3.to_checksum_address(to_address)
@@ -30,7 +26,35 @@ def transactions_count(web3, wallet_address):
     return int(web3.eth.get_transaction_count(web3.to_checksum_address(wallet_address)))
 
 
-def gas_fees(web3):
+def estimate_gas_price(web3):
+    price = web3.eth.gas_price
+
+    multiplier = 1.2
+    if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
+        multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["bsc"]["chain_id"]:
+        multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
+        multiplier = 1.1
+
+    return int(price * multiplier)
+
+
+def estimate_gas(web3, tx_data):
+    gas = web3.eth.estimate_gas(tx_data)
+
+    multiplier = 1.2
+    if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
+        multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["bsc"]["chain_id"]:
+        multiplier = 1.5
+    elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
+        multiplier = 1.1
+
+    return int(gas * multiplier)
+
+
+def estimate_gas_fees(web3):
     base_fee = web3.eth.gas_price
     max_priority_fee_per_gas = web3.eth.max_priority_fee
     max_fee_per_gas = base_fee + max_priority_fee_per_gas
@@ -48,17 +72,6 @@ def gas_fees(web3):
     }
 
 
-def calculate_gas_fees(web3, tx_gas, max_tx_cost):
-    max_fee_per_gas = int(max_tx_cost / tx_gas)
-    max_priority_fee_per_gas = web3.eth.max_priority_fee * 100
-
-    return {
-        "maxPriorityFeePerGas": max_priority_fee_per_gas,
-        "maxFeePerGas": max_fee_per_gas,
-        "type": 2,
-    }
-
-
 def manual_gas_fees(max_fee_per_gas, max_priority_fee_per_gas):
     return {
         "maxPriorityFeePerGas": max_priority_fee_per_gas,
@@ -67,16 +80,8 @@ def manual_gas_fees(max_fee_per_gas, max_priority_fee_per_gas):
     }
 
 
-def estimate_gas(web3, tx_data):
-    gas = web3.eth.estimate_gas(tx_data)
-
-    multiplier = 1.2
-    if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
-        multiplier = 1.5
-    elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
-        multiplier = 1.1
-
-    return int(gas * multiplier)
+def estimate_fee(web3, tx_data):
+    return estimate_gas(web3, tx_data) * estimate_gas_price(web3)
 
 
 def token_allowance(token, spender_address, wallet_address):
@@ -87,20 +92,23 @@ def approve_token(web3, token, amount, spender_address, wallet_address, private_
     if token.is_native():
         return True
 
-    allowance = token_allowance(token, spender_address, wallet_address)
+    allowance = token_allowance(token, spender_address, web3.to_checksum_address(wallet_address))
 
     if allowance >= amount:
         return True
 
     data = token.contract.encodeABI("approve", args=(spender_address, amount))
-    tx_data = transaction_data(web3, from_address=wallet_address, to_address=token.address, data=data)
+    tx_data = transaction_data(
+        web3, from_address=web3.to_checksum_address(wallet_address), to_address=token.address, data=data
+    )
     tx_hash = send_transaction(web3, tx_data, private_key)
 
     return verify_transaction(web3, tx_hash)
 
 
-def send_transaction(web3, tx_data, private_key):
-    if tx_data.get("gas", None) is None:
+def send_transaction(web3, tx_data, private_key, include_fees=True, fees_v2=False):
+    if include_fees:
+        tx_data.update(estimate_gas_fees(web3) if fees_v2 else {"gasPrice": estimate_gas_price(web3)})
         tx_data["gas"] = estimate_gas(web3, tx_data)
 
     signed_tx = web3.eth.account.sign_transaction(tx_data, private_key)

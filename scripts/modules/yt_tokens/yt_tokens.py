@@ -8,6 +8,8 @@ from core.helpers import (
     transaction_data,
     send_transaction,
     verify_transaction,
+    estimate_gas,
+    estimate_gas_price,
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
@@ -89,6 +91,9 @@ class YtTokens:
                 data=remote_tx_data["data"],
                 value=int(remote_tx_data["value"]),
             )
+            tx_data["gasPrice"] = estimate_gas_price(self.web3)
+            tx_data["gas"] = estimate_gas(self.web3, tx_data)
+
             if self.web3.eth.chain_id == 1 and tx_data["gasPrice"] > Web3.to_wei(self.max_ethereum_gas_price, "gwei"):
                 logger.error(
                     f"{self.address} | {self.token.symbol} | {prettify_number(wei_to_int(calculated_amount, self.token.decimals))} | Gas price exceeds limit of {self.max_ethereum_gas_price} Gwei"

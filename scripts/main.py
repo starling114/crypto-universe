@@ -6,6 +6,7 @@ from modules.bridge.jumper.bridge_jumper import BridgeJumper
 from modules.bridge.relay.bridge_relay import BridgeRelay
 from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
 from modules.swap.jumper.swap_jumper import SwapJumper
+from modules.swap.pancakeswap.swap_pancakeswap import SwapPancakeswap
 from modules.transfer.transfer import Transfer
 from modules.yt_tokens.yt_tokens import YtTokens
 from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
@@ -22,6 +23,7 @@ MODULES = {
     "bridge-relay": BridgeRelay,
     "bridge-hyperlane": BridgeHyperlane,
     "swap-jumper": SwapJumper,
+    "swap-pancakeswap": SwapPancakeswap,
     "transfer": Transfer,
     "yt_tokens": YtTokens,
     "testnet-mitosis": TestnetMitosis,

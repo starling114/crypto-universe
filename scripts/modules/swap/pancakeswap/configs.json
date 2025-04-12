@@ -1,0 +1,11 @@
+{
+  "chains": {
+    "bsc": {
+      "tokens": [
+        "WBNB",
+        "CAKE",
+        "USDT"
+      ]
+    }
+  }
+}

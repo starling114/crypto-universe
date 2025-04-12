@@ -1,4 +1,5 @@
 from web3 import Web3
+from web3.middleware import geth_poa_middleware
 
 from core.models.token import Token
 from core.models.chain import Chain
@@ -35,7 +36,10 @@ def build_chain(chain):
 
 
 def build_web3(chain, private_rpc=False):
-    return Web3(Web3.HTTPProvider(chain.random_rpc(private_rpc)))
+    if chain.chain_id == CONFIGS["chains"]["bsc"]["chain_id"]:
+        return Web3(Web3.HTTPProvider(chain.random_rpc(private_rpc)), middlewares=[geth_poa_middleware])
+    else:
+        return Web3(Web3.HTTPProvider(chain.random_rpc(private_rpc)))
 
 
 def build_contract(web3, address, abi):

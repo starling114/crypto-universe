@@ -8,7 +8,7 @@ from core.helpers import (
     approve_token,
     send_transaction,
     verify_transaction,
-    estimate_gas,
+    estimate_fee,
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
@@ -82,7 +82,7 @@ class SwapJumper:
         tx_data = transaction_data(
             self.web3, from_address=self.address, to_address=data["to"], data=data["data"], value=value
         )
-        gas_fee = estimate_gas(self.web3, tx_data) * tx_data["gasPrice"]
+        gas_fee = estimate_fee(self.web3, tx_data)
         jumper_fee = value - simulate_amount
         return gas_fee + jumper_fee
 

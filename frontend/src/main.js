@@ -23,6 +23,8 @@ import BridgeHyperlaneView from '@/views/BridgeHyperlaneView.vue'
 import BridgeHyperlaneSettingsView from '@/views/settings/BridgeHyperlaneSettingsView.vue'
 import SwapJumperView from '@/views/SwapJumperView.vue'
 import SwapJumperSettingsView from '@/views/settings/SwapJumperSettingsView.vue'
+import SwapPancakeswapView from '@/views/SwapPancakeswapView.vue'
+import SwapPancakeswapSettingsView from '@/views/settings/SwapPancakeswapSettingsView.vue'
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
@@ -147,6 +149,18 @@ const routes = [
     name: 'Swap Jumper Settings',
     component: SwapJumperSettingsView,
     meta: { title: 'CU | Swap Jumper Settings' }
+  },
+  {
+    path: '/swap-pancakeswap',
+    name: 'Swap Pancakeswap',
+    component: SwapPancakeswapView,
+    meta: { title: 'CU | Swap Pancakeswap' }
+  },
+  {
+    path: '/swap-pancakeswap/settings',
+    name: 'Swap Pancakeswap Settings',
+    component: SwapPancakeswapSettingsView,
+    meta: { title: 'CU | Swap Pancakeswap Settings' }
   },
   {
     path: '/transfer',

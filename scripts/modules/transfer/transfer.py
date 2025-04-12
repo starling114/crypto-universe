@@ -7,7 +7,7 @@ from core.helpers import (
     transaction_data,
     send_transaction,
     verify_transaction,
-    estimate_gas,
+    estimate_fee,
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
@@ -43,10 +43,8 @@ class Transfer:
 
     def calculate_fee(self, base_amount):
         tx_data = self.get_transaction_data(base_amount)
-        gas_price = tx_data.pop("gasPrice")
-        gas_estimate = estimate_gas(self.web3, tx_data)
 
-        return int(gas_estimate * gas_price * 1.5)
+        return estimate_fee(self.web3, tx_data)
 
     def calculate_amount(self):
         balance = calculate_token_balance(self.web3, self.source_address, self.token)

@@ -228,7 +228,7 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('swap-jumper')">
+      <cu-sidebar-item v-if="moduleEnabled('swap-jumper') || moduleEnabled('swap-pancakeswap')">
         <template #left>
           <ArrowsRightLeftIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
@@ -250,6 +250,26 @@
           <template #center>Jumper</template>
           <template #right>
             <router-link to="/swap-jumper/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
+            </router-link> </template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item v-if="moduleEnabled('swap-pancakeswap')" tag="router-link" link="/swap-pancakeswap">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(pancakeswap.png)',
+                WebkitMaskImage: 'url(pancakeswap.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Pancakeswap</template>
+          <template #right>
+            <router-link to="/swap-pancakeswap/settings">
               <AdjustmentsHorizontalIcon
                 class="flex-shrink-0 w-6 h-6 text-gray-500 hidden hover:text-gray-900 group-hover:block transition duration-75 dark:text-gray-400 dark:hover:text-white" />
             </router-link> </template>

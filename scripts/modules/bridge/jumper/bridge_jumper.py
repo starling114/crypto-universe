@@ -1,5 +1,5 @@
 from utils import post_call, ExecutionError, sleep
-from core.helpers import transaction_data, approve_token, estimate_gas
+from core.helpers import transaction_data, approve_token, estimate_fee
 from modules.bridge.bridge_base import BridgeBase
 from modules.bridge.jumper.helpers import MAX_SLIPPAGE
 
@@ -42,7 +42,7 @@ class BridgeJumper(BridgeBase):
         tx_data = transaction_data(
             self.web3, from_address=self.address, to_address=remote_data["to"], data=remote_data["data"], value=value
         )
-        gas_fee = estimate_gas(self.web3, tx_data) * tx_data["gasPrice"]
+        gas_fee = estimate_fee(self.web3, tx_data)
         jumper_fee = value - base_amount
         return gas_fee + jumper_fee
 
