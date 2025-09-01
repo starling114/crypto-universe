@@ -14,7 +14,8 @@
     "avalanche",
     "fantom",
     "zora",
-    "mode"
+    "mode",
+    "mantle"
   ],
   "naming_strategies": [
     "indexes",

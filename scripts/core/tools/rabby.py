@@ -1,20 +1,32 @@
+import os
+
 from utils import logger, sleep, ExecutionError
 from selenium.common import NoSuchWindowException
 
 
 class Rabby:
+    IDENTIFIER = "acmacodkjbdgmoleebolmdjonilkdbch"
+    UNLOCK_PATH = "unlock"
     URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html"
     UNLOCK_URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html#/unlock"
 
     def __init__(self, ads, password):
         self.ads = ads
         self.password = password
+        self.identifier = os.getenv("RABY_IDENTIFIER", self.IDENTIFIER)
+        self.unlock_path = os.getenv("RABY_UNLOCK_PATH", self.UNLOCK_PATH)
+
+    def url(self):
+        return f"chrome-extension://{self.identifier}/index.html"
+
+    def unlock_url(self):
+        return f"chrome-extension://{self.identifier}/index.html#/{self.unlock_path}"
 
     def open(self):
-        self.ads.open_url(Rabby.URL)
+        self.ads.open_url(self.url())
 
     def authenticate(self) -> None:
-        self.ads.open_url(Rabby.UNLOCK_URL)
+        self.ads.open_url(self.unlock_url())
 
         if not self.ads.find_element('//button[span[text()="Unlock"]]', 2):
             logger.info(f"Profile: {self.ads.profile} | Rabby | Already authenticated")
@@ -110,7 +122,7 @@ class Rabby:
         return connected
 
     def import_new(self, label, address, password, private_key):
-        self.ads.open_url(Rabby.URL)
+        self.ads.open_url(self.url())
         sleep(1, 2)
 
         self.ads.click_element('//button[span[text()="Next"]]', 1)
@@ -129,10 +141,10 @@ class Rabby:
 
         import_address = self.ads.find_element('//div[@class="address-viewer-text subtitle"]').text
 
-        if import_address != address:
+        if import_address.lower() != address.lower():
             raise ExecutionError("Address is not matching the one uner private key.")
 
-        self.ads.open_url(Rabby.URL)
+        self.ads.open_url(self.url())
         self.ads.click_element('//button[@class="ant-modal-close"]', 2)
         self.ads.click_element('//div[@class="current-address"]', 1)
         self.ads.click_element('//div[@class="rabby-address-item-title"]', 1)

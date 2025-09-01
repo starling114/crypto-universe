@@ -29,6 +29,11 @@
       "tokens": [
         "BERA"
       ]
+    },
+    "bsc": {
+      "tokens": [
+        "BNB"
+      ]
     }
   }
 }

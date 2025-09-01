@@ -69,7 +69,7 @@ class Transfer:
         else:
             tx_pre_data = transaction_data(self.web3, from_address=self.source_address)
             tx_data = self.token.contract.functions.transfer(
-                self.web3.to_checksum_address(self.source_address),
+                self.web3.to_checksum_address(self.destinaion_address),
                 amount,
             ).build_transaction(tx_pre_data)
 
@@ -88,7 +88,7 @@ class Transfer:
                 )
                 return True
 
-            tx_hash = send_transaction(self.web3, tx_data, private_key)
+            tx_hash = send_transaction(self.web3, tx_data, private_key, fees_v2=True)
 
             logger.info(f"{get_transaction_link(self.chain, tx_hash)}")
 

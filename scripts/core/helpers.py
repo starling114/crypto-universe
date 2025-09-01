@@ -49,7 +49,7 @@ def estimate_gas(web3, tx_data):
     elif web3.eth.chain_id == CONFIGS["chains"]["bsc"]["chain_id"]:
         multiplier = 1.5
     elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
-        multiplier = 1.1
+        multiplier = 1.2
 
     return int(gas * multiplier)
 
@@ -63,7 +63,7 @@ def estimate_gas_fees(web3):
     if web3.eth.chain_id == CONFIGS["chains"]["berachain"]["chain_id"]:
         multiplier = 1.5
     elif web3.eth.chain_id == CONFIGS["chains"]["ethereum"]["chain_id"]:
-        multiplier = 1.1
+        multiplier = 1.2
 
     return {
         "maxPriorityFeePerGas": max_priority_fee_per_gas,

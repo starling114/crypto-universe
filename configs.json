@@ -6,11 +6,8 @@
       "scan": "https://etherscan.io",
       "rpcs": [
         "https://eth.llamarpc.com",
-        "https://eth-mainnet.public.blastapi.io",
-        "https://ethereum-rpc.publicnode.com",
-        "https://ethereum.blockpi.network/v1/rpc/public",
-        "https://rpc.ankr.com/eth",
-        "https://eth.meowrpc.com"
+        "https://rpc.payload.de",
+        "https://ethereum-rpc.publicnode.com"
       ],
       "tokens": {
         "ETH": "",
@@ -39,7 +36,6 @@
       "native_token": "ETH",
       "scan": "https://arbiscan.io",
       "rpcs": [
-        "https://arbitrum.llamarpc.com",
         "https://1rpc.io/arb"
       ],
       "tokens": {

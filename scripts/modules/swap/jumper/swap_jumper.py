@@ -117,7 +117,7 @@ class SwapJumper:
             approve_token(self.web3, self.from_token, calculated_amount, remote_data["to"], self.address, private_key)
 
             tx_data = transaction_data(self.web3, self.address, remote_data["to"], remote_data["data"], remote_value)
-            tx_hash = send_transaction(self.web3, tx_data, private_key)
+            tx_hash = send_transaction(self.web3, tx_data, private_key, fees_v2=True)
 
             logger.info(f"{get_transaction_link(self.chain, tx_hash)}")
 
