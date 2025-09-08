@@ -1,14 +1,12 @@
 import os
 
-from utils import logger, sleep, ExecutionError
 from selenium.common import NoSuchWindowException
+from utils import ExecutionError, logger, sleep
 
 
 class Rabby:
     IDENTIFIER = "acmacodkjbdgmoleebolmdjonilkdbch"
     UNLOCK_PATH = "unlock"
-    URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html"
-    UNLOCK_URL = "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/index.html#/unlock"
 
     def __init__(self, ads, password):
         self.ads = ads
@@ -26,20 +24,22 @@ class Rabby:
         self.ads.open_url(self.url())
 
     def authenticate(self) -> None:
-        self.ads.open_url(self.unlock_url())
+        self.ads.open_url(self.url())
 
-        if not self.ads.find_element('//button[span[text()="Unlock"]]', 2):
-            logger.info(f"Profile: {self.ads.profile} | Rabby | Already authenticated")
+        if not self.ads.find_element('//div[text()="Add an Address"]', 2):
+            logger.info(f"Profile: {self.ads.label} | Rabby | Already authenticated")
             return
+
+        self.ads.open_url(self.unlock_url())
 
         self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
         self.ads.click_element('//button[span[text()="Unlock"]]')
         if not self.ads.find_element('//div[@class="gasprice"]', 15):
             raise ExecutionError("Rabby auth failed")
-        logger.success(f"Profile: {self.ads.profile} | Rabby | Authenticated")
+        logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
 
     def sign(self):
-        logger.debug(f"Profile: {self.ads.profile} | Rabby | Signing transaction")
+        logger.debug(f"Profile: {self.ads.label} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()
         signed = False
         sleep(2.5, 3.5)
@@ -49,7 +49,7 @@ class Rabby:
             if target_tab:
                 sleep(2, 3)
                 if not self.ads.click_element('//button[span[text()="Sign and Create"] and not(@disabled)]', 10):
-                    logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to sign")
+                    logger.warning(f"Profile: {self.ads.label} | Rabby | Failed to sign")
                     break
                 sleep(0.5, 1)
                 self.ads.click_element('//button[text()="Confirm"]')
@@ -58,7 +58,7 @@ class Rabby:
                     if not self.ads.until_present('//span[text()="Transaction created"]', 25):
                         if self.ads.find_element('//span[text()="Fail to create"]'):
                             self.ads.click_element('//button[span[text()="Cancel"]]')
-                            logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to create")
+                            logger.warning(f"Profile: {self.ads.label} | Rabby | Failed to create")
                             break
                 except NoSuchWindowException:
                     pass
@@ -71,14 +71,14 @@ class Rabby:
         return signed
 
     def fast_sign(self):
-        logger.debug(f"Profile: {self.ads.profile} | Rabby | Fast Signing transaction")
+        logger.debug(f"Profile: {self.ads.label} | Rabby | Fast Signing transaction")
         current_tab = self.ads.current_tab()
         signed = False
 
         for _ in range(25000):
             target_tab = self.ads.find_tab("notification.html", keep_focused=True)
             if target_tab:
-                logger.info(f"Profile: {self.ads.profile} | Rabby | Trying to sign")
+                logger.info(f"Profile: {self.ads.label} | Rabby | Trying to sign")
                 self.ads.hover_element('//span[text()="Normal"] | //span[text()="Fast"] | //span[text()="Instant"]', 25)
                 self.ads.click_element('//div[text()="Instant"]', 25)
                 if self.ads.find_element('//button[span[text()="Sign and Create"]]', 25).get_attribute("disabled"):
@@ -91,7 +91,7 @@ class Rabby:
                     self.ads.until_present('//span[text()="Transaction created"]', 25)
                 except NoSuchWindowException:
                     pass
-                logger.success(f"Profile: {self.ads.profile} | Rabby | Transaction signed")
+                logger.success(f"Profile: {self.ads.label} | Rabby | Transaction signed")
                 signed = True
                 break
             self.ads.switch_tab(current_tab)
@@ -100,7 +100,7 @@ class Rabby:
         return signed
 
     def connect(self):
-        logger.debug(f"Profile: {self.ads.profile} | Rabby | Connecting")
+        logger.debug(f"Profile: {self.ads.label} | Rabby | Connecting")
         current_tab = self.ads.current_tab()
         connected = False
         sleep(3, 5)
@@ -110,7 +110,7 @@ class Rabby:
             if target_tab:
                 sleep(2, 3)
                 if not self.ads.click_element('//button[span[text()="Connect"]]', 10):
-                    logger.warning(f"Profile: {self.ads.profile} | Rabby | Failed to sign")
+                    logger.warning(f"Profile: {self.ads.label} | Rabby | Failed to sign")
                     break
                 sleep(0.5, 1)
                 connected = True

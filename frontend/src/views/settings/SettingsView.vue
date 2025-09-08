@@ -26,7 +26,7 @@
     </div>
   </cu-collapsible-section>
 
-  <cu-collapsible-section v-if="debugMode" name="premium" title="Premium">
+  <cu-collapsible-section name="premium" title="Premium">
     <cu-label label="License Key"></cu-label>
     <div>
       <input type="text" id="licenseKey" v-model="lisenceKey" placeholder="Enter license..."
@@ -58,7 +58,6 @@ const privateKeys = ref('')
 const availablePremiumModules = ref([])
 const premiumModules = ref([])
 const premiumMode = ref(false)
-const debugMode = ref(false)
 const lisenceKey = ref('')
 const lisenceKeyValidationError = ref(false)
 
@@ -90,7 +89,6 @@ const loadDefaults = async () => {
   })
 
   premiumMode.value = proxy.$globalConfigs.premium_mode
-  debugMode.value = proxy.$globalConfigs.debug_mode
 }
 
 const handleSave = async () => {

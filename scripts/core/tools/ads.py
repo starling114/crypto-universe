@@ -1,17 +1,17 @@
-import requests
-import random
 import os
+import random
 
+import requests
+from core.tools.metamask import Metamask
+from core.tools.rabby import Rabby
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.common import NoSuchElementException
-
-from utils import sleep, logger, debug_mode, ExecutionError
-from core.tools.rabby import Rabby
-from core.tools.metamask import Metamask
+from selenium.webdriver.common.keys import Keys
+from utils import ExecutionError, debug_mode, logger, sleep
 
 
 class Ads:
@@ -21,15 +21,17 @@ class Ads:
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
     SYSTEM_TABS = ["Rabby Offscreen Page", "DevTools"]
 
-    def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY):
+    def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY, label=None):
         self.profile = profile
+        self.label = label or profile
         self.driver = self._start_profile()
         self.actions = ActionChains(self.driver)
+        self.wallet: Rabby | Metamask = None
         self._prepare_browser()
         self._prepare_wallet(wallet, wallet_password)
 
-    def open_url(self, url, xpath=None, timeout=30, track_mouse=False):
-        logger.debug(f"Profile: {self.profile} | Openning url: {url}")
+    def open_url(self, url, xpath=None, timeout=30, track_mouse=False, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Openning url: {url}")
         if url.startswith("chrome-extension"):
             self.driver.get(url)
 
@@ -41,9 +43,14 @@ class Ads:
         if track_mouse:
             self._track_mouse_position()
 
-    def click_element(self, xpath, timeout=5, random_place=False):
-        logger.debug(f"Profile: {self.profile} | Clicking element: {xpath}")
+        if sleep_time:
+            sleep(sleep_time)
+
+    def click_element(self, xpath, timeout=5, random_place=False, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Clicking element: {xpath}")
         web_element = self.find_element(xpath, timeout)
+
+        result = False
         if web_element:
 
             if random_place:
@@ -57,12 +64,15 @@ class Ads:
             else:
                 web_element.click()
 
-            return True
-        else:
-            return False
+            result = True
+
+        if sleep_time:
+            sleep(sleep_time)
+
+        return result
 
     def hover_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile} | Hovering element: {xpath}")
+        logger.debug(f"Profile: {self.label} | Hovering element: {xpath}")
         web_element = self.find_element(xpath, timeout)
         if web_element:
             self.actions.move_to_element(web_element).perform()
@@ -70,29 +80,45 @@ class Ads:
         else:
             return False
 
-    def input_text(self, xpath, text, timeout=5, delay=0.1):
-        logger.debug(f"Profile: {self.profile} | Inputting text: {xpath} -> {text}")
+    def input_text(self, xpath, text, timeout=5, delay=0.1, single=False, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
-        if web_element:
-            web_element.clear()
-            for letter in str(text):
-                web_element.send_keys(letter)
-                sleep(delay)
-            return True
-        else:
-            return False
 
-    def find_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile} | Finding element: {xpath}")
+        result = False
+        if web_element:
+            if single:
+                for _ in range(len(web_element.get_attribute("value"))):
+                    web_element.send_keys(Keys.BACKSPACE)
+                    sleep(delay)
+                web_element.send_keys(text)
+            else:
+                web_element.clear()
+                for letter in str(text):
+                    web_element.send_keys(letter)
+                    sleep(delay)
+            result = True
+
+        if sleep_time:
+            sleep(sleep_time)
+
+        return result
+
+    def find_element(self, xpath, timeout=5, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Finding element: {xpath}")
+        result = None
         for _ in range(timeout):
             try:
-                return self.driver.find_element(By.XPATH, xpath)
+                result = self.driver.find_element(By.XPATH, xpath)
             except NoSuchElementException:
                 sleep(0.5, 1)
-        return None
+
+        if sleep_time:
+            sleep(sleep_time)
+
+        return result
 
     def while_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile} | While present: {xpath}")
+        logger.debug(f"Profile: {self.label} | While present: {xpath}")
         for _ in range(timeout):
             try:
                 self.driver.find_element(By.XPATH, xpath)
@@ -103,7 +129,7 @@ class Ads:
         return False
 
     def until_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.profile} | Until present: {xpath}")
+        logger.debug(f"Profile: {self.label} | Until present: {xpath}")
         for _ in range(timeout):
             element = self.find_element(xpath, timeout)
 
@@ -113,7 +139,7 @@ class Ads:
         return False
 
     def scroll(self, direction, pixels=None, xpath=None):
-        logger.debug(f"Profile: {self.profile} | Scrolling: {direction}")
+        logger.debug(f"Profile: {self.label} | Scrolling: {direction}")
         if xpath is not None:
             element = self.find_element(xpath)
             if element is not None:
@@ -187,7 +213,7 @@ class Ads:
         #   sleep(1)
 
     def close_browser(self):
-        logger.debug(f"Profile: {self.profile} | Closing browser")
+        logger.debug(f"Profile: {self.label} | Closing browser")
         for _ in range(3):
             sleep(5)
             data = self._check_browser()
@@ -195,7 +221,7 @@ class Ads:
                 parameters = {"serial_number": self.profile}
                 requests.get(f"{Ads.URL}/stop", params=parameters)
             else:
-                logger.success(f"Profile: {self.profile} | Closed")
+                logger.success(f"Profile: {self.label} | Closed")
                 break
 
     def send_key(self, key):
@@ -204,32 +230,32 @@ class Ads:
     def screenshot(self, folder):
         if not os.path.exists(folder):
             os.makedirs(folder)
-        self.driver.save_screenshot(f"{folder}/{self.profile}.png")
+        self.driver.save_screenshot(f"{folder}/{self.label}.png")
 
     def current_tab(self):
         return self.driver.current_window_handle
 
     def switch_tab(self, tab):
-        logger.debug(f"Profile: {self.profile} | Switching tab: {tab}")
+        logger.debug(f"Profile: {self.label} | Switching tab: {tab}")
         self.driver.switch_to.window(tab)
 
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
-        logger.debug(f"Profile: {self.profile} | Finding tab: {part_of_name}, {part_of_url}")
+        logger.debug(f"Profile: {self.label} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
         tabs = self.driver.window_handles
         for tab in reversed(tabs):
             self.switch_tab(tab)
             if self.driver.title not in self.SYSTEM_TABS:
-                logger.debug(f"Profile: {self.profile} | Switched to `{self.driver.title}` tab, checking...")
+                logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab, checking...")
                 if part_of_url is not None:
-                    logger.debug(f"Profile: {self.profile} | Checking part of url: {self.driver.current_url}")
+                    logger.debug(f"Profile: {self.label} | Checking part of url: {self.driver.current_url}")
                     if part_of_url in self.driver.current_url:
                         target_tab = self.current_tab()
                         if not keep_focused:
                             self.switch_tab(current_tab)
                         return target_tab
                 if part_of_name is not None:
-                    logger.debug(f"Profile: {self.profile} | Checking part of name: {self.driver.title}")
+                    logger.debug(f"Profile: {self.label} | Checking part of name: {self.driver.title}")
                     if part_of_name in self.driver.title:
                         target_tab = self.current_tab()
                         if not keep_focused:
@@ -241,19 +267,19 @@ class Ads:
         return self.driver.execute_script("return {x: window.mouseX, y: window.mouseY};")
 
     def execute_script(self, script, element=None):
-        logger.debug(f"Profile: {self.profile} | Executing script")
+        logger.debug(f"Profile: {self.label} | Executing script")
         if element is not None:
             return self.driver.execute_script(script, element)
         else:
             return self.driver.execute_script(script)
 
     def _start_profile(self):
-        logger.debug(f"Profile: {self.profile} | Starting profile")
+        logger.debug(f"Profile: {self.label} | Starting profile")
         profile_data = self._check_browser()
         if profile_data["data"]["status"] != "Active":
             profile_data = self._open_browser()
 
-        logger.success(f"Profile: {self.profile} | Started")
+        logger.success(f"Profile: {self.label} | Started")
 
         chrome_driver = profile_data["data"]["webdriver"]
         selenium_port = profile_data["data"]["ws"]["selenium"]
@@ -269,7 +295,7 @@ class Ads:
 
     def _check_browser(self):
         try:
-            logger.debug(f"Profile: {self.profile} | Checking browser")
+            logger.debug(f"Profile: {self.label} | Checking browser")
             parameters = {"serial_number": self.profile}
             response = requests.get(f"{Ads.URL}/active", params=parameters)
             response.raise_for_status()
@@ -288,19 +314,19 @@ class Ads:
         return response.json()
 
     def _prepare_browser(self):
-        logger.debug(f"Profile: {self.profile} | Preparing browser")
+        logger.debug(f"Profile: {self.label} | Preparing browser")
         sleep(3, 4)
         tabs = self._filter_tabs()
 
         if len(tabs) > 1:
             for tab in tabs[1:]:
                 self.switch_tab(tab)
-                logger.debug(f"Profile: {self.profile} | Closing `{self.driver.title}` tab")
+                logger.debug(f"Profile: {self.label} | Closing `{self.driver.title}` tab")
                 self.driver.close()
 
         self.switch_tab(tabs[0])
-        if not debug_mode():
-            self.driver.maximize_window()
+        # if not debug_mode():
+        #     self.driver.maximize_window()
 
     def _prepare_wallet(self, wallet_name, wallet_password):
         wallet = self.WALLETS.get(wallet_name)
@@ -325,7 +351,7 @@ class Ads:
         final_tabs = []
         for tab in start_tabs:
             self.switch_tab(tab)
-            logger.debug(f"Profile: {self.profile} | Switched to `{self.driver.title}` tab")
+            logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab")
             if self.driver.title not in self.SYSTEM_TABS:
                 final_tabs.append(tab)
 

@@ -1,19 +1,24 @@
 import sys
-from dotenv import load_dotenv, find_dotenv
 
-from modules.withdraw.okx.withdraw_okx import WithdrawOkx
+from dotenv import find_dotenv, load_dotenv
+from modules.activity.treehouse_prize.treehouse_prize import TreehousePrize
+from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
 from modules.bridge.jumper.bridge_jumper import BridgeJumper
 from modules.bridge.relay.bridge_relay import BridgeRelay
-from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
+from modules.chore.rabby_import.rabby_import import RabbyImport
 from modules.swap.jumper.swap_jumper import SwapJumper
 from modules.swap.pancakeswap.swap_pancakeswap import SwapPancakeswap
-from modules.transfer.transfer import Transfer
-from modules.yt_tokens.yt_tokens import YtTokens
 from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
-from modules.activity.treehouse_prize.treehouse_prize import TreehousePrize
-from modules.chore.rabby_import.rabby_import import RabbyImport
-
-from utils import log_error, logger, import_premium_module, run_module, run_premium_module
+from modules.transfer.transfer import Transfer
+from modules.withdraw.okx.withdraw_okx import WithdrawOkx
+from modules.yt_tokens.yt_tokens import YtTokens
+from utils import (
+    import_premium_module,
+    log_error,
+    logger,
+    run_module,
+    run_premium_module,
+)
 
 load_dotenv(find_dotenv("../.env"))
 
@@ -34,6 +39,7 @@ PREMIUM_MODULES = {
     "premium/sale-fjord": import_premium_module("sale-fjord-sale_fjord", "SaleFjord"),
     "premium/mint-kingdomly": import_premium_module("mint-kingdomly-mint_kingdomly", "MintKingdomly"),
     "premium/mint-magiceden": import_premium_module("mint-magiceden-mint_magiceden", "MintMagiceden"),
+    "premium/farm-lighter": import_premium_module("farm-lighter-farm_lighter", "FarmLighter"),
 }
 
 if __name__ == "__main__":

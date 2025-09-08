@@ -15,6 +15,7 @@
   ],
   "premium_modules": [
     "mint-magiceden",
-    "mint-kingdomly"
+    "mint-kingdomly",
+    "farm-lighter"
   ]
 }

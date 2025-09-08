@@ -83,6 +83,35 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
+      <cu-sidebar-item v-if="premiumModuleEnabled('farm-lighter')" mode="premium">
+        <template #left>
+          <RectangleStackIcon
+            class="flex-shrink-0 w-6 h-6 text-red-700 transition duration-75 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100" />
+        </template>
+        <template #center>Farm</template>
+
+        <cu-sidebar-sub-item mode="premium" tag="router-link" link="/farm-lighter">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-red-700 dark:text-red-300 group-hover:text-red-900 dark:group-hover:text-red-100"
+              :style="{
+                maskImage: 'url(lighter.png)',
+                WebkitMaskImage: 'url(lighter.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Lighter</template>
+          <template #right>
+            <router-link to="/farm-lighter/settings">
+              <AdjustmentsHorizontalIcon
+                class="flex-shrink-0 w-6 h-6 text-red-700 hidden hover:text-red-900 group-hover:block transition duration-75 dark:text-red-400 dark:hover:text-white" />
+            </router-link>
+          </template>
+        </cu-sidebar-sub-item>
+      </cu-sidebar-item>
+
       <cu-sidebar-item v-if="moduleEnabled('balances')" tag="router-link" link="/balances">
         <template #left>
           <BanknotesIcon

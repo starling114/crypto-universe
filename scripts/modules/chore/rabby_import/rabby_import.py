@@ -1,9 +1,8 @@
 from multiprocessing import Pool
-from utils import load_json, sleep, log_error
-from utils import logger
 
-from core.tools.ads import Ads
 from core.helpers import zip_to_objects
+from core.tools.ads import Ads
+from utils import load_json, log_error, logger, sleep
 
 
 class RabbyImport:
@@ -17,11 +16,11 @@ class RabbyImport:
 
     def execute(self):
         try:
-            logger.info(f"Profile: {self.ads.profile} | Rabby Import | Starting")
+            logger.info(f"Profile: {self.ads.label} | Rabby Import | Starting")
 
             self.ads.wallet.import_new(self.label, self.address, self.password, self.private_key)
 
-            logger.success(f"Profile: {self.ads.profile} | Rabby Import | Imported Successfully")
+            logger.success(f"Profile: {self.ads.label} | Rabby Import | Imported Successfully")
             self.ads.close_browser()
             return True
         except Exception as e:

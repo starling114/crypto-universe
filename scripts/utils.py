@@ -1,11 +1,14 @@
-import os
-import json
-import sys
 import importlib
-import requests
+import json
+import os
 import random
-import traceback
+import re
+import sys
 import time
+import traceback
+from decimal import Decimal
+
+import requests
 from loguru import logger
 
 NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -121,3 +124,26 @@ def run_premium_module(aaarg, modules):
         module.run(instructions, secrets)
     else:
         logger.error(f"Invalid premium module choice: {aaarg}")
+
+
+def random_decimal(a: Decimal, b: Decimal) -> Decimal:
+    lower = min(a, b)
+    upper = max(a, b)
+    scale = upper - lower
+    return lower + Decimal(str(random.random())) * scale
+
+
+def format_time_seconds(seconds: float) -> str:
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def parse_number_text(text):
+    formatted_text = text.replace("$", "").replace(",", "").strip()
+    match = re.search(r"(-?\$?[\d,.]+)", formatted_text)
+    if match:
+        return Decimal(match.group(1))
+    else:
+        return None
