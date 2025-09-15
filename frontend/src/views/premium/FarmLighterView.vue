@@ -51,6 +51,17 @@
         label="Exotic Currencies (%)" placeholder="Exotic Currencies (%)"
         tooltip="Allowed perscentage of usage for exotic currencies. In percentage of this value one of exotic currencies will be chosen" />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="logVolumes" v-model="logVolumes" label="Log Volumes"
+        tooltip="Log out volume changes between runs." />
+    </div>
+    <div class="mb-2">
+      <cu-checkbox name="parallelExecution" v-model="parallelExecution" label="Parallel execution"
+        tooltip="Run N profiles in parallel, set how many profiles to run in a batch." />
+    </div>
+    <div v-if="parallelExecution" class="mt-1 grid grid-cols-6 gap-2">
+      <cu-input name="profilesInBatch" size="small" v-model="profilesInBatch" placeholder="Profiles in batch" />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -72,6 +83,7 @@ import {
   CuInput,
   CuCollapsibleSection,
   CuButton,
+  CuCheckbox,
   CuLogs
 } from '@/components/cu'
 import VueMultiselect from 'vue-multiselect'
@@ -90,6 +102,10 @@ const maxOpenDelayMinutes = ref(3)
 const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
 const exoticCurrenciesPercent = ref(10)
+
+const logVolumes = ref(false)
+const parallelExecution = ref(false)
+const profilesInBatch = ref(5)
 
 const logs = ref([])
 const moduleRunning = ref(false)
@@ -110,17 +126,20 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'profiles')) return
 
     profiles.value = availableProfiles.value.filter(item => data.profiles.includes(item.serial_number))
-    minLeverage.value = data.min_leverage
-    maxLeverage.value = data.max_leverage
-    minPositionUsd.value = data.min_position_usd
-    maxPositionUsd.value = data.max_position_usd
-    minHoldingMinutes.value = data.min_holding_minutes
-    maxHoldingMinutes.value = data.max_holding_minutes
-    minOpenDelayMinutes.value = data.min_open_delay_minutes
-    maxOpenDelayMinutes.value = data.max_open_delay_minutes
-    sizeMismatchPercent.value = data.size_mismatch_percent
-    liquidationThresholdPercent.value = data.liquidation_threshold_percent
-    exoticCurrenciesPercent.value = data.exotic_currencies_percent
+    minLeverage.value = data.min_leverage ?? minLeverage.value
+    maxLeverage.value = data.max_leverage ?? maxLeverage.value
+    minPositionUsd.value = data.min_position_usd ?? minPositionUsd.value
+    maxPositionUsd.value = data.max_position_usd ?? maxPositionUsd.value
+    minHoldingMinutes.value = data.min_holding_minutes ?? minHoldingMinutes.value
+    maxHoldingMinutes.value = data.max_holding_minutes ?? maxHoldingMinutes.value
+    minOpenDelayMinutes.value = data.min_open_delay_minutes ?? minOpenDelayMinutes.value
+    maxOpenDelayMinutes.value = data.max_open_delay_minutes ?? maxOpenDelayMinutes.value
+    sizeMismatchPercent.value = data.size_mismatch_percent ?? sizeMismatchPercent.value
+    liquidationThresholdPercent.value = data.liquidation_threshold_percent ?? liquidationThresholdPercent.value
+    exoticCurrenciesPercent.value = data.exotic_currencies_percent ?? exoticCurrenciesPercent.value
+    parallelExecution.value = data.parallel_execution ?? parallelExecution.value
+    profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
+    logVolumes.value = data.log_volumes ?? logVolumes.value
   }, logs)
 }
 
@@ -140,7 +159,10 @@ const handleExecute = async () => {
     max_open_delay_minutes: parseFloat(maxOpenDelayMinutes.value),
     size_mismatch_percent: parseFloat(sizeMismatchPercent.value),
     liquidation_threshold_percent: parseFloat(liquidationThresholdPercent.value),
-    exotic_currencies_percent: parseFloat(exoticCurrenciesPercent.value)
+    exotic_currencies_percent: parseFloat(exoticCurrenciesPercent.value),
+    parallel_execution: parallelExecution.value,
+    profiles_in_batch: parseInt(profilesInBatch.value),
+    log_volumes: logVolumes.value,
   }, logs)
 
   await startModule(proxy, module.value, logs)

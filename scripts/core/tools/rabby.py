@@ -26,7 +26,7 @@ class Rabby:
     def authenticate(self) -> None:
         self.ads.open_url(self.url())
 
-        if not self.ads.find_element('//div[text()="Add an Address"]', 2):
+        if self.ads.find_element('//div[text()="Swap"]', 2):
             logger.info(f"Profile: {self.ads.label} | Rabby | Already authenticated")
             return
 
