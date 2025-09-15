@@ -8,6 +8,7 @@ from modules.bridge.relay.bridge_relay import BridgeRelay
 from modules.chore.rabby_import.rabby_import import RabbyImport
 from modules.swap.jumper.swap_jumper import SwapJumper
 from modules.swap.pancakeswap.swap_pancakeswap import SwapPancakeswap
+from modules.testing.ads_execution.ads_execution import AdsExecution
 from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
 from modules.transfer.transfer import Transfer
 from modules.withdraw.okx.withdraw_okx import WithdrawOkx
@@ -34,6 +35,7 @@ MODULES = {
     "testnet-mitosis": TestnetMitosis,
     "activity-treehouse_prize": TreehousePrize,
     "chore-rabby_import": RabbyImport,
+    "testing-ads_execution": AdsExecution,
 }
 PREMIUM_MODULES = {
     "premium/sale-fjord": import_premium_module("sale-fjord-sale_fjord", "SaleFjord"),

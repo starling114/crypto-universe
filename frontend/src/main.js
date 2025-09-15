@@ -34,6 +34,7 @@ import ActivityTreehousePrizeView from '@/views/ActivityTreehousePrizeView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 import FarmLighterView from '@/views/premium/FarmLighterView.vue'
 import FarmLighterSettingsView from '@/views/settings/premium/FarmLighterSettingsView.vue'
+import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
 
 const app = createApp(App)
 
@@ -217,6 +218,12 @@ const routes = [
     name: 'Chore Rabby Import',
     component: ChoreRabbyImportView,
     meta: { title: 'CU | Chore - Rabby Import' }
+  },
+  {
+    path: '/testing-ads_execution',
+    name: 'Testing ADS Execution',
+    component: TestingAdsExecutionView,
+    meta: { title: 'CU | Testing - ADS Execution' }
   }
 ]
 
