@@ -374,7 +374,7 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('chore-rabby_import')">
+      <cu-sidebar-item v-if="moduleEnabled('testing-ads_execution')">
         <template #left>
           <BeakerIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
