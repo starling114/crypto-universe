@@ -62,6 +62,16 @@
     <div v-if="parallelExecution" class="mt-1 grid grid-cols-6 gap-2">
       <cu-input name="profilesInBatch" size="small" v-model="profilesInBatch" placeholder="Profiles in batch" />
     </div>
+    <div class="mt-1 grid grid-cols-6 gap-2">
+      <cu-input name="walletConnectionClicks" size="small" v-model="walletConnectionClicks"
+        label="Wallet Connection Clicks"
+        tooltip="If instead of connecting rabby wallet script connects somethings else or raby is not connecting in wallets popup, adjust this value." />
+    </div>
+    <div class="mt-1 grid grid-cols-6 gap-2">
+      <cu-input name="orderVerificationMinutes" size="small" v-model="orderVerificationMinutes"
+        label="Order verification time in minutes" placeholder="Order verification time in minutes"
+        tooltip="0.25 is 15 seconds. Not recommended to change! If you internetnet connection is bad this can be increased, but higher losses per trade due to the spread difference are expected because of longer waiting time." />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -102,6 +112,8 @@ const maxOpenDelayMinutes = ref(3)
 const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
 const exoticCurrenciesPercent = ref(10)
+const walletConnectionClicks = ref(39)
+const orderVerificationMinutes = ref(0.25)
 
 const logVolumes = ref(false)
 const parallelExecution = ref(false)
@@ -140,6 +152,8 @@ const loadDefaults = async () => {
     parallelExecution.value = data.parallel_execution ?? parallelExecution.value
     profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
+    walletConnectionClicks.value = data.wallet_connection_clicks ?? walletConnectionClicks.value
+    orderVerificationMinutes.value = data.order_verification_minutes ?? orderVerificationMinutes.value
   }, logs)
 }
 
@@ -163,6 +177,8 @@ const handleExecute = async () => {
     parallel_execution: parallelExecution.value,
     profiles_in_batch: parseInt(profilesInBatch.value),
     log_volumes: logVolumes.value,
+    wallet_connection_clicks: walletConnectionClicks.value,
+    order_verification_minutes: orderVerificationMinutes.value,
   }, logs)
 
   await startModule(proxy, module.value, logs)

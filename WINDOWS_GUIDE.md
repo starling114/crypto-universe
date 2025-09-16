@@ -62,17 +62,9 @@ Windows firewall: If Windows asks to allow access, click “Allow access”.
 From the project root (`...\crypto-universe`):
 ```bash
 git pull
-npm install
 ```
-Python requirements rarely change, but if they do:
+Then start the app:
 ```bash
-cd scripts
-myenv\Scripts\activate
-pip install -r requirements.txt
-```
-Then restart the app:
-```bash
-cd ..
 npm start
 ```
 
