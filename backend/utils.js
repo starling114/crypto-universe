@@ -90,11 +90,11 @@ export async function checkVersion() {
 
   const upToDate = compareVersions(localVersion, latestVersion)
 
-  if (!upToDate) {
-    console.log('\x1b[31m', 'Crypto Universe is out of date, please update it running `git pull`')
-    console.log('\x1b[31m', `Latest available version: ${latestVersion}, Local version: ${localVersion}`)
-    console.log('\x1b[0m')
-  }
+  // if (!upToDate) {
+  //   console.log('\x1b[31m', 'Crypto Universe is out of date, please update it running `git pull`')
+  //   console.log('\x1b[31m', `Latest available version: ${latestVersion}, Local version: ${localVersion}`)
+  //   console.log('\x1b[0m')
+  // }
 
   return upToDate
 }
