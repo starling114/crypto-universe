@@ -15,7 +15,7 @@ from utils import ExecutionError, debug_mode, logger, sleep
 
 
 class Ads:
-    URL = "http://local.adspower.net:50325/api/v1/browser"
+    URL = f"{os.getenv('ADSPOWER_URL', 'http://local.adspower.net:50325/api/v1')}/browser"
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
@@ -131,7 +131,7 @@ class Ads:
     def until_present(self, xpath, timeout=5):
         logger.debug(f"Profile: {self.label} | Until present: {xpath}")
         for _ in range(timeout):
-            element = self.find_element(xpath, timeout)
+            element = self.find_element(xpath, timeout=1)
 
             if element is not None:
                 return True
@@ -281,6 +281,8 @@ class Ads:
 
         logger.success(f"Profile: {self.label} | Started")
 
+        # TODO: Use network host for docker
+        # mount chromedrivers from host machine
         chrome_driver = profile_data["data"]["webdriver"]
         selenium_port = profile_data["data"]["ws"]["selenium"]
 

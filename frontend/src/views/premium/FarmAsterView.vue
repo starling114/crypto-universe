@@ -1,13 +1,10 @@
 <template>
-  <cu-title title="Farm - Lighter" />
+  <cu-title title="Farm - Aster" />
 
   <div class="mb-2">
     <cu-label name="profiles" label="Profiles" tooltip="Choose profiles to run automation." />
     <VueMultiselect name="profiles" placeholder="Select profiles..." v-model="profiles" :options="availableProfiles"
       :multiple="true" :close-on-select="false" label="name" track-by="serial_number" />
-    <cu-label name="assetsToTrade" label="Assets to trade" tooltip="Choose assets to trade." />
-    <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
-      :options="availableAssets" :multiple="true" :close-on-select="false" label="name" track-by="name" />
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
@@ -39,41 +36,15 @@
       <cu-input name="minOpenDelayMinutes" size="small" v-model="minOpenDelayMinutes" label="Min" placeholder="Min" />
       <cu-input name="maxOpenDelayMinutes" size="small" v-model="maxOpenDelayMinutes" label="Max" placeholder="Max" />
     </div>
-    <div class=" mt-1 grid grid-cols-3 gap-2">
+    <div class="mt-1 grid grid-cols-3 gap-2">
       <cu-input name="sizeMismatchPercent" size="small" v-model="sizeMismatchPercent" label="Size mismatch (%)"
         placeholder="Size mismatch (%)"
-        tooltip="Due to the min size in USd for each asset order position size of all hedges might be slightly different. This percentage defines maximum allowed value. For example if hedge position is 1000 and 'Size mismatch' value is set to 0.5 it means that if difference between main and hedge position is different >0.5% positions will be closed." />
+        tooltip="Due to the market orders position size of all hedges might be slightly different. This percentage defines maximum allowed value. For example if hedge position is 1000 and 'Size mismatch' value is set to 0.5 it means that if difference between main and hedge position is different >0.5% positions will be closed." />
     </div>
     <div class="mt-1 grid grid-cols-3 gap-2">
       <cu-input name="liquidationThresholdPercent" size="small" v-model="liquidationThresholdPercent"
         label="Liquidation threshold (%)" placeholder="Liquidation threshold (%)"
         tooltip="Allowed perscentage of price till liquidation. For example if market price and liquidation price defference is less than 'Liquidation threshold' value, positions will be closed." />
-    </div>
-    <div class="mb-2">
-      <cu-checkbox name="limitOrder" v-model="limitOrder" label="Limit order"
-        tooltip="Enable to create main position via limit order." />
-    </div>
-    <div v-if="limitOrder">
-      <cu-label name="verifyOrderTime" label="Verify limit order time in minutes"
-        tooltip="After placing limit order position verification time will be a random value between these Min and Max in minutes. After this time if position is not filled, order will be cancelled and new one will be openned." />
-      <div class="mt-1 grid grid-cols-6 gap-2">
-        <cu-input name="minVerifyOrderMinutes" size="small" v-model="minVerifyOrderMinutes" label="Min"
-          placeholder="Min holding time in minutes" />
-        <cu-input name="maxVerifyOrderMinutes" size="small" v-model="maxVerifyOrderMinutes" label="Max"
-          placeholder="Max holding time in minutes" />
-      </div>
-    </div>
-    <div class="mb-2">
-      <cu-checkbox name="setMarketOrderSlippage" v-model="setMarketOrderSlippage"
-        label="Set custom market order slippage" tooltip="Enable to set custom market order slippage." />
-    </div>
-    <div v-if="setMarketOrderSlippage" class="mt-1 grid grid-cols-3 gap-2">
-      <cu-input name="marketOrderSlippage" size="small" v-model="marketOrderSlippage" label="Market order slippage (%)"
-        placeholder="Market order slippage (%)" tooltip="Slippage for market orders." />
-    </div>
-    <div class="mb-2">
-      <cu-checkbox name="setLeverage" v-model="setLeverage" label="Set Leverage on each run"
-        tooltip="Set leverage to randomly generated on each run." />
     </div>
     <div class="mb-2">
       <cu-checkbox name="logVolumes" v-model="logVolumes" label="Log Volumes"
@@ -123,28 +94,8 @@ const minHoldingMinutes = ref(13)
 const maxHoldingMinutes = ref(25)
 const minOpenDelayMinutes = ref(1)
 const maxOpenDelayMinutes = ref(3)
-const limitOrder = ref(false)
-const minVerifyOrderMinutes = ref(1)
-const maxVerifyOrderMinutes = ref(1.5)
-const setMarketOrderSlippage = ref(false)
-const marketOrderSlippage = ref(0.05)
 const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
-const setLeverage = ref(false)
-const assetsToTrade = ref([])
-const availableAssets = ref([
-  { name: 'ETH' },
-  { name: 'BTC' },
-  { name: 'SOL' },
-  { name: 'BNB' },
-  { name: 'HYPE' },
-  { name: 'PUMP' },
-  { name: 'ENA' },
-  { name: 'FARTCOIN' },
-  { name: 'LINK' },
-  { name: 'XRP' },
-  { name: 'MNT' }
-])
 
 const logVolumes = ref(false)
 const parallelExecution = ref(false)
@@ -153,7 +104,7 @@ const profilesInBatch = ref(5)
 const logs = ref([])
 const moduleRunning = ref(false)
 
-const module = ref('premium/farm-lighter')
+const module = ref('premium/farm-aster')
 
 const { proxy } = getCurrentInstance()
 
@@ -168,7 +119,7 @@ const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
     if (!Object.hasOwn(data, 'profiles')) return
 
-    profiles.value = availableProfiles.value.filter(item => (data.profiles ?? []).includes(item.serial_number))
+    profiles.value = availableProfiles.value.filter(item => data.profiles.includes(item.serial_number))
     minLeverage.value = data.min_leverage ?? minLeverage.value
     maxLeverage.value = data.max_leverage ?? maxLeverage.value
     minPositionUsd.value = data.min_position_usd ?? minPositionUsd.value
@@ -177,18 +128,11 @@ const loadDefaults = async () => {
     maxHoldingMinutes.value = data.max_holding_minutes ?? maxHoldingMinutes.value
     minOpenDelayMinutes.value = data.min_open_delay_minutes ?? minOpenDelayMinutes.value
     maxOpenDelayMinutes.value = data.max_open_delay_minutes ?? maxOpenDelayMinutes.value
-    limitOrder.value = data.limit_order ?? limitOrder.value
-    minVerifyOrderMinutes.value = data.min_verify_order_minutes ?? minVerifyOrderMinutes.value
-    maxVerifyOrderMinutes.value = data.max_verify_order_minutes ?? maxVerifyOrderMinutes.value
-    setMarketOrderSlippage.value = data.set_market_order_slippage ?? setMarketOrderSlippage.value
-    marketOrderSlippage.value = data.market_order_slippage ?? marketOrderSlippage.value
     sizeMismatchPercent.value = data.size_mismatch_percent ?? sizeMismatchPercent.value
     liquidationThresholdPercent.value = data.liquidation_threshold_percent ?? liquidationThresholdPercent.value
     parallelExecution.value = data.parallel_execution ?? parallelExecution.value
     profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
-    setLeverage.value = data.set_leverage ?? setLeverage.value
-    assetsToTrade.value = availableAssets.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
   }, logs)
 }
 
@@ -206,18 +150,11 @@ const handleExecute = async () => {
     max_holding_minutes: parseFloat(maxHoldingMinutes.value),
     min_open_delay_minutes: parseFloat(minOpenDelayMinutes.value),
     max_open_delay_minutes: parseFloat(maxOpenDelayMinutes.value),
-    limit_order: limitOrder.value,
-    min_verify_order_minutes: parseFloat(minVerifyOrderMinutes.value),
-    max_verify_order_minutes: parseFloat(maxVerifyOrderMinutes.value),
-    set_market_order_slippage: setMarketOrderSlippage.value,
-    market_order_slippage: parseFloat(marketOrderSlippage.value),
     size_mismatch_percent: parseFloat(sizeMismatchPercent.value),
     liquidation_threshold_percent: parseFloat(liquidationThresholdPercent.value),
     parallel_execution: parallelExecution.value,
-    profiles_in_batch: profilesInBatch.value,
+    profiles_in_batch: parseInt(profilesInBatch.value),
     log_volumes: logVolumes.value,
-    set_leverage: setLeverage.value,
-    assets_to_trade: assetsToTrade.value.map(asset => asset.name)
   }, logs)
 
   await startModule(proxy, module.value, logs)

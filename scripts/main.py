@@ -42,6 +42,7 @@ PREMIUM_MODULES = {
     "premium/mint-kingdomly": import_premium_module("mint-kingdomly-mint_kingdomly", "MintKingdomly"),
     "premium/mint-magiceden": import_premium_module("mint-magiceden-mint_magiceden", "MintMagiceden"),
     "premium/farm-lighter": import_premium_module("farm-lighter-farm_lighter", "FarmLighter"),
+    "premium/farm-aster": import_premium_module("farm-aster-farm_aster", "FarmAster"),
 }
 
 if __name__ == "__main__":

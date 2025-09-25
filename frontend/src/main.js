@@ -34,6 +34,8 @@ import ActivityTreehousePrizeView from '@/views/ActivityTreehousePrizeView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 import FarmLighterView from '@/views/premium/FarmLighterView.vue'
 import FarmLighterSettingsView from '@/views/settings/premium/FarmLighterSettingsView.vue'
+import FarmAsterView from '@/views/premium/FarmAsterView.vue'
+import FarmAsterSettingsView from '@/views/settings/premium/FarmAsterSettingsView.vue'
 import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
 
 const app = createApp(App)
@@ -86,6 +88,18 @@ const routes = [
     name: 'Farm Lighter Settings',
     component: FarmLighterSettingsView,
     meta: { title: 'CU | Farm Lighter Settings' }
+  },
+  {
+    path: '/farm-aster',
+    name: 'Farm Aster',
+    component: FarmAsterView,
+    meta: { title: 'CU | Farm Aster' }
+  },
+  {
+    path: '/farm-aster/settings',
+    name: 'Farm Aster Settings',
+    component: FarmAsterSettingsView,
+    meta: { title: 'CU | Farm Aster Settings' }
   },
   {
     path: '/settings',
