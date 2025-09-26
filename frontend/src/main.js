@@ -27,10 +27,8 @@ import SwapPancakeswapView from '@/views/SwapPancakeswapView.vue'
 import SwapPancakeswapSettingsView from '@/views/settings/SwapPancakeswapSettingsView.vue'
 import TransferView from '@/views/TransferView.vue'
 import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
-import TestnetMitosisView from '@/views/TestnetMitosisView.vue'
 import YtTokensView from '@/views/YtTokensView.vue'
 import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
-import ActivityTreehousePrizeView from '@/views/ActivityTreehousePrizeView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 import FarmLighterView from '@/views/premium/FarmLighterView.vue'
 import FarmLighterSettingsView from '@/views/settings/premium/FarmLighterSettingsView.vue'
@@ -41,7 +39,6 @@ import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
 const app = createApp(App)
 
 app.config.globalProperties.$axios = axios.create({
-  // baseURL: 'http://' + window.location.host,
   baseURL: 'http://localhost:3000',
 })
 loadConfigs(app.config.globalProperties, (data) => { app.config.globalProperties.$globalConfigs = data })
@@ -214,18 +211,6 @@ const routes = [
     name: 'YT Tokens Settings',
     component: YtTokensSettingsView,
     meta: { title: 'CU | YT Tokens Settings' }
-  },
-  {
-    path: '/testnet-mitosis',
-    name: 'Testnet Mitosis',
-    component: TestnetMitosisView,
-    meta: { title: 'CU | Testnet - Mitosis' }
-  },
-  {
-    path: '/activity-treehouse_prize',
-    name: 'Activity Treehouse Prize',
-    component: ActivityTreehousePrizeView,
-    meta: { title: 'CU | Activity - Treehouse Prize' }
   },
   {
     path: '/chore-rabby_import',

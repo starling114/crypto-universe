@@ -1,7 +1,6 @@
 import sys
 
 from dotenv import find_dotenv, load_dotenv
-from modules.activity.treehouse_prize.treehouse_prize import TreehousePrize
 from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
 from modules.bridge.jumper.bridge_jumper import BridgeJumper
 from modules.bridge.relay.bridge_relay import BridgeRelay
@@ -9,7 +8,6 @@ from modules.chore.rabby_import.rabby_import import RabbyImport
 from modules.swap.jumper.swap_jumper import SwapJumper
 from modules.swap.pancakeswap.swap_pancakeswap import SwapPancakeswap
 from modules.testing.ads_execution.ads_execution import AdsExecution
-from modules.testnet.mitosis.testnet_mitosis import TestnetMitosis
 from modules.transfer.transfer import Transfer
 from modules.withdraw.okx.withdraw_okx import WithdrawOkx
 from modules.yt_tokens.yt_tokens import YtTokens
@@ -32,13 +30,10 @@ MODULES = {
     "swap-pancakeswap": SwapPancakeswap,
     "transfer": Transfer,
     "yt_tokens": YtTokens,
-    "testnet-mitosis": TestnetMitosis,
-    "activity-treehouse_prize": TreehousePrize,
     "chore-rabby_import": RabbyImport,
     "testing-ads_execution": AdsExecution,
 }
 PREMIUM_MODULES = {
-    "premium/sale-fjord": import_premium_module("sale-fjord-sale_fjord", "SaleFjord"),
     "premium/mint-kingdomly": import_premium_module("mint-kingdomly-mint_kingdomly", "MintKingdomly"),
     "premium/mint-magiceden": import_premium_module("mint-magiceden-mint_magiceden", "MintMagiceden"),
     "premium/farm-lighter": import_premium_module("farm-lighter-farm_lighter", "FarmLighter"),
