@@ -8,7 +8,7 @@ from utils import load_json, log_error, logger, sleep
 class RabbyImport:
     def __init__(self, profile, label, address, password, private_key):
         self.profile = profile
-        self.ads = Ads(profile)
+        self.ads: Ads = Ads(profile)
         self.label = label
         self.address = address
         self.password = password

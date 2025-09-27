@@ -1,3 +1,4 @@
+import asyncio
 import importlib
 import json
 import os
@@ -22,7 +23,7 @@ logger.remove()
 logger.level("INFO", color="<bold><cyan>")
 logger.level("WARNING", color="<bold><yellow>")
 logger.level("DEBUG", color="<bold><blue>")
-level = "DEBUG" if debug_mode() and False else "INFO"
+level = "DEBUG" if debug_mode() else "INFO"
 format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
 logger.add(sys.stdout, colorize=True, format=format, level=level)
 
@@ -92,6 +93,13 @@ def sleep(delay, max_delay=None):
         delay = random.uniform(delay, max_delay)
 
     time.sleep(delay)
+
+
+async def async_sleep(delay, max_delay=None):
+    if max_delay is not None:
+        delay = random.uniform(delay, max_delay)
+
+    await asyncio.sleep(delay)
 
 
 def import_premium_module(file, name):

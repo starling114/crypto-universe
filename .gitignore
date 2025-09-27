@@ -1,8 +1,9 @@
 **/instructions.json
-**/secrets*.json
+**/secrets.json
 **/tmp
 !**/.keep
 private_configs.json
+/data
 
 
 .DS_Store
