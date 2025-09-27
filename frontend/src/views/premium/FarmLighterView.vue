@@ -80,6 +80,10 @@
         tooltip="Log out volume changes between runs." />
     </div>
     <div class="mb-2">
+      <cu-checkbox name="getLatestStats" v-model="getLatestStats" label="Only get latest balance and volume stats"
+        tooltip="Only get latest balance and volume stats, don't run trading logic." />
+    </div>
+    <div class="mb-2">
       <cu-checkbox name="parallelExecution" v-model="parallelExecution" label="Parallel execution"
         tooltip="Run N profiles in parallel, set how many profiles to run in a batch." />
     </div>
@@ -149,6 +153,7 @@ const availableAssets = ref([
 const logVolumes = ref(false)
 const parallelExecution = ref(false)
 const profilesInBatch = ref(5)
+const getLatestStats = ref(false)
 
 const logs = ref([])
 const moduleRunning = ref(false)
@@ -157,7 +162,7 @@ const module = ref('premium/farm-lighter')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.push(log)
+const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
@@ -189,6 +194,7 @@ const loadDefaults = async () => {
     logVolumes.value = data.log_volumes ?? logVolumes.value
     setLeverage.value = data.set_leverage ?? setLeverage.value
     assetsToTrade.value = availableAssets.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
+    getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
   }, logs)
 }
 
@@ -217,7 +223,8 @@ const handleExecute = async () => {
     profiles_in_batch: profilesInBatch.value,
     log_volumes: logVolumes.value,
     set_leverage: setLeverage.value,
-    assets_to_trade: assetsToTrade.value.map(asset => asset.name)
+    assets_to_trade: assetsToTrade.value.map(asset => asset.name),
+    get_latest_stats: getLatestStats.value
   }, logs)
 
   await startModule(proxy, module.value, logs)
@@ -225,7 +232,6 @@ const handleExecute = async () => {
 
 const handleStop = async () => {
   await stopModule(proxy, module.value)
-  moduleRunning.value = false
 }
 
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)

@@ -1,3 +1,4 @@
+import asyncio
 import os
 import signal
 import sys
@@ -32,20 +33,21 @@ class AdsExecution:
         else:
             return ""
 
-    def stop(self):
+    async def stop(self):
         logger.info(f"{self.log_prefix()}Stopping trading strategy")
-        self.is_running = False
+        await self.ads.close_browser()
 
-    def start(self):
+    async def start(self):
+        await self.ads.start()
         logger.info(f"{self.log_prefix()}Starting trading strategy")
-        self.ads.wallet.authenticate()
-        sleep(2)
+        await self.ads.wallet.authenticate()
         logger.info("Openning lighter...")
-        self.ads.open_url("https://app.lighter.xyz/trade/ETH", sleep_time=2)
-        if self.ads.until_present('//button[contains(text(), "Positions")]', 30):
-            logger.success(f"{self.log_prefix()} Test successfully passed")
-        else:
+        await self.ads.open_url("https://app.lighter.xyz/trade/ETH", sleep_time=2)
+        if not await self.ads.until_present('//button[contains(text(), "Positions")]', 30):
             logger.error(f"{self.log_prefix()} Test passed unsuccessfully")
+        else:
+            logger.success(f"{self.log_prefix()} Test passed successfully")
+        await self.ads.close_browser()
 
     @classmethod
     def run_batch(cls, profile, labels, passwords, process=None):
@@ -56,9 +58,9 @@ class AdsExecution:
         try:
             instance = cls(profile=profile, label=labels[profile], password=passwords[profile], process=process)
 
-            instance.start()
+            asyncio.run(instance.start())
         except (KeyboardInterrupt, SystemExit):
-            instance.stop()
+            asyncio.run(instance.stop())
             raise
 
     @classmethod

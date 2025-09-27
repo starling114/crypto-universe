@@ -1,21 +1,24 @@
+import asyncio
 import os
 import random
+from time import sleep
 
-import requests
+import aiohttp
+import playwright._impl._errors as playwright_errors
 from core.tools.metamask import Metamask
 from core.tools.rabby import Rabby
-from selenium import webdriver
-from selenium.common import NoSuchElementException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from utils import ExecutionError, debug_mode, logger, sleep
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Page,
+    async_playwright,
+)
+from utils import ExecutionError, async_sleep, debug_mode, logger
 
 
 class Ads:
-    URL = f"{os.getenv('ADSPOWER_URL', 'http://local.adspower.net:50325/api/v1')}/browser"
+    URL = f"http://{os.getenv('HOST_URL', 'local.adspower.net')}:{os.getenv('ADSPOWER_PORT', '50325')}/api/v1/browser"
+
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
@@ -24,337 +27,325 @@ class Ads:
     def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY, label=None):
         self.profile = profile
         self.label = label or profile
-        self.driver = self._start_profile()
-        self.actions = ActionChains(self.driver)
+        self.playwright = None
+        self.browser: Browser = None
+        self.context: BrowserContext = None
+        self.page: Page = None
         self.wallet: Rabby | Metamask = None
-        self._prepare_browser()
         self._prepare_wallet(wallet, wallet_password)
 
-    def open_url(self, url, xpath=None, timeout=30, track_mouse=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Openning url: {url}")
-        if url.startswith("chrome-extension"):
-            self.driver.get(url)
+    async def start(self):
+        await self._start_profile()
 
-        self.driver.get(url)
+    async def close_other_tabs(self):
+        for page in self.context.pages:
+            if page != self.page:
+                await page.close()
 
-        if xpath is not None:
-            self.find_element(xpath, timeout)
+    async def open_url(self, url, timeout=30, sleep_time=None):
+        result = False
 
-        if track_mouse:
-            self._track_mouse_position()
+        awaited = await self.safe_playwright_call(
+            self.page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000),
+            timeout=timeout,
+            name=f"open_url({url})",
+            swallow_timeout=True,
+        )
+        result = True if awaited is not None else False
 
         if sleep_time:
-            sleep(sleep_time)
+            await async_sleep(sleep_time)
 
-    def click_element(self, xpath, timeout=5, random_place=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Clicking element: {xpath}")
-        web_element = self.find_element(xpath, timeout)
+        logger.debug(f"Profile: {self.label} | {result} | Opening URL: {url}")
+        return result
 
+    async def click_element(self, selector, timeout=5, sleep_time=None, source=None):
         result = False
-        if web_element:
 
-            if random_place:
-                middle_width = (web_element.size["width"] // 2) - 5
-                middle_height = (web_element.size["height"] // 2) - 5
+        element = await self.find_element(selector=selector, timeout=timeout, source=source)
+        if element:
+            await element.click()
 
-                random_x = random.randint(-middle_width, middle_width)
-                random_y = random.randint(-middle_height, middle_height)
-
-                self.actions.move_to_element_with_offset(web_element, random_x, random_y).click().perform()
-            else:
-                web_element.click()
+            if sleep_time:
+                await async_sleep(sleep_time)
 
             result = True
 
-        if sleep_time:
-            sleep(sleep_time)
-
+        logger.debug(f"Profile: {self.label} | {result} | Clicking element: {selector}")
         return result
 
-    def hover_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | Hovering element: {xpath}")
-        web_element = self.find_element(xpath, timeout)
-        if web_element:
-            self.actions.move_to_element(web_element).perform()
-            return True
-        else:
-            return False
+    # def hover_element(self, selector, timeout=5000):
+    #     """Hover over element"""
+    #     logger.debug(f"Profile: {self.label} | Hovering element: {selector}")
 
-    def input_text(self, xpath, text, timeout=5, delay=0.1, single=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Inputting text: {xpath} -> {text}")
-        web_element = self.find_element(xpath, timeout)
+    #     try:
+    #         self.page.wait_for_selector(selector, timeout=timeout)
+    #         self.page.hover(selector)
+    #         return True
+    #     except Exception as e:
+    #         logger.error(f"Profile: {self.label} | Failed to hover element: {selector}, Error: {e}")
+    #         return False
 
+    async def input_text(self, selector, text, timeout=5, delay=0.1, sleep_time=None):
         result = False
-        if web_element:
-            if single:
-                for _ in range(len(web_element.get_attribute("value"))):
-                    web_element.send_keys(Keys.BACKSPACE)
-                    sleep(delay)
-                web_element.send_keys(text)
-            else:
-                web_element.clear()
-                for letter in str(text):
-                    web_element.send_keys(letter)
-                    sleep(delay)
+
+        element = await self.find_element(selector=selector, timeout=timeout)
+        if element:
+            await element.fill("")
+            await element.type(str(text), delay=delay)
+
+            if sleep_time:
+                await async_sleep(sleep_time)
+
             result = True
 
-        if sleep_time:
-            sleep(sleep_time)
-
+        logger.debug(f"Profile: {self.label} | {result} | Inputting text: {selector} -> {text}")
         return result
 
-    def find_element(self, xpath, timeout=5, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Finding element: {xpath}")
+    async def find_element(self, selector, timeout=5, sleep_time=None, source=None):
+        source = source or self.page
+        element = await self.safe_playwright_call(
+            source.wait_for_selector(selector, timeout=timeout * 1000),
+            timeout=timeout,
+            name=f"find_element({selector})",
+            swallow_timeout=True,
+        )
+
+        logger.debug(f"Profile: {self.label} | {element is not None} | Locating element: {selector}")
+        return element
+
+    async def element_text(self, selector, timeout=5, sleep_time=None, source=None):
+        element = await self.find_element(selector, timeout=timeout, sleep_time=sleep_time, source=source)
         result = None
-        for _ in range(timeout):
-            try:
-                result = self.driver.find_element(By.XPATH, xpath)
-            except NoSuchElementException:
-                sleep(0.5, 1)
 
-        if sleep_time:
-            sleep(sleep_time)
+        if element:
+            result = await element.inner_text()
+        else:
+            raise ExecutionError(f"Element not found for extracting text: {selector}")
 
+        logger.debug(f"Profile: {self.label} | {result is not None} | Getting element text: {selector} -> {result}")
         return result
 
-    def while_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | While present: {xpath}")
-        for _ in range(timeout):
-            try:
-                self.driver.find_element(By.XPATH, xpath)
-                sleep(0.5, 1)
-            except NoSuchElementException:
-                return True
+    async def while_present(self, selector, timeout=5):
+        result = False
 
-        return False
+        awaited = await self.safe_playwright_call(
+            self.page.wait_for_selector(selector, state="detached", timeout=timeout * 1000),
+            timeout=timeout,
+            name=f"while_present({selector})",
+            swallow_timeout=True,
+        )
+        result = True if awaited is not None else False
 
-    def until_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | Until present: {xpath}")
-        for _ in range(timeout):
-            element = self.find_element(xpath, timeout=1)
+        logger.debug(f"Profile: {self.label} | While present result: {result} | Selector: {selector}")
+        return result
 
-            if element is not None:
-                return True
+    async def until_present(self, selector, timeout=5):
+        result = False
 
-        return False
+        result = await self.find_element(selector=selector, timeout=timeout) is not None
+        logger.debug(f"Profile: {self.label} | {result} | Until present: {selector}")
+        return result
 
-    def scroll(self, direction, pixels=None, xpath=None):
-        logger.debug(f"Profile: {self.label} | Scrolling: {direction}")
-        if xpath is not None:
-            element = self.find_element(xpath)
-            if element is not None:
-                if direction == "top":
-                    self.driver.execute_script("arguments[0].scrollTop = 0;", element)
-                elif direction == "bottom":
-                    self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", element)
-                elif direction == "middle":
-                    self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight / 2;", element)
-                elif pixels is not None:
-                    self.driver.execute_script(f"arguments[0].scrollBy(0, {pixels});", element)
-                else:
-                    raise Exception("Invalid direction or missing pixels argument for scrolling the element.")
-        else:
-            if direction == "top":
-                self.driver.execute_script("window.scrollTo(0, 0);")
-            elif direction == "bottom":
-                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            elif direction == "middle":
-                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
-            elif pixels is not None:
-                self.driver.execute_script(f"window.scrollBy(0, {pixels});")
-            else:
-                Exception("Invalid direction or missing pixels argument for scroll.")
+    # def scroll(self, direction, pixels=None, selector=None):
+    #     """Scroll page or element"""
+    #     logger.debug(f"Profile: {self.label} | Scrolling: {direction}")
 
-        # TODO: Implement move mouse events
-        # def move_mouse(self, element, duration=2, steps=3):
-        #   actions = ActionChains(self.driver)
+    #     if selector is not None:
+    #         element = self.page.locator(selector)
+    #         if direction == "top":
+    #             element.evaluate("el => el.scrollTop = 0")
+    #         elif direction == "bottom":
+    #             element.evaluate("el => el.scrollTop = el.scrollHeight")
+    #         elif direction == "middle":
+    #             element.evaluate("el => el.scrollTop = el.scrollHeight / 2")
+    #         elif pixels is not None:
+    #             element.evaluate(f"el => el.scrollBy(0, {pixels})")
+    #         else:
+    #             raise Exception("Invalid direction or missing pixels argument for scrolling the element.")
+    #     else:
+    #         if direction == "top":
+    #             self.page.evaluate("window.scrollTo(0, 0)")
+    #         elif direction == "bottom":
+    #             self.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    #         elif direction == "middle":
+    #             self.page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+    #         elif pixels is not None:
+    #             self.page.evaluate(f"window.scrollBy(0, {pixels})")
+    #         else:
+    #             raise Exception("Invalid direction or missing pixels argument for scroll.")
 
-        #   location = element.location
-        #   size = element.size
+    async def stop(self):
+        await self.browser.close()
+        await self.context.close()
+        await self.playwright.stop()
 
-        #   start_x = 989
-        #   start_y = 760
-
-        #   # Calculate the center of the element
-        #   end_x = location['x'] + size['width'] // 2
-        #   end_y = location['y'] + size['height'] // 2
-
-        #   delta_x = (end_x - start_x) // steps
-        #   delta_y = (end_y - start_y) // steps
-
-        #   x_position, y_position = start_x, start_y
-        #   logger.info(f"Delta - x: {delta_x}, y: {delta_y}")
-        #   logger.info(f"Start - x: {x_position}, y: {y_position}")
-
-        #   # Ensure the initial position is within bounds
-        #   if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
-        #           0 <= y_position < self.driver.execute_script('return window.innerHeight')):
-        #       logger.error("Start position out of bounds!")
-        #       return
-
-        #   for i in range(steps):
-        #       x_position += delta_x
-        #       y_position += delta_y
-
-        #       logger.info(f"Move - x: {x_position}, y: {y_position}")
-
-        #       if not (0 <= x_position < self.driver.execute_script('return window.innerWidth') and
-        #               0 <= y_position < self.driver.execute_script('return window.innerHeight')):
-        #           logger.error("Move target out of bounds!")
-        #           break
-
-        #       actions.move_by_offset(delta_x, delta_y).perform()
-        #       logger.success("Moved")
-
-        #       sleep(duration / steps)
-
-        #   logger.info(f"End - x: {x_position}, y: {y_position}")
-        #   actions.move_to_element(element).perform()
-        #   sleep(1)
-
-    def close_browser(self):
+    async def close_browser(self):
         logger.debug(f"Profile: {self.label} | Closing browser")
+
+        try:
+            for page in self.context.pages:
+                await page.close()
+            await self.stop()
+        except Exception:
+            pass
+
         for _ in range(3):
-            sleep(5)
-            data = self._check_browser()
+            data = await self._check_browser()
             if data["data"]["status"] == "Active":
                 parameters = {"serial_number": self.profile}
-                requests.get(f"{Ads.URL}/stop", params=parameters)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{Ads.URL}/stop", params=parameters) as response:
+                        response.raise_for_status()
             else:
                 logger.success(f"Profile: {self.label} | Closed")
                 break
 
-    def send_key(self, key):
-        self.actions.send_keys(key).perform()
+    # def send_key(self, key):
+    #     """Send keyboard key"""
+    #     self.page.keyboard.press(key)
 
-    def screenshot(self, folder):
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        self.driver.save_screenshot(f"{folder}/{self.label}.png")
+    # def screenshot(self, folder):
+    #     """Take screenshot"""
+    #     if not os.path.exists(folder):
+    #         os.makedirs(folder)
+    #     self.page.screenshot(path=f"{folder}/{self.label}.png")
 
-    def current_tab(self):
-        return self.driver.current_window_handle
+    # def current_tab(self):
+    #     """Get current page (tab)"""
+    #     return self.page
 
-    def switch_tab(self, tab):
-        logger.debug(f"Profile: {self.label} | Switching tab: {tab}")
-        self.driver.switch_to.window(tab)
+    # def switch_tab(self, page_index=None, page=None):
+    #     """Switch to tab by index or page object"""
+    #     logger.debug(f"Profile: {self.label} | Switching tab")
 
-    def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
-        logger.debug(f"Profile: {self.label} | Finding tab: {part_of_name}, {part_of_url}")
-        current_tab = self.current_tab()
-        tabs = self.driver.window_handles
-        for tab in reversed(tabs):
-            self.switch_tab(tab)
-            if self.driver.title not in self.SYSTEM_TABS:
-                logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab, checking...")
-                if part_of_url is not None:
-                    logger.debug(f"Profile: {self.label} | Checking part of url: {self.driver.current_url}")
-                    if part_of_url in self.driver.current_url:
-                        target_tab = self.current_tab()
-                        if not keep_focused:
-                            self.switch_tab(current_tab)
-                        return target_tab
-                if part_of_name is not None:
-                    logger.debug(f"Profile: {self.label} | Checking part of name: {self.driver.title}")
-                    if part_of_name in self.driver.title:
-                        target_tab = self.current_tab()
-                        if not keep_focused:
-                            self.switch_tab(current_tab)
-                        return target_tab
-        return None
+    #     pages = self.context.pages
+    #     if page is not None:
+    #         self.page = page
+    #     elif page_index is not None and 0 <= page_index < len(pages):
+    #         self.page = pages[page_index]
+    #     else:
+    #         logger.warning(f"Profile: {self.label} | Invalid tab index or page")
 
-    def mouse_position(self):
-        return self.driver.execute_script("return {x: window.mouseX, y: window.mouseY};")
+    # def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
+    #     """Find tab by URL or title"""
+    #     logger.debug(f"Profile: {self.label} | Finding tab: {part_of_name}, {part_of_url}")
 
-    def execute_script(self, script, element=None):
-        logger.debug(f"Profile: {self.label} | Executing script")
-        if element is not None:
-            return self.driver.execute_script(script, element)
-        else:
-            return self.driver.execute_script(script)
+    #     current_page = self.page
+    #     pages = self.context.pages
 
-    def _start_profile(self):
+    #     for page in reversed(pages):
+    #         try:
+    #             title = page.title()
+    #             url = page.url
+
+    #             if title not in self.SYSTEM_TABS:
+    #                 logger.debug(f"Profile: {self.label} | Checking page `{title}`")
+
+    #                 if part_of_url is not None and part_of_url in url:
+    #                     if keep_focused:
+    #                         self.page = page
+    #                     return page
+
+    #                 if part_of_name is not None and part_of_name in title:
+    #                     if keep_focused:
+    #                         self.page = page
+    #                     return page
+    #         except:
+    #             continue
+
+    #     return None
+
+    # def mouse_position(self):
+    #     """Get mouse position"""
+    #     return self.page.evaluate("() => ({x: window.mouseX || 0, y: window.mouseY || 0})")
+
+    async def execute_script(self, script):
+        result = await self.page.evaluate(script)
+        logger.debug(f"Profile: {self.label} | {True} | Executing script")
+        return result
+
+    async def _start_profile(self):
         logger.debug(f"Profile: {self.label} | Starting profile")
-        profile_data = self._check_browser()
+
+        profile_data = await self._check_browser()
         if profile_data["data"]["status"] != "Active":
-            profile_data = self._open_browser()
+            profile_data = await self._open_browser()
 
         logger.success(f"Profile: {self.label} | Started")
 
-        # TODO: Use network host for docker
-        # mount chromedrivers from host machine
-        chrome_driver = profile_data["data"]["webdriver"]
-        selenium_port = profile_data["data"]["ws"]["selenium"]
+        puppeteer_host_port = profile_data["data"]["ws"]["puppeteer"]
+        host, port = puppeteer_host_port.replace("ws://", "").split(":", 1)
+        puppeteer = f"ws://{os.getenv('HOST_URL', host)}:{port}"
 
-        service = Service(executable_path=chrome_driver)
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.connect_over_cdp(puppeteer)
 
-        options = Options()
-        options.add_experimental_option("debuggerAddress", selenium_port)
-        options.add_argument("--disable-blink-features=AutomationControlled")
+        if self.browser.contexts:
+            self.context = self.browser.contexts[0]
+        else:
+            self.context = self.browser.new_context()
+        self.page = await self.context.new_page()
+        await self.close_other_tabs()
 
-        driver = webdriver.Chrome(options=options, service=service)
-        return driver
-
-    def _check_browser(self):
+    async def _check_browser(self):
         try:
             logger.debug(f"Profile: {self.label} | Checking browser")
             parameters = {"serial_number": self.profile}
-            response = requests.get(f"{Ads.URL}/active", params=parameters)
-            response.raise_for_status()
-            json_response = response.json()
-            if json_response["code"] == 0:
-                return response.json()
-            else:
-                raise ExecutionError(json_response)
+            headers = {}
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{Ads.URL}/active", params=parameters, headers=headers) as response:
+                    response.raise_for_status()
+                    json_response = await response.json()
+
+                    if json_response["code"] == 0:
+                        return json_response
+                    else:
+                        raise ExecutionError(json_response)
         except Exception as e:
             raise ExecutionError(f"Connection to AdsPower failed: {e}")
 
-    def _open_browser(self):
-        parameters = {"serial_number": self.profile, "open_tabs": 1}
-        response = requests.get(f"{Ads.URL}/start", params=parameters)
-        response.raise_for_status()
-        return response.json()
+    async def _open_browser(self):
+        try:
+            logger.debug(f"Profile: {self.label} | Opening browser")
+            parameters = {"serial_number": self.profile, "open_tabs": 1}
+            headers = {}
 
-    def _prepare_browser(self):
-        logger.debug(f"Profile: {self.label} | Preparing browser")
-        sleep(3, 4)
-        tabs = self._filter_tabs()
-
-        if len(tabs) > 1:
-            for tab in tabs[1:]:
-                self.switch_tab(tab)
-                logger.debug(f"Profile: {self.label} | Closing `{self.driver.title}` tab")
-                self.driver.close()
-
-        self.switch_tab(tabs[0])
-        # if not debug_mode():
-        #     self.driver.maximize_window()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{Ads.URL}/start", params=parameters, headers=headers) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except Exception as e:
+            raise ExecutionError(f"Connection to AdsPower failed: {e}")
 
     def _prepare_wallet(self, wallet_name, wallet_password):
-        wallet = self.WALLETS.get(wallet_name)
+        wallet_class = self.WALLETS.get(wallet_name)
 
-        if wallet:
-            self.wallet = wallet(self, wallet_password)
+        if wallet_class:
+            self.wallet = wallet_class(self, wallet_password)
         else:
-            raise ExecutionError(f"Invalid wallet: {wallet_name}")
+            logger.warning(f"Profile: {self.label} | Invalid wallet: {wallet_name}")
 
-    def _track_mouse_position(self):
-        self.execute_script(
-            """
-                document.addEventListener('mousemove', function(event) {
-                    window.mouseX = event.clientX;
-                    window.mouseY = event.clientY;
-                });
-            """
-        )
-
-    def _filter_tabs(self):
-        start_tabs = self.driver.window_handles
-        final_tabs = []
-        for tab in start_tabs:
-            self.switch_tab(tab)
-            logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab")
-            if self.driver.title not in self.SYSTEM_TABS:
-                final_tabs.append(tab)
-
-        return final_tabs
+    async def safe_playwright_call(self, coro, timeout=None, name=None, swallow_timeout=True):
+        name = name or repr(coro)
+        try:
+            if timeout is not None:
+                return await asyncio.wait_for(coro, timeout=timeout)
+            else:
+                return await coro
+        except asyncio.TimeoutError:
+            if swallow_timeout:
+                logger.debug(f"Timeout in Playwright call {name}")
+                return None
+            else:
+                raise
+        except playwright_errors.TimeoutError:
+            if swallow_timeout:
+                logger.debug(f"Playwright timeout: {name}")
+                return None
+            else:
+                raise
+        except Exception as e:
+            logger.exception(f"Unexpected Playwright error in {name}: {e}")
+            return None

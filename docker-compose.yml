@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    container_name: crypto-universe-app
+    volumes:
+      - ./data:/data
+    ports:
+      - "3000:3000"

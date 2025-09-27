@@ -1,115 +1,108 @@
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
+# Sensitive files
 **/instructions.json
-**/secrets*.json
-**/tmp
-private_configs.json
+**/secrets.json
+**/private_configs.json
+**/scripts/modules/premium/
+
+# Dependencies
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
 
 # Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+scripts/**/__pycache__/
+scripts/**/*.py[cod]
+scripts/**/$py.class
+scripts/**/*.so
+scripts/**/.Python
+scripts/**/build/
+scripts/**/develop-eggs/
+scripts/**/dist/
+scripts/**/downloads/
+scripts/**/eggs/
+scripts/**/.eggs/
+scripts/**/lib/
+scripts/**/lib64/
+scripts/**/parts/
+scripts/**/sdist/
+scripts/**/var/
+scripts/**/wheels/
+scripts/**/*.egg-info/
+scripts/**/.installed.cfg
+scripts/**/*.egg
+scripts/**/MANIFEST
 
 # Virtual environments
-myenv/
-venv/
-env/
-ENV/
+scripts/**/myenv/
+scripts/**/venv/
+scripts/**/env/
+scripts/**/ENV/
 
 # IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo
+**/*~
 
 # OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+**/.DS_Store
+**/.DS_Store?
+**/.Spotlight-V100
+**/.Trashes
+**/ehthumbs.db
+**/Thumbs.db
 
 # Logs
-logs/
-*.log
+**/logs/
+**/*.log
 
 # Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
+**/pids/
+**/*.pid
+**/*.seed
+**/*.pid.lock
 
 # Coverage directory used by tools like istanbul
-coverage/
+**/coverage/
 
 # nyc test coverage
-.nyc_output
+**/.nyc_output
 
 # Dependency directories
-jspm_packages/
+**/jspm_packages/
 
 # Optional npm cache directory
-.npm
+**/.npm
 
 # Optional REPL history
-.node_repl_history
+**/.node_repl_history
 
 # Output of 'npm pack'
-*.tgz
+**/*.tgz
 
 # Yarn Integrity file
-.yarn-integrity
+**/.yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
-.env.local
-.env.production
-.env.*.local
+**/.env
+**/.env.test
+**/.env.local
+**/.env.production
+**/.env.local
+**/.env.*.local
 
 
 # Temporary files
-tmp/
-temp/
-
-# Build outputs
-frontend/dist/
-frontend/build/
+**/tmp
 
 # Git
-.git/
-.gitignore
-
-scripts/modules/premium/private/
+**/.git/
+**/.gitignore
 
 # Documentation
-README.md
-*.md
+**/*.md
 
 # Demo files
 demo/

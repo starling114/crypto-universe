@@ -109,7 +109,6 @@ async function fetchVersion() {
 }
 
 export function pythonExecutable() {
-  // return os.platform() === 'win32' ? 'python' : 'python3'
   return os.platform() === 'win32' ? 'myenv\\Scripts\\python.exe' : 'myenv/bin/python'
 }
 
@@ -130,7 +129,7 @@ export function moduleDataFilepath(module, type, script_type) {
 }
 
 export async function adsProfiles() {
-  const apiUrl = (process.env.ADSPOWER_URL || 'http://local.adspower.net:50325/api/v1') + '/user/list';
+  const apiUrl = `http://${process.env.HOST_URL || 'local.adspower.net'}:${process.env.ADSPOWER_PORT || '50325'}/api/v1/user/list`;
   const pageSize = 100;
   let allProfiles = [];
   let page = 1;

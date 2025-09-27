@@ -101,7 +101,7 @@ const module = ref('swap-pancakeswap')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.push(log)
+const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {

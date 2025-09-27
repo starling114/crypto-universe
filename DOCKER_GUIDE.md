@@ -11,47 +11,61 @@ This guide shows how to install and run Crypto Universe using Docker.
 4. Launch Docker Desktop and wait for it to start (you'll see the Docker icon in your system tray)
 
 ## Quick Start
+These helper scripts will automatically create a `crypto-universe` folder on your Desktop, go into it, and then download and start the app for you.
 
-### Method 1: Using Helper Script (Easiest)
-1. Download the helper script:
-   - **Windows**: Download `bin/docker-run.bat` and double-click it
-   - **Mac/Linux**: Download `bin/docker-run.sh` and run: `chmod +x docker-run.sh && ./docker-run.sh`
+### Windows
+1. Open the Start Menu, search for `PowerShell`, and open it.
+2. Copy and paste this line, then press `Enter`:
+  ```powershell
+  iwr https://raw.githubusercontent.com/starling114/crypto-universe/migration_to_docker/bin/setup_windows.ps1 | Invoke-Expression
+  ```
 
-### Method 2: Manual Command
-1. Open Command Prompt or PowerShell
-2. Create a directory for your configurations:
-```bash
-mkdir crypto-universe
-cd crypto-universe
-```
-1. Run this command (includes volume mounting for persistence):
-```bash
-docker run -d -p 3000:3000 \
-  -v ./scripts:/app/scripts \
-  -v ./backend:/app/backend \
-  --name crypto-universe \
-  starling114/crypto-universe:latest
-```
-1. Open your browser and go to: http://localhost:3000
+#### Running the app again (after first setup)
+Once you’ve already installed it, you don’t need to run the setup again. Just choose **one of these** methods:
 
-## AdsPower Configuration
+- From folder:
+  Open the `crypto-universe` folder on your Desktop and double-click the file `docker_run.ps1`.  
+  (If Windows asks how to open it, choose `PowerShell`.)
+- PowerShell:
+  Open `crypto-universe` folder and run:
+  ```powershell
+  .\docker_run.ps1
+  ```
+- Docker Desktop application (might not properly get new updates):
+  1. Open `Docker Desktop`  
+  2. Go to `Containers`  
+  3. Find `crypto-universe` in the list  
+  4. Use the buttons to `Start`, `Stop`, or `Restart` the app
 
-Make sure:
+### MaOS
+1. Open the `Terminal` app.
+2. Copy and paste this line, then press `Enter`:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/starling114/crypto-universe/migration_to_docker/bin/setup_macos.sh | bash
+   ```
 
-1. **AdsPower is running** on your host machine
-2. **AdsPower API is enabled** (usually on port 50325)
-3. **The container is pre-configured** to connect to AdsPower automatically
+#### Running the app again (after first setup)
+Once you’ve already installed it, you don’t need to run the setup again. Just:
 
-### Docker Desktop Not Starting
-- Make sure Windows Hyper-V is enabled
-- Check that virtualization is enabled in BIOS
-- Try running Docker Desktop as Administrator
+- Docker Desktop application:
+  1. Open `Docker Desktop`  
+  2. Go to `Containers`  
+  3. Find `crypto-universe` in the list  
+  4. Use the buttons to `Start`, `Stop`, or `Restart` the app
+- Terminal app:
+  Open `crypto-universe` folder and run:
+  ```bash
+  ./docker_run.sh
+  ```
 
-### Container Won't Start
-Check the logs for errors:
-```bash
-docker logs crypto-universe
-```
+## AdsPower Setup
 
-### Permission Issues
-If you encounter permission issues, try running Command Prompt as Administrator.
+Ensure the following:
+
+1. AdsPower is running on the host machine.
+2. AdsPower API is enabled (default port `50325`).
+
+Defaults and overrides:
+- Default inside image: `ADSPOWER_PORT=50325` (works on Docker Desktop for Mac/Windows)
+- You can override at runtime via Compose (`.env`) or with `-e ADSPOWER_PORT=...` in `docker run`.
+
