@@ -109,7 +109,6 @@ async function fetchVersion() {
 }
 
 export function pythonExecutable() {
-  // return os.platform() === 'win32' ? 'python' : 'python3'
   return os.platform() === 'win32' ? 'myenv\\Scripts\\python.exe' : 'myenv/bin/python'
 }
 

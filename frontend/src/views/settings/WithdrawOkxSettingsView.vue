@@ -38,7 +38,7 @@ const module = ref('withdraw-okx')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.push(log)
+const handleAppendLogs = async (log) => logs.value.unshift(log)
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'secrets', 'python', (data) => {

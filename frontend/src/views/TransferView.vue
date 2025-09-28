@@ -90,7 +90,7 @@ const module = ref('transfer')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.push(log)
+const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {

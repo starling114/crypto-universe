@@ -60,7 +60,7 @@ const module = ref('balances')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.push(log)
+const handleAppendLogs = async (log) => logs.value.unshift(log)
 
 const loadDefaults = async () => {
   await loadModuleData(proxy, module.value, 'instructions', 'js', (data) => {
