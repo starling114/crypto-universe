@@ -7,7 +7,18 @@
       :multiple="true" :close-on-select="false" label="name" track-by="serial_number" />
     <cu-label name="assetsToTrade" label="Assets to trade" tooltip="Choose assets to trade." />
     <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
-      :options="availableAssets" :multiple="true" :close-on-select="false" label="name" track-by="name" />
+      :options="availableAssetsToTrade" :multiple="true" :close-on-select="false" label="name" track-by="name" />
+    <cu-checkbox name="tradeExoticAssets" v-model="tradeExoticAssets" label="Trade exotic assets"
+      tooltip="Trade exotic assets." />
+    <div v-if="tradeExoticAssets">
+      <cu-label name="exoticAssetsToTrade" label="Exotic assets to trade"
+        tooltip="Choose exotic assets to trade and set probability of picking exotic asset instead of regular asset." />
+      <VueMultiselect name="exoticAssetsToTrade" placeholder="Select exotic assets to trade..."
+        v-model="exoticAssetsToTrade" :options="availableExoticAssetsToTrade" :multiple="true" :close-on-select="false"
+        label="name" track-by="name" />
+      <cu-input name="exoticAssetsProbability" size="small" v-model="exoticAssetsProbability" label="Probability"
+        placeholder="Probability" />
+    </div>
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
@@ -136,19 +147,11 @@ const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
 const setLeverage = ref(false)
 const assetsToTrade = ref([])
-const availableAssets = ref([
-  { name: 'ETH' },
-  { name: 'BTC' },
-  { name: 'SOL' },
-  { name: 'BNB' },
-  { name: 'HYPE' },
-  { name: 'PUMP' },
-  { name: 'ENA' },
-  { name: 'FARTCOIN' },
-  { name: 'LINK' },
-  { name: 'XRP' },
-  { name: 'MNT' }
-])
+const availableAssetsToTrade = ref([])
+const availableExoticAssetsToTrade = ref([])
+const tradeExoticAssets = ref(false)
+const exoticAssetsToTrade = ref([])
+const exoticAssetsProbability = ref(3)
 
 const logVolumes = ref(false)
 const parallelExecution = ref(false)
@@ -168,6 +171,13 @@ const handleScriptFinish = async () => moduleRunning.value = false
 const loadDefaults = async () => {
   await loadAdsProfiles(proxy, (profilesData) => {
     availableProfiles.value = profilesData
+  }, logs)
+
+  await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
+    if (!Object.hasOwn(data, 'assets_to_trade')) return
+
+    availableAssetsToTrade.value = (data.assets_to_trade ?? availableAssetsToTrade.value).map(asset => ({ name: asset }))
+    availableExoticAssetsToTrade.value = (data.exotic_assets_to_trade ?? availableExoticAssetsToTrade.value).map(asset => ({ name: asset }))
   }, logs)
 
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
@@ -193,7 +203,10 @@ const loadDefaults = async () => {
     profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
     setLeverage.value = data.set_leverage ?? setLeverage.value
-    assetsToTrade.value = availableAssets.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
+    assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
+    tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
+    exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
+    exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
     getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
   }, logs)
 }
@@ -224,6 +237,9 @@ const handleExecute = async () => {
     log_volumes: logVolumes.value,
     set_leverage: setLeverage.value,
     assets_to_trade: assetsToTrade.value.map(asset => asset.name),
+    trade_exotic_assets: tradeExoticAssets.value,
+    exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
+    exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
     get_latest_stats: getLatestStats.value
   }, logs)
 
