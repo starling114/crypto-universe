@@ -70,6 +70,18 @@ export const stopModule = async (proxy, module, logs) => {
   }
 }
 
+export const statusModule = async (proxy, module, logs) => {
+  try {
+    return (await proxy.$axios.get('/api/status_module', { params: { module: module }})).data
+  } catch (error) {
+    if (logs) {
+      logs.value.push('Error: ' + error.toString())
+    }
+
+    return null
+  }
+}
+
 export const beforeUnloadModule = (moduleRunning) => (event) => {
   if (moduleRunning.value) {
     event.preventDefault()

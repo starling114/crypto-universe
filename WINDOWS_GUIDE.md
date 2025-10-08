@@ -1,76 +1,38 @@
-# Crypto Universe — Windows Setup Guide (Non‑Technical)
+# Crypto Universe — Windows Setup Guide
 
-This guide shows how to install and run Crypto Universe on Windows step by step. No coding knowledge required.
+This guide explains how to install and run Crypto Universe on Windows step by step. It is written for non‑technical users.
 
-### 1) Prerequisites (install these once)
-- Install Git: download from `https://git-scm.com/download/win` → run installer → keep defaults.
-- Install Node.js LTS: download from `https://nodejs.org` (LTS) → run installer → keep defaults.
-- Install Python 3.10+ for Windows: download from `https://www.python.org/downloads/windows/` → during install, check “Add Python to PATH”.
-- Optional (only if you plan to use ADS profiles): install AdsPower from `https://adspower.com` and keep it running.
+## Prerequisites
+- Git
+  - Download from https://git-scm.com/download/win and install (keep defaults).
+- Node.js (LTS)
+  - Download from https://nodejs.org and install (LTS, keep defaults).
+- Python 3.10.11
+  - Download from https://www.python.org/downloads/release/python-31011/ and install.
+  - During install, check “Add Python to PATH”.
 
-### 2) Download the project
-1. Open Start → type "Command Prompt" → open it.
-2. Choose a folder where you want the project (e.g., `C:\Users\YourName\Projects`).
-3. Run:
-```bash
-cd C:\Users\YourName\Projects
-git clone https://github.com/starling114/crypto-universe.git
-cd crypto-universe
+## Quick Setup (Recommended)
+If you already have Git, Node.js, and Python 3.10+ installed, run this single command in PowerShell to perform the initial install:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseBasicParsing https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/bin/setup_windows.ps1 | iex"
 ```
 
-### 3) Install app dependencies (Node.js)
-From the project folder (you should be in `...\crypto-universe`):
-```bash
-npm install
-```
-This installs the Node.js part of the application (web server and UI).
+And then start application via `CU` shortcut on desktop.
 
-### 4) Set up Python environment (for automation modules)
-1. Go to the `scripts` folder:
-```bash
-cd scripts
-```
-2. Create a virtual environment named `myenv`:
-```bash
-python -m venv myenv
-```
-3. Activate the environment (Windows):
-```bash
-myenv\Scripts\activate
-```
-4. Install required Python packages:
-```bash
-pip install -r requirements.txt
-```
+What this does (one-time):
+- Clones or updates the project at `C:\Users\YourName\Desktop\crypto-universe`.
+- Installs Node and Python project dependencies.
 
-### 5) Start the application
-From the project root (`...\crypto-universe`) start the app:
-```bash
-npm start
-```
-What happens:
-- A local server starts on `http://localhost:3000`.
-- Your browser will not open automatically; open it yourself and go to `http://localhost:3000`.
+### After initial setup
+- To start the app click `CU` shortcut on desktop
+- To update the app run the same command from `Quick Setup` section
 
-Windows firewall: If Windows asks to allow access, click “Allow access”.
+## Troubleshooting
+- Node/Python not found: install them from the links in Prerequisites and restart PowerShell.
+- Python version too old: install Python 3.10+.
+- ExecutionPolicy errors: start PowerShell as Administrator or use the one‑liner (it bypasses policy for the current process only).
 
-### 6) Using the app
-- Navigate through the UI to select modules (e.g., Bridge, Swap, Transfer, etc.).
-- When you click Start in the UI, the app runs the Python module in the background and streams live logs to the page.
-
-### 7) Updating the app later
-From the project root (`...\crypto-universe`):
-```bash
-git pull
-```
-Then start the app:
-```bash
-npm start
-```
-
-### 8) Uninstall / clean up
-- Stop the app (press Ctrl+C in the terminal running `npm start`).
-- Delete the `crypto-universe` folder.
-- Optionally remove Node.js/Python if you installed them only for this.
-
-You’re all set! Open `http://localhost:3000` to use Crypto Universe on Windows.
+## Uninstall / Clean up
+- Stop the app (Ctrl+C in the terminal running `npm start`).
+- Delete the folder `C:\Users\YourName\Desktop\crypto-universe`.

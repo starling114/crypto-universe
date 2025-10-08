@@ -1,0 +1,2 @@
+class TradingUnavailableError(Exception):
+    pass

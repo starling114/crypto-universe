@@ -107,6 +107,18 @@ def import_premium_module(file, name):
     return getattr(module, name)
 
 
+def import_premium_module_extra(module_name, class_name):
+    try:
+        module = importlib.import_module(f"modules.premium.{module_name}")
+        return getattr(module, class_name)
+    except (ImportError, AttributeError):
+        try:
+            module = importlib.import_module(f"modules.premium.private.{module_name}")
+            return getattr(module, class_name)
+        except (ImportError, AttributeError):
+            return None
+
+
 def run_module(aaarg, modules):
     module = modules.get(aaarg, None)
     if module:
@@ -141,9 +153,38 @@ def format_time_seconds(seconds: float) -> str:
 
 
 def parse_number_text(text):
-    formatted_text = text.replace("$", "").replace("%", "").replace(",", "").replace("x", "").strip()
-    match = re.search(r"(-?\$?[\d,.]+)", formatted_text)
+    formatted_text = text.replace("$", "").replace(",", "").strip()
+    match = re.search(r"(-?[\d,.]+)", formatted_text)
     if match:
         return Decimal(match.group(1))
     else:
         return None
+
+
+def fetch_api(
+    method: str,
+    url: str,
+    params: dict | None = None,
+    json: dict | None = None,
+    headers: dict | None = None,
+    timeout: int | float = 5,
+    proxy: str | None = None,
+    return_json: bool = True,
+):
+    request_method = method.lower()
+    if request_method not in {"get", "post"}:
+        raise ExecutionError(f"Unsupported HTTP method: {method}")
+
+    kwargs = {
+        "params": params,
+        "json": json,
+        "headers": headers,
+        "timeout": timeout,
+    }
+    if proxy:
+        kwargs["proxies"] = {"http": f"http://{proxy}", "https": f"http://{proxy}"}
+
+    response = requests.request(request_method, url, **kwargs)
+    response.raise_for_status()
+
+    return response.json() if return_json else response.text

@@ -1,0 +1,24 @@
+{
+  "assets_to_trade": [
+    "ETH",
+    "BTC",
+    "HYPE",
+    "XPL",
+    "SOL",
+    "ASTER",
+    "BNB"
+  ],
+  "exotic_assets_to_trade": [
+    "KAITO",
+    "PUMP",
+    "LINEA",
+    "ARB",
+    "LINK",
+    "WLFI",
+    "FARTCOIN"
+  ],
+  "perps": [
+    "lighter",
+    "extended"
+  ]
+}

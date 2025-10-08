@@ -1,21 +1,22 @@
 import os
-import random
 
 import requests
 from core.tools.metamask import Metamask
 from core.tools.rabby import Rabby
 from selenium import webdriver
-from selenium.common import NoSuchElementException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from utils import ExecutionError, debug_mode, logger, sleep
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from utils import ExecutionError, logger, sleep
 
 
 class Ads:
-    URL = f"{os.getenv('ADSPOWER_URL', 'http://local.adspower.net:50325/api/v1')}/browser"
+    URL = os.getenv("ADSPOWER_URL", "http://local.adspower.net:50325/api/v1")
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
@@ -30,58 +31,77 @@ class Ads:
         self._prepare_browser()
         self._prepare_wallet(wallet, wallet_password)
 
-    def open_url(self, url, xpath=None, timeout=30, track_mouse=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Openning url: {url}")
-        if url.startswith("chrome-extension"):
+    def open_url(self, url, timeout=30, track_mouse=False, sleep_time=None):
+        try:
+            if url.startswith("chrome-extension"):
+                self.driver.get(url)
+
             self.driver.get(url)
 
-        self.driver.get(url)
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-        if xpath is not None:
-            self.find_element(xpath, timeout)
+            if track_mouse:
+                self._track_mouse_position()
 
-        if track_mouse:
-            self._track_mouse_position()
+            if sleep_time:
+                sleep(sleep_time)
+        except TimeoutException:
+            raise ExecutionError(f"Timeout opening url: {url}")
 
-        if sleep_time:
-            sleep(sleep_time)
+        logger.debug(f"Profile: {self.label} | True | Openning url: {url}")
 
-    def click_element(self, xpath, timeout=5, random_place=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Clicking element: {xpath}")
+    def find_element(self, xpath, timeout=5, sleep_time=None, source=None, retries=3):
+        result = None
+        for _ in range(retries):
+            try:
+                if source is not None:
+                    result = source.find_element(By.XPATH, xpath)
+                else:
+                    result = WebDriverWait(self.driver, timeout).until(
+                        EC.presence_of_element_located((By.XPATH, xpath))
+                    )
+
+                if sleep_time:
+                    sleep(sleep_time)
+
+                break
+            except TimeoutException:
+                break
+            except StaleElementReferenceException:
+                sleep(0.5)
+
+        logger.debug(f"Profile: {self.label} | {result is not None} | Finding element: {xpath}")
+        return result
+
+    def click_element(self, xpath, timeout=5, sleep_time=None):
         web_element = self.find_element(xpath, timeout)
 
         result = False
         if web_element:
-
-            if random_place:
-                middle_width = (web_element.size["width"] // 2) - 5
-                middle_height = (web_element.size["height"] // 2) - 5
-
-                random_x = random.randint(-middle_width, middle_width)
-                random_y = random.randint(-middle_height, middle_height)
-
-                self.actions.move_to_element_with_offset(web_element, random_x, random_y).click().perform()
-            else:
-                web_element.click()
+            web_element.click()
 
             result = True
 
         if sleep_time:
             sleep(sleep_time)
 
+        logger.debug(f"Profile: {self.label} | {result} | Clicking element: {xpath}")
         return result
 
     def hover_element(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | Hovering element: {xpath}")
         web_element = self.find_element(xpath, timeout)
+
+        result = False
         if web_element:
             self.actions.move_to_element(web_element).perform()
-            return True
+            result = True
         else:
-            return False
+            result = False
+
+        logger.debug(f"Profile: {self.label} | {result} | Hovering element: {xpath}")
+        return result
 
     def input_text(self, xpath, text, timeout=5, delay=0.1, single=False, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Inputting text: {xpath} -> {text}")
         web_element = self.find_element(xpath, timeout)
 
         result = False
@@ -101,42 +121,30 @@ class Ads:
         if sleep_time:
             sleep(sleep_time)
 
-        return result
-
-    def find_element(self, xpath, timeout=5, sleep_time=None):
-        logger.debug(f"Profile: {self.label} | Finding element: {xpath}")
-        result = None
-        for _ in range(timeout):
-            try:
-                result = self.driver.find_element(By.XPATH, xpath)
-            except NoSuchElementException:
-                sleep(0.5, 1)
-
-        if sleep_time:
-            sleep(sleep_time)
-
+        logger.debug(f"Profile: {self.label} | {result} | Inputting text: {xpath} -> {text}")
         return result
 
     def while_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | While present: {xpath}")
-        for _ in range(timeout):
-            try:
-                self.driver.find_element(By.XPATH, xpath)
-                sleep(0.5, 1)
-            except NoSuchElementException:
-                return True
+        result = False
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.invisibility_of_element_located((By.XPATH, xpath)))
+            result = True
+        except TimeoutException:
+            logger.debug(f"Profile: {self.label} | Element still present after timeout: {xpath}")
 
-        return False
+        logger.debug(f"Profile: {self.label} | {result} | While present: {xpath}")
+        return result
 
     def until_present(self, xpath, timeout=5):
-        logger.debug(f"Profile: {self.label} | Until present: {xpath}")
-        for _ in range(timeout):
-            element = self.find_element(xpath, timeout=1)
+        result = False
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((By.XPATH, xpath)))
+            result = True
+        except TimeoutException:
+            logger.debug(f"Profile: {self.label} | Element not found after timeout: {xpath}")
 
-            if element is not None:
-                return True
-
-        return False
+        logger.debug(f"Profile: {self.label} | {result} | Until present: {xpath}")
+        return result
 
     def scroll(self, direction, pixels=None, xpath=None):
         logger.debug(f"Profile: {self.label} | Scrolling: {direction}")
@@ -152,7 +160,7 @@ class Ads:
                 elif pixels is not None:
                     self.driver.execute_script(f"arguments[0].scrollBy(0, {pixels});", element)
                 else:
-                    raise Exception("Invalid direction or missing pixels argument for scrolling the element.")
+                    raise ExecutionError("Invalid direction or missing pixels argument for scrolling the element.")
         else:
             if direction == "top":
                 self.driver.execute_script("window.scrollTo(0, 0);")
@@ -219,7 +227,7 @@ class Ads:
             data = self._check_browser()
             if data["data"]["status"] == "Active":
                 parameters = {"serial_number": self.profile}
-                requests.get(f"{Ads.URL}/stop", params=parameters)
+                requests.get(f"{Ads.URL}/browser/stop", params=parameters)
             else:
                 logger.success(f"Profile: {self.label} | Closed")
                 break
@@ -273,6 +281,21 @@ class Ads:
         else:
             return self.driver.execute_script(script)
 
+    def proxy_ip(self):
+        try:
+            parameters = {"serial_number": self.profile}
+            response = requests.get(f"{Ads.URL}/user/list", params=parameters)
+            response.raise_for_status()
+            sleep(0.5)
+            json_response = response.json()
+            if json_response["code"] == 0:
+                return json_response.get("data", {}).get("list", [])[0].get("ip")
+            else:
+                raise ExecutionError(json_response)
+        except Exception as e:
+            logger.error(f"Connection to AdsPower failed: {e}")
+            return None
+
     def _start_profile(self):
         logger.debug(f"Profile: {self.label} | Starting profile")
         profile_data = self._check_browser()
@@ -281,8 +304,6 @@ class Ads:
 
         logger.success(f"Profile: {self.label} | Started")
 
-        # TODO: Use network host for docker
-        # mount chromedrivers from host machine
         chrome_driver = profile_data["data"]["webdriver"]
         selenium_port = profile_data["data"]["ws"]["selenium"]
 
@@ -299,7 +320,7 @@ class Ads:
         try:
             logger.debug(f"Profile: {self.label} | Checking browser")
             parameters = {"serial_number": self.profile}
-            response = requests.get(f"{Ads.URL}/active", params=parameters)
+            response = requests.get(f"{Ads.URL}/browser/active", params=parameters)
             response.raise_for_status()
             json_response = response.json()
             if json_response["code"] == 0:
@@ -311,7 +332,7 @@ class Ads:
 
     def _open_browser(self):
         parameters = {"serial_number": self.profile, "open_tabs": 1}
-        response = requests.get(f"{Ads.URL}/start", params=parameters)
+        response = requests.get(f"{Ads.URL}/browser/start", params=parameters)
         response.raise_for_status()
         return response.json()
 
@@ -327,8 +348,6 @@ class Ads:
                 self.driver.close()
 
         self.switch_tab(tabs[0])
-        # if not debug_mode():
-        #     self.driver.maximize_window()
 
     def _prepare_wallet(self, wallet_name, wallet_password):
         wallet = self.WALLETS.get(wallet_name)

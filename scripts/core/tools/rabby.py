@@ -42,19 +42,16 @@ class Rabby:
         logger.debug(f"Profile: {self.ads.label} | Rabby | Signing transaction")
         current_tab = self.ads.current_tab()
         signed = False
-        sleep(2.5, 3.5)
 
         for _ in range(5):
             target_tab = self.ads.find_tab("notification.html", keep_focused=True)
             if target_tab:
-                sleep(2, 3)
-                if not self.ads.click_element('//button[span[text()="Sign and Create"] and not(@disabled)]', 10):
+                if not self.ads.click_element('//button[span[contains(text(), "Sign")] and not(@disabled)]', 10):
                     logger.warning(f"Profile: {self.ads.label} | Rabby | Failed to sign")
                     break
                 sleep(0.5, 1)
-                self.ads.click_element('//button[text()="Confirm"]')
-                sleep(1, 2)
                 try:
+                    self.ads.click_element('//button[text()="Confirm"]')
                     if not self.ads.until_present('//span[text()="Transaction created"]', 25):
                         if self.ads.find_element('//span[text()="Fail to create"]'):
                             self.ads.click_element('//button[span[text()="Cancel"]]')
@@ -63,10 +60,10 @@ class Rabby:
                 except NoSuchWindowException:
                     pass
                 signed = True
-            sleep(1, 2)
+                break
+            sleep(1)
 
         self.ads.switch_tab(current_tab)
-        sleep(2, 3)
 
         return signed
 
@@ -103,21 +100,19 @@ class Rabby:
         logger.debug(f"Profile: {self.ads.label} | Rabby | Connecting")
         current_tab = self.ads.current_tab()
         connected = False
-        sleep(3, 5)
 
         for _ in range(1):
             target_tab = self.ads.find_tab("notification.html#/approval", keep_focused=True)
             if target_tab:
-                sleep(2, 3)
                 if not self.ads.click_element('//button[span[text()="Connect"]]', 10):
                     logger.warning(f"Profile: {self.ads.label} | Rabby | Failed to sign")
                     break
                 sleep(0.5, 1)
                 connected = True
-            sleep(1, 2)
+                break
+            sleep(1)
 
         self.ads.switch_tab(current_tab)
-        sleep(2, 3)
 
         return connected
 

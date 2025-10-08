@@ -9,10 +9,9 @@
     <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
       :options="availableAssetsToTrade" :multiple="true" :close-on-select="false" label="name" track-by="name" />
     <cu-checkbox name="tradeExoticAssets" v-model="tradeExoticAssets" label="Trade exotic assets"
-      tooltip="Trade exotic assets." />
+      tooltip="Choose exotic assets to trade and set probability of picking exotic asset instead of regular asset." />
     <div v-if="tradeExoticAssets">
-      <cu-label name="exoticAssetsToTrade" label="Exotic assets to trade"
-        tooltip="Choose exotic assets to trade and set probability of picking exotic asset instead of regular asset." />
+      <cu-label name="exoticAssetsToTrade" label="Exotic assets to trade" />
       <VueMultiselect name="exoticAssetsToTrade" placeholder="Select exotic assets to trade..."
         v-model="exoticAssetsToTrade" :options="availableExoticAssetsToTrade" :multiple="true" :close-on-select="false"
         label="name" track-by="name" />
@@ -108,12 +107,13 @@
     <cu-button class="w-1/3 ml-4" color="red" label="Stop" @click="handleStop" :disabled="!moduleRunning" />
   </div>
 
-  <cu-logs :logs="logs" :module="module" @append:logs="handleAppendLogs" @finished:script="handleScriptFinish" />
+  <cu-logs :logs="logs" :clear="true" :module="module" @append:logs="handleAppendLogs" @clear:logs="handleClearLogs"
+    @finished:script="handleScriptFinish" />
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
-import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
@@ -166,6 +166,7 @@ const module = ref('premium/farm-lighter')
 const { proxy } = getCurrentInstance()
 
 const handleAppendLogs = async (log) => logs.value.unshift(log)
+const handleClearLogs = async () => logs.value = []
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
@@ -209,6 +210,7 @@ const loadDefaults = async () => {
     exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
     getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
   }, logs)
+  moduleRunning.value = (await statusModule(proxy, module.value, logs)) ?? moduleRunning.value
 }
 
 const handleExecute = async () => {

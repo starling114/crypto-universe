@@ -111,6 +111,16 @@ apiRoutes.post('/stop_module', (req, res) => {
   }
 })
 
+apiRoutes.get('/status_module', (req, res) => {
+  const { module } = req.query
+
+  if (pythonProcesses[module]) {
+    res.json(true)
+  } else {
+    res.json(false)
+  }
+})
+
 apiRoutes.post('/start_module', (req, res) => {
   const { module } = req.body
 

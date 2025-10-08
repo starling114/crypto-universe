@@ -1,5 +1,5 @@
 <template>
-  <cu-title title="Farm - Aster Settings" />
+  <cu-title title="Airdrop - Perps Setings" />
   <div class="mb-2">
     <cu-checkbox name="enableProxies" v-model="enableProxies" label="Proxies Check"
       tooltip="Enable proxies check between runs, usefull with unstable proxies" />
@@ -42,7 +42,7 @@ const labels = ref('')
 const proxies = ref('')
 const passwords = ref('')
 
-const module = ref('premium/farm-aster')
+const module = ref('premium/airdrop-perps')
 
 const logs = ref([])
 

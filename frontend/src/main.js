@@ -32,8 +32,8 @@ import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 import FarmLighterView from '@/views/premium/FarmLighterView.vue'
 import FarmLighterSettingsView from '@/views/settings/premium/FarmLighterSettingsView.vue'
-import FarmAsterView from '@/views/premium/FarmAsterView.vue'
-import FarmAsterSettingsView from '@/views/settings/premium/FarmAsterSettingsView.vue'
+import AirdropPerpsView from '@/views/premium/AirdropPerpsView.vue'
+import AirdropPerpsSettingsView from '@/views/settings/premium/AirdropPerpsSettingsView.vue'
 import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
 
 const app = createApp(App)
@@ -87,16 +87,16 @@ const routes = [
     meta: { title: 'CU | Farm Lighter Settings' }
   },
   {
-    path: '/farm-aster',
-    name: 'Farm Aster',
-    component: FarmAsterView,
-    meta: { title: 'CU | Farm Aster' }
+    path: '/airdrop-perps',
+    name: 'Airdrop Perps',
+    component: AirdropPerpsView,
+    meta: { title: 'CU | Airdrop Perps' }
   },
   {
-    path: '/farm-aster/settings',
-    name: 'Farm Aster Settings',
-    component: FarmAsterSettingsView,
-    meta: { title: 'CU | Farm Aster Settings' }
+    path: '/airdrop-perps/settings',
+    name: 'Airdrop Perps Settings',
+    component: AirdropPerpsSettingsView,
+    meta: { title: 'CU | Airdrop Perps Settings' }
   },
   {
     path: '/settings',

@@ -7,10 +7,16 @@
         <li v-for="(log, index) in logs" :key="index" v-html="log"></li>
       </ul>
     </div>
-    <button v-if="logs.length >= 50" @click="toggleAutoScroll"
-      class="px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-white border-white hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-700 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none absolute top-2 right-2">
-      To Bottom
-    </button>
+    <div v-if="logs.length >= 50" class="absolute top-2 right-2 flex flex-col space-y-2">
+      <button @click="toggleAutoScroll"
+        class="px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-white border-white hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none">
+        To Bottom
+      </button>
+      <button v-if="clear" @click="clearLogs"
+        class="px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-white border-white hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none">
+        Clear Logs
+      </button>
+    </div>
     <button v-if="logs.length >= 50" @click="toggleAutoScroll"
       class="px-3 py-2 text-xs font-medium text-center rounded-lg text-gray-700 bg-white border-white hover:bg-gray-300 hover:border-gray-300 dark:bg-gray-700 dark:border-gray-700 dark:text-white dark:hover:bg-gray-900 focus:ring-0 focus:outline-none self-end">
       To Top
@@ -23,10 +29,11 @@ import { defineProps, defineEmits, ref, onMounted, onBeforeUnmount, getCurrentIn
 
 const props = defineProps({
   logs: { type: Array, required: true },
-  module: { type: String, required: true }
+  module: { type: String, required: true },
+  clear: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['append:logs', 'finished:script'])
+const emit = defineEmits(['append:logs', 'finished:script', 'clear:logs'])
 
 const eventSource = ref(null)
 const isAutoScrolling = ref(false)
@@ -77,6 +84,10 @@ const scrollToBottom = () => {
 
 const scrollToTop = () => {
   window.scrollTo(0, 0)
+}
+
+const clearLogs = () => {
+  emit('clear:logs')
 }
 
 const toggleAutoScroll = () => {
