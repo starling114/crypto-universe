@@ -43,6 +43,7 @@ def load_json(file_path, check_existance=True):
 
 
 SECRETS = load_json("../backend/modules/crypto_universe/secrets.json", check_existance=False)
+INSTRUCTIONS = load_json("../backend/modules/crypto_universe/instructions.json", check_existance=False)
 CONFIGS = load_json("../configs.json")
 PRIVATE_CONFIGS = load_json("../private_configs.json", check_existance=False)
 ERC20_ABI = load_json("../erc20abi.json")
@@ -136,7 +137,7 @@ def run_premium_module(aaarg, modules):
         location = "/".join(aaarg.split("-"))
         instructions = load_json(f"modules/{location}/instructions.json")
         secrets = load_json(f"modules/{location}/secrets.json", check_existance=False)
-        module.run(instructions, secrets)
+        module.run(instructions, secrets, INSTRUCTIONS["license_key"])
     else:
         logger.error(f"Invalid premium module choice: {aaarg}")
 

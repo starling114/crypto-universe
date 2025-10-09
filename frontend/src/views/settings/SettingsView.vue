@@ -29,11 +29,11 @@
   <cu-collapsible-section name="premium" title="Premium">
     <cu-label label="License Key"></cu-label>
     <div>
-      <input type="text" id="licenseKey" v-model="lisenceKey" placeholder="Enter license..."
+      <input type="text" id="licenseKey" v-model="licenseKey" placeholder="Enter license..."
         class="w-1/3 mr-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-gray-600 focus:border-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-white dark:focus:border-white" />
       <cu-button class="w-1/3" color="orange" label="Activate" @click="handleSave" />
     </div>
-    <span v-if="lisenceKeyValidationError" class="text-red-600">License key is no valid</span>
+    <span v-if="licenseKeyValidationError" class="text-red-600">License key is no valid</span>
   </cu-collapsible-section>
 </template>
 
@@ -58,8 +58,8 @@ const privateKeys = ref('')
 const availablePremiumModules = ref([])
 const premiumModules = ref([])
 const premiumMode = ref(false)
-const lisenceKey = ref('')
-const lisenceKeyValidationError = ref(false)
+const licenseKey = ref('')
+const licenseKeyValidationError = ref(false)
 
 const module = ref('crypto_universe')
 
@@ -71,7 +71,7 @@ const loadDefaults = async () => {
 
     modules.value = data.modules ?? modules.value
     premiumModules.value = data.premium_modules ?? premiumModules.value
-    lisenceKey.value = data.lisence_key ?? lisenceKey.value
+    licenseKey.value = data.license_key ?? licenseKey.value
   })
 
   await loadModuleData(proxy, module.value, 'secrets', 'js', (data) => {
@@ -94,14 +94,14 @@ const loadDefaults = async () => {
 const handleSave = async () => {
   let data = { modules: modules.value, premium_modules: premiumModules.value }
 
-  if (lisenceKey.value) {
-    data.lisence_key = lisenceKey.value
+  if (licenseKey.value) {
+    data.license_key = licenseKey.value
   }
 
   await updateModuleData(proxy, module.value, 'instructions', 'js', {
     modules: modules.value,
     premium_modules: premiumModules.value,
-    lisence_key: lisenceKey.value
+    license_key: licenseKey.value
   })
 
   window.location.reload()

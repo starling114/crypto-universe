@@ -198,7 +198,7 @@ export async function getTokensPrice() {
 export function premiumMode() {
   const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
 
-  return !!instructions.lisence_key
+  return !!instructions.license_key
 }
 
 export const multicallAddress = '0xca11bde05977b3631167028862be2a173976ca11'

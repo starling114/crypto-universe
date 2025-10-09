@@ -24,6 +24,13 @@ What this does (one-time):
 - Clones or updates the project at `C:\Users\YourName\Desktop\crypto-universe`.
 - Installs Node and Python project dependencies.
 
+### Machine ID
+To get your Machine ID, run this single command in PowerShell:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseBasicParsing https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/bin/machine_id_windows.ps1 | iex"
+```
+
 ### After initial setup
 - To start the app click `CU` shortcut on desktop
 - To update the app click `update.sh` file in `C:\Users\YourName\Desktop\crypto-universe\bin`
