@@ -99,43 +99,39 @@ try {
 } finally { Pop-Location }
 
 $ScriptsDir = Join-Path $TargetDir 'scripts'
-$VenvDir    = Join-Path $ScriptsDir 'myenv'
-${PipPath}  = Join-Path (Join-Path $VenvDir 'Scripts') 'pip.exe'
+$VenvDir = Join-Path $ScriptsDir 'myenv'
+$VenvPython = Join-Path (Join-Path $VenvDir 'Scripts') 'python.exe'
 
 Info 'Setting up Python virtual environment in scripts\myenv ...'
 if (-not (Test-Path $VenvDir)) {
   try {
     Push-Location $ScriptsDir
     & $global:PY -m venv 'myenv'
+    if (-not $?) { throw 'Failed to create virtual environment' }
   } catch {
-    Err 'Failed to create Python virtual environment.'
+    Err "Failed to create Python virtual environment: $_"
   } finally { Pop-Location }
 }
 
-$Activate = Join-Path (Join-Path $VenvDir 'Scripts') 'Activate.ps1'
-if (Test-Path $Activate) {
-  try {
-    . $Activate
-    Info 'Virtual environment activated.'
-  } catch {
-    Warn 'Failed to activate virtual environment. Falling back to direct pip path.'
-  }
-} else {
-  Warn 'Activate.ps1 not found. Falling back to direct pip path.'
+if (-not (Test-Path $VenvPython)) {
+  Err "Python executable not found in virtual environment at $VenvPython"
 }
 
-if (Get-Command pip -ErrorAction SilentlyContinue) {
-  Info 'Upgrading pip and installing Python requirements (activated environment) ...'
-  pip install --upgrade pip
-  pip install -r (Join-Path $ScriptsDir 'requirements.txt')
+Info 'Upgrading pip in the virtual environment...'
+try {
+  & $VenvPython -m pip install --upgrade pip --no-cache-dir
+  if (-not $?) { throw 'Failed to upgrade pip' }
+} catch {
+  Err "Failed to upgrade pip in the virtual environment: $_"
 }
-elseif (Test-Path $PipPath) {
-  Info 'Upgrading pip and installing Python requirements (direct path) ...'
-  & $PipPath install --upgrade pip
-  & $PipPath install -r (Join-Path $ScriptsDir 'requirements.txt')
-}
-else {
-  Err "pip not found in virtual environment at $PipPath"
+
+Info 'Installing Python dependencies...'
+try {
+  $requirementsPath = Join-Path $ScriptsDir 'requirements.txt'
+  & $VenvPython -m pip install -r $requirementsPath --no-cache-dir
+  if (-not $?) { throw 'Failed to install requirements' }
+} catch {
+  Err "Failed to install Python dependencies: $_"
 }
 
 try {

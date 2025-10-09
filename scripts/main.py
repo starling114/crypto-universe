@@ -34,9 +34,6 @@ MODULES = {
     "testing-ads_execution": AdsExecution,
 }
 PREMIUM_MODULES = {
-    "premium/mint-kingdomly": import_premium_module("mint-kingdomly-mint_kingdomly", "MintKingdomly"),
-    "premium/mint-magiceden": import_premium_module("mint-magiceden-mint_magiceden", "MintMagiceden"),
-    "premium/farm-lighter": import_premium_module("farm-lighter-farm_lighter", "FarmLighter"),
     "premium/airdrop-perps": import_premium_module("airdrop-perps-airdrop_perps", "AirdropPerps"),
 }
 

@@ -38,35 +38,38 @@ case "$(uname -s)" in
     ;;
 esac
 
-ZIP_FILE="compiled-modules-${OS}-latest-python3.10.zip"
+ZIP_PATTERN="premium-modules-${OS}-*-python3.10.zip"
 
-if [ -f "$ROOT_DIR/$ZIP_FILE" ]; then
-  TEMP_DIR="$(mktemp -d)"
-  info "Found $ZIP_FILE, processing..."
+for ZIP_FILE in "$ROOT_DIR"/$ZIP_PATTERN; do
+  if [ -f "$ZIP_FILE" ]; then
+    ZIP_BASENAME=$(basename "$ZIP_FILE")
+    TEMP_DIR="$(mktemp -d)"
+    info "Found $ZIP_BASENAME, processing..."
 
-  mv "$ROOT_DIR/$ZIP_FILE" "$TEMP_DIR/" || { rm -rf "$TEMP_DIR"; err "Failed to move $ZIP_FILE to temp directory"; }
+    mv "$ZIP_FILE" "$TEMP_DIR/" || { rm -rf "$TEMP_DIR"; err "Failed to move $ZIP_BASENAME to temp directory"; }
 
-  info "Extracting $ZIP_FILE..."
-  unzip -q "$TEMP_DIR/$ZIP_FILE" -d "$TEMP_DIR" || { rm -rf "$TEMP_DIR"; err "Failed to extract $ZIP_FILE"; }
+    info "Extracting $ZIP_BASENAME..."
+    unzip -q "$TEMP_DIR/$ZIP_BASENAME" -d "$TEMP_DIR" || { rm -rf "$TEMP_DIR"; err "Failed to extract $ZIP_BASENAME"; }
 
-  info "Moving files to their destinations..."
-  find "$TEMP_DIR" -type f | while read -r file; do
-    if [ "$(basename "$file")" = "$ZIP_FILE" ]; then
-      continue
-    fi
+    info "Moving files to their destinations..."
+    find "$TEMP_DIR" -type f | while read -r file; do
+      if [ "$(basename "$file")" = "$ZIP_BASENAME" ]; then
+        continue
+      fi
 
-    rel_path="${file#$TEMP_DIR/}"
-    if [ -n "$rel_path" ] && [ "$rel_path" != "$file" ]; then
-      dest_dir="$ROOT_DIR/scripts/modules/premium/$(dirname "$rel_path")"
-      mkdir -p "$dest_dir"
-      mv -f "$file" "$dest_dir/"
-      info "Moved $rel_path -> scripts/modules/premium/$rel_path"
-    fi
-  done
+      rel_path="${file#$TEMP_DIR/}"
+      if [ -n "$rel_path" ] && [ "$rel_path" != "$file" ]; then
+        dest_dir="$ROOT_DIR/scripts/modules/premium/$(dirname "$rel_path")"
+        mkdir -p "$dest_dir"
+        mv -f "$file" "$dest_dir/"
+        info "Moved $rel_path -> scripts/modules/premium/$rel_path"
+      fi
+    done
 
-  rm -rf "$TEMP_DIR"
-  info "Finished processing $ZIP_FILE"
-fi
+    rm -rf "$TEMP_DIR"
+    info "Finished processing $ZIP_BASENAME"
+  fi
+done
 
 info "Launching application..."
 if ! npm start; then

@@ -30,8 +30,6 @@ import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import YtTokensView from '@/views/YtTokensView.vue'
 import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
-import FarmLighterView from '@/views/premium/FarmLighterView.vue'
-import FarmLighterSettingsView from '@/views/settings/premium/FarmLighterSettingsView.vue'
 import AirdropPerpsView from '@/views/premium/AirdropPerpsView.vue'
 import AirdropPerpsSettingsView from '@/views/settings/premium/AirdropPerpsSettingsView.vue'
 import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
@@ -73,18 +71,6 @@ const routes = [
     name: 'Mint Magiceden Settings',
     component: MintMagicedenSettingsView,
     meta: { title: 'CU | Mint Magiceden Settings' }
-  },
-  {
-    path: '/farm-lighter',
-    name: 'Farm Lighter',
-    component: FarmLighterView,
-    meta: { title: 'CU | Farm Lighter' }
-  },
-  {
-    path: '/farm-lighter/settings',
-    name: 'Farm Lighter Settings',
-    component: FarmLighterSettingsView,
-    meta: { title: 'CU | Farm Lighter Settings' }
   },
   {
     path: '/airdrop-perps',

@@ -55,23 +55,23 @@ if [ -d "$TARGET_DIR/.git" ]; then
   info "Found existing project at $TARGET_DIR. Resetting to main branch..."
   (
     cd "$TARGET_DIR" || err "Could not access $TARGET_DIR"
-    
+
     if ! git fetch --all; then
       err "Failed to fetch from remote. Please check your internet connection."
     fi
-    
+
     if git stash --include-untracked; then
       info 'Stashed local changes before reset.'
     fi
-    
+
     if ! git checkout --force main; then
       err "Failed to checkout main branch."
     fi
-    
+
     if ! git reset --hard origin/main; then
       err "Failed to reset to origin/main. Please check your repository access."
     fi
-    
+
     git clean -fd || warn "Warning: Failed to clean untracked files"
   )
 else
@@ -96,13 +96,19 @@ if [ ! -d myenv ]; then
   fi
 fi
 
-PIP_BIN="$(pwd)/myenv/bin/pip"
-if [ ! -x "$PIP_BIN" ]; then
-  err "pip not found in virtual environment. Please try re-running the script or reinstalling Python."
+if [ -f "myenv/bin/python" ]; then
+  VENV_PYTHON="myenv/bin/python"
+else
+  err "Failed to find Python executable in virtual environment. Please check your Python installation."
+fi
+
+info "Upgrading pip in the virtual environment..."
+if ! "$VENV_PYTHON" -m pip install --upgrade pip --no-cache-dir; then
+  err "Failed to upgrade pip. Please check your Python installation."
 fi
 
 info "Installing Python dependencies..."
-if ! "$PIP_BIN" install --upgrade pip || ! "$PIP_BIN" install -r requirements.txt; then
+if ! "$VENV_PYTHON" -m pip install -r requirements.txt; then
   err "Failed to install Python dependencies. Please check requirements.txt or your internet connection."
 fi
 
