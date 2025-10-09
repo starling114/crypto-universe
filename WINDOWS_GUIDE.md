@@ -26,7 +26,7 @@ What this does (one-time):
 
 ### After initial setup
 - To start the app click `CU` shortcut on desktop
-- To update the app run the same command from `Quick Setup` section
+- To update the app click `update.sh` file in `C:\Users\YourName\Desktop\crypto-universe\bin`
 
 ## Troubleshooting
 - Node/Python not found: install them from the links in Prerequisites and restart PowerShell.

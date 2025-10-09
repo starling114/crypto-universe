@@ -50,15 +50,37 @@ if (Test-Path (Join-Path $TargetDir '.git')) {
     Push-Location $TargetDir
     $stdout = [System.IO.Path]::GetTempFileName()
     $stderr = [System.IO.Path]::GetTempFileName()
-
-    $proc = Start-Process -FilePath 'git' -ArgumentList 'pull','--rebase','--autostash' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-    if ($proc.ExitCode -ne 0) {
-      # Fallback: plain pull
-      $proc2 = Start-Process -FilePath 'git' -ArgumentList 'pull' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-      if ($proc2.ExitCode -ne 0) {
-        $errMsg = try { Get-Content -Raw -ErrorAction SilentlyContinue $stderr } catch { '' }
-        Err ("Failed to update repository. Git exit code: $($proc2.ExitCode). $errMsg")
-      }
+    
+    Info 'Resetting to main branch...'
+    
+    $fetch = Start-Process -FilePath 'git' -ArgumentList 'fetch','--all' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    if ($fetch.ExitCode -ne 0) {
+      $errMsg = try { Get-Content -Raw -ErrorAction SilentlyContinue $stderr } catch { 'Unknown error' }
+      Err "Failed to fetch from remote: $errMsg"
+    }
+    
+    $stash = Start-Process -FilePath 'git' -ArgumentList 'stash','--include-untracked' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    if ($stash.ExitCode -eq 0) {
+      $stashed = $true
+      Info 'Stashed local changes before reset.'
+    }
+    
+    $checkout = Start-Process -FilePath 'git' -ArgumentList 'checkout','--force','main' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    if ($checkout.ExitCode -ne 0) {
+      $errMsg = try { Get-Content -Raw -ErrorAction SilentlyContinue $stderr } catch { 'Unknown error' }
+      Err "Failed to checkout main branch: $errMsg"
+    }
+    
+    $reset = Start-Process -FilePath 'git' -ArgumentList 'reset','--hard','origin/main' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    if ($reset.ExitCode -ne 0) {
+      $errMsg = try { Get-Content -Raw -ErrorAction SilentlyContinue $stderr } catch { 'Unknown error' }
+      Err "Failed to reset to origin/main: $errMsg"
+    }
+    
+    $clean = Start-Process -FilePath 'git' -ArgumentList 'clean','-fd' -WorkingDirectory $TargetDir -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    if ($clean.ExitCode -ne 0) {
+      $errMsg = try { Get-Content -Raw -ErrorAction SilentlyContinue $stderr } catch { 'Unknown error' }
+      Warn "Warning: Failed to clean untracked files: $errMsg"
     }
   } finally { Pop-Location }
 }
@@ -135,20 +157,24 @@ try {
     }
 
     if (Test-Path $ShortcutPath) {
-        Info "Desktop shortcut already exists, skipping: $ShortcutPath"
+        try {
+            Remove-Item -Path $ShortcutPath -Force
+        }
+        catch {
+            Write-Warning "Failed to delete existing shortcut: $ShortcutPath. Error: $_"
+        }
     }
-    else {
-        $wsh = New-Object -ComObject WScript.Shell
-        $sc = $wsh.CreateShortcut($ShortcutPath)
-        $sc.TargetPath = $gitBash
-        $relativeShPath = $StartSh -replace ([regex]::Escape($TargetDir + '\')), '' -replace '\\', '/'
-        $sc.Arguments = "-c `"./$relativeShPath`""
-        $sc.WorkingDirectory = $TargetDir
-        $sc.IconLocation = if (Test-Path $IconPath) { "$IconPath, 0" } else { 'C:\Windows\System32\shell32.dll, 167' }
-        $sc.Save()
 
-        Write-Information "Created Desktop shortcut for start.sh: $ShortcutPath" -InformationAction Continue
-    }
+    $wsh = New-Object -ComObject WScript.Shell
+    $sc = $wsh.CreateShortcut($ShortcutPath)
+    $sc.TargetPath = $gitBash
+    $relativeShPath = $StartSh -replace ([regex]::Escape($TargetDir + '\')), '' -replace '\\', '/'
+    $sc.Arguments = "-c `"./$relativeShPath`""
+    $sc.WorkingDirectory = $TargetDir
+    $sc.IconLocation = if (Test-Path $IconPath) { "$IconPath, 0" } else { 'C:\Windows\System32\shell32.dll, 167' }
+    $sc.Save()
+
+    Write-Information "Created Desktop shortcut for start.sh: $ShortcutPath" -InformationAction Continue
 } catch {
   Warn "Failed to create Desktop shortcut: $_"
 }

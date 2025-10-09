@@ -89,10 +89,6 @@
         placeholder="Market order slippage (%)" tooltip="Slippage for market orders." />
     </div>
     <div class="mb-2">
-      <cu-checkbox name="setLeverage" v-model="setLeverage" label="Set Leverage on each run"
-        tooltip="Set leverage to randomly generated on each run." />
-    </div>
-    <div class="mb-2">
       <cu-checkbox name="logVolumes" v-model="logVolumes" label="Log Volumes"
         tooltip="Log out volume changes between runs." />
     </div>
@@ -158,7 +154,6 @@ const setMarketOrderSlippage = ref(false)
 const marketOrderSlippage = ref(0.05)
 const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
-const setLeverage = ref(false)
 const assetsToTrade = ref([])
 const availableAssetsToTrade = ref([])
 const availableExoticAssetsToTrade = ref([])
@@ -218,7 +213,6 @@ const loadDefaults = async () => {
     parallelExecution.value = data.parallel_execution ?? parallelExecution.value
     profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
-    setLeverage.value = data.set_leverage ?? setLeverage.value
     assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
     tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
     exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
@@ -258,7 +252,6 @@ const handleExecute = async () => {
     parallel_execution: parallelExecution.value,
     profiles_in_batch: profilesInBatch.value,
     log_volumes: logVolumes.value,
-    set_leverage: setLeverage.value,
     assets_to_trade: assetsToTrade.value.map(asset => asset.name),
     trade_exotic_assets: tradeExoticAssets.value,
     exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),

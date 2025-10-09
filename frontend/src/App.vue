@@ -17,7 +17,7 @@
   </div>
   <section>
     <cu-sidebar>
-      <cu-sidebar-logo text="Crypto Universe" logo="logo.svg" :debug="debugMode" :premium="premiumMode" />
+      <cu-sidebar-logo text="Crypto Universe" logo="logo.png" :debug="debugMode" :premium="premiumMode" />
       <cu-sidebar-item tag="router-link" link="/">
         <template #left>
           <ChartPieIcon

@@ -1,7 +1,7 @@
 <template>
   <div class="mb-5">
     <div class="flex items-center ps-2.5">
-      <img :src="logo" class="h-6 me-3 sm:h-7" alt="Flowbite Logo" />
+      <img :src="logo" class="h-9 me-3 sm:h-11" alt="Flowbite Logo" />
       <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">{{ text }}</span>
     </div>
     <div v-if="premium" class="flex items-center ps-2.5 mt-2">

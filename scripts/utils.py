@@ -107,7 +107,7 @@ def import_premium_module(file, name):
     return getattr(module, name)
 
 
-def import_premium_module_extra(module_name, class_name):
+def import_premium_module_extra(module_name, class_name, force=True):
     try:
         module = importlib.import_module(f"modules.premium.{module_name}")
         return getattr(module, class_name)
@@ -116,7 +116,10 @@ def import_premium_module_extra(module_name, class_name):
             module = importlib.import_module(f"modules.premium.private.{module_name}")
             return getattr(module, class_name)
         except (ImportError, AttributeError):
-            return None
+            if force:
+                raise
+            else:
+                return None
 
 
 def run_module(aaarg, modules):

@@ -5,9 +5,9 @@ set -euo pipefail
 REPO_URL="https://github.com/starling114/crypto-universe.git"
 TARGET_DIR="${HOME}/Desktop/crypto-universe"
 
-info() { echo "✅ $*" ; }
-warn() { echo "⚠️ $*" ; }
-err()  { echo "❌ Error: $*" 1>&2 ; exit 1 ; }
+info() { echo "[INFO] $*" ; }
+warn() { echo "[WARN] $*" ; }
+err()  { echo "[ERROR] $*" 1>&2 ; exit 1 ; }
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -52,14 +52,32 @@ ensure_node
 ensure_python
 
 if [ -d "$TARGET_DIR/.git" ]; then
-  info "Found existing project at $TARGET_DIR. Updating to the latest version..."
-  if ! (cd "$TARGET_DIR" && git pull --rebase --autostash || git pull); then
-    err "Failed to update the project. Please check your internet connection or repository access."
-  fi
+  info "Found existing project at $TARGET_DIR. Resetting to main branch..."
+  (
+    cd "$TARGET_DIR" || err "Could not access $TARGET_DIR"
+    
+    if ! git fetch --all; then
+      err "Failed to fetch from remote. Please check your internet connection."
+    fi
+    
+    if git stash --include-untracked; then
+      info 'Stashed local changes before reset.'
+    fi
+    
+    if ! git checkout --force main; then
+      err "Failed to checkout main branch."
+    fi
+    
+    if ! git reset --hard origin/main; then
+      err "Failed to reset to origin/main. Please check your repository access."
+    fi
+    
+    git clean -fd || warn "Warning: Failed to clean untracked files"
+  )
 else
   info "Downloading project to $TARGET_DIR..."
   if ! mkdir -p "$(dirname "$TARGET_DIR")" || ! git clone "$REPO_URL" "$TARGET_DIR"; then
-    err "Failed to download the project. Please check your internet connection or ensure you have permission to write to $HOME/Desktop."
+    err "Failed to download the project. Please check your internet connection or ensure you have permission to write to $TARGET_DIR."
   fi
 fi
 
@@ -90,4 +108,4 @@ fi
 
 cd "$TARGET_DIR" || err "Could not return to project directory."
 
-info "Setup complete! 🎉"
+info "Setup complete!"

@@ -3,10 +3,16 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT_DIR" || { echo "❌ Error: Could not navigate to project directory ($ROOT_DIR). Please check permissions."; exit 1; }
+cd "$ROOT_DIR" || { echo "[ERROR]  Could not navigate to project directory ($ROOT_DIR). Please check permissions."; exit 1; }
 
 info() { echo "[INFO] $*" ; }
-err()  { echo "[ERROR] $*" 1>&2 ; exit 1 ; }
+err()  {
+  echo "[ERROR] $*" 1>&2;
+  echo ""
+  read -n 1 -s -r -p "Press any key to exit..."
+  echo
+  exit 1
+}
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -15,24 +21,52 @@ need_cmd() {
 }
 
 need_cmd npm
+need_cmd unzip
 
-MOVE_MAP=(
-  "airdrop_perps.py|airdrop/perps"
-  "lighter_perp.py|airdrop/perps"
-  "extended_perp.py|airdrop/perps"
-)
+case "$(uname -s)" in
+  Darwin*)
+    OS="macos"
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    OS="windows"
+    ;;
+  Linux*)
+    OS="linux"
+    ;;
+  *)
+    err "Unsupported operating system: $(uname -s)"
+    ;;
+esac
 
-for entry in "${MOVE_MAP[@]}"; do
-  fname="${entry%%|*}"
-  dest_rel="${entry##*|}"
-  src_path="$ROOT_DIR/$fname"
-  dest_dir="$ROOT_DIR/scripts/modules/premium/$dest_rel"
-  if [ -f "$src_path" ]; then
-    mkdir -p "$dest_dir"
-    mv -f "$src_path" "$dest_dir/"
-    info "Moved $fname -> scripts/modules/premium/$dest_rel/"
-  fi
-done
+ZIP_FILE="compiled-modules-${OS}-latest-python3.10.zip"
+
+if [ -f "$ROOT_DIR/$ZIP_FILE" ]; then
+  TEMP_DIR="$(mktemp -d)"
+  info "Found $ZIP_FILE, processing..."
+
+  mv "$ROOT_DIR/$ZIP_FILE" "$TEMP_DIR/" || { rm -rf "$TEMP_DIR"; err "Failed to move $ZIP_FILE to temp directory"; }
+
+  info "Extracting $ZIP_FILE..."
+  unzip -q "$TEMP_DIR/$ZIP_FILE" -d "$TEMP_DIR" || { rm -rf "$TEMP_DIR"; err "Failed to extract $ZIP_FILE"; }
+
+  info "Moving files to their destinations..."
+  find "$TEMP_DIR" -type f | while read -r file; do
+    if [ "$(basename "$file")" = "$ZIP_FILE" ]; then
+      continue
+    fi
+
+    rel_path="${file#$TEMP_DIR/}"
+    if [ -n "$rel_path" ] && [ "$rel_path" != "$file" ]; then
+      dest_dir="$ROOT_DIR/scripts/modules/premium/$(dirname "$rel_path")"
+      mkdir -p "$dest_dir"
+      mv -f "$file" "$dest_dir/"
+      info "Moved $rel_path -> scripts/modules/premium/$rel_path"
+    fi
+  done
+
+  rm -rf "$TEMP_DIR"
+  info "Finished processing $ZIP_FILE"
+fi
 
 info "Launching application..."
 if ! npm start; then
