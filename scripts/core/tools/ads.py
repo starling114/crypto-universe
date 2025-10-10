@@ -299,8 +299,10 @@ class Ads:
     def _start_profile(self):
         logger.debug(f"Profile: {self.label} | Starting profile")
         profile_data = self._check_browser()
+        logger.debug(f"Browser checked: {self.label} | {profile_data}")
         if profile_data["data"]["status"] != "Active":
             profile_data = self._open_browser()
+            logger.debug(f"Browser openned: {self.label} | {profile_data}")
 
         logger.success(f"Profile: {self.label} | Started")
 
