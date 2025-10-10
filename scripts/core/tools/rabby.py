@@ -34,7 +34,7 @@ class Rabby:
 
         self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
         self.ads.click_element('//button[span[text()="Unlock"]]')
-        if not self.ads.find_element('//div[@class="gasprice"]', 15):
+        if not self.ads.until_present('//div[text()="Swap"]', 15):
             raise ExecutionError("Rabby auth failed")
         logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
 
