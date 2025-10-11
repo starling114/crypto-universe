@@ -14,23 +14,6 @@ from loguru import logger
 NULL_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
-def debug_mode():
-    return os.getenv("DEBUG") == "true"
-
-
-logger.remove()
-logger.level("INFO", color="<bold><cyan>")
-logger.level("WARNING", color="<bold><yellow>")
-logger.level("DEBUG", color="<bold><blue>")
-level = "DEBUG" if debug_mode() else "INFO"
-format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
-logger.add(sys.stdout, colorize=True, format=format, level=level)
-
-
-class ExecutionError(Exception):
-    pass
-
-
 def load_json(file_path, check_existance=True):
     if not os.path.exists(file_path):
         if check_existance:
@@ -47,6 +30,23 @@ INSTRUCTIONS = load_json("../backend/modules/crypto_universe/instructions.json",
 CONFIGS = load_json("../configs.json")
 PRIVATE_CONFIGS = load_json("../private_configs.json", check_existance=False)
 ERC20_ABI = load_json("../erc20abi.json")
+
+
+def debug_mode():
+    return INSTRUCTIONS["debug_mode"]
+
+
+logger.remove()
+logger.level("INFO", color="<bold><cyan>")
+logger.level("WARNING", color="<bold><yellow>")
+logger.level("DEBUG", color="<bold><blue>")
+level = "DEBUG" if debug_mode() else "INFO"
+format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
+logger.add(sys.stdout, colorize=True, format=format, level=level)
+
+
+class ExecutionError(Exception):
+    pass
 
 
 def round_number(number, precision=5):
@@ -124,6 +124,9 @@ def import_premium_module_extra(module_name, class_name, force=True):
 
 
 def run_module(aaarg, modules):
+    if debug_mode():
+        logger.debug("Debug mode is enabled")
+
     module = modules.get(aaarg, None)
     if module:
         module.run()
@@ -132,6 +135,9 @@ def run_module(aaarg, modules):
 
 
 def run_premium_module(aaarg, modules):
+    if debug_mode():
+        logger.debug("Debug mode is enabled")
+
     module = modules.get(aaarg, None)
     if module:
         location = "/".join(aaarg.split("-"))

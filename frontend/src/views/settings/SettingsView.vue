@@ -26,7 +26,7 @@
     </div>
   </cu-collapsible-section>
 
-  <cu-collapsible-section name="premium" title="Premium">
+  <cu-collapsible-section name="premium" title="Premium" class="mb-2">
     <cu-label label="License Key"></cu-label>
     <div>
       <input type="text" id="licenseKey" v-model="licenseKey" placeholder="Enter license..."
@@ -35,11 +35,21 @@
     </div>
     <span v-if="licenseKeyValidationError" class="text-red-600">License key is no valid</span>
   </cu-collapsible-section>
+
+  <cu-collapsible-section name="additionalSettings" title="Additional Settings">
+    <div class="grid grid-cols-2 gap-2">
+      <cu-checkbox name="debugMode" v-model="debugMode" label="Debug Mode" tooltip="Turn on to enable debug mode." />
+    </div>
+    <div class="mt-4 mb-4 flex justify-center">
+      <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />
+    </div>
+  </cu-collapsible-section>
 </template>
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { loadModuleData, updateModuleData } from '@/utils'
+import { initFlowbite } from 'flowbite'
 import {
   CuTitle,
   CuHorizontalCheckboxGroup,
@@ -47,6 +57,7 @@ import {
   CuCollapsibleSection,
   CuButton,
   CuTextarea,
+  CuCheckbox,
 } from '@/components/cu'
 
 const availableModules = ref([])
@@ -60,6 +71,7 @@ const premiumModules = ref([])
 const premiumMode = ref(false)
 const licenseKey = ref('')
 const licenseKeyValidationError = ref(false)
+const debugMode = ref(false)
 
 const module = ref('crypto_universe')
 
@@ -72,6 +84,7 @@ const loadDefaults = async () => {
     modules.value = data.modules ?? modules.value
     premiumModules.value = data.premium_modules ?? premiumModules.value
     licenseKey.value = data.license_key ?? licenseKey.value
+    debugMode.value = data.debug_mode ?? debugMode.value
   })
 
   await loadModuleData(proxy, module.value, 'secrets', 'js', (data) => {
@@ -101,7 +114,8 @@ const handleSave = async () => {
   await updateModuleData(proxy, module.value, 'instructions', 'js', {
     modules: modules.value,
     premium_modules: premiumModules.value,
-    license_key: licenseKey.value
+    license_key: licenseKey.value,
+    debug_mode: debugMode.value,
   })
 
   window.location.reload()
@@ -141,6 +155,7 @@ const groupedModules = computed(() => {
 })
 
 onMounted(async () => {
+  initFlowbite()
   await loadDefaults()
 })
 </script>

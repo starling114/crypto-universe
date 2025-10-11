@@ -60,7 +60,9 @@ export function compareVersions(version1, version2) {
 }
 
 export function debugMode() {
-  return process.env.DEBUG === "true"
+  const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
+
+  return !!instructions.debug_mode
 }
 
 export function runAuthentication() {
