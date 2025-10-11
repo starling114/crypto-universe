@@ -112,6 +112,58 @@ if ! "$VENV_PYTHON" -m pip install -r requirements.txt; then
   err "Failed to install Python dependencies. Please check requirements.txt or your internet connection."
 fi
 
+info "Creating Applications shortcut for start.sh..."
+DESTINATION_DIR="/Applications"
+SHORTCUT_NAME="CU"
+START_SH="$TARGET_DIR/bin/start.sh"
+ICON_PATH="$TARGET_DIR/frontend/public/logo.icns"
+APP_DIR="$DESTINATION_DIR/$SHORTCUT_NAME.app"
+CONTENTS_DIR="$APP_DIR/Contents"
+EXEC_DIR="$CONTENTS_DIR/MacOS"
+PLIST_FILE="$CONTENTS_DIR/Info.plist"
+
+need_cmd bash
+need_cmd osascript
+
+if [ -d "$APP_DIR" ]; then
+    rm -rf "$APP_DIR" || warn "Failed to delete existing shortcut: $APP_DIR"
+fi
+
+mkdir -p "$EXEC_DIR" || err "Failed to create directory $EXEC_DIR"
+
+cat > "$EXEC_DIR/$SHORTCUT_NAME" << EOF
+#!/bin/bash
+osascript -e "tell application \\"Terminal\\" to do script \\"bash '$START_SH'\\"" -e 'tell application "Terminal" to activate'
+EOF
+
+chmod +x "$EXEC_DIR/$SHORTCUT_NAME" || err "Failed to make $EXEC_DIR/$SHORTCUT_NAME executable"
+
+cat > "$PLIST_FILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>$SHORTCUT_NAME</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.example.$SHORTCUT_NAME</string>
+    <key>CFBundleName</key>
+    <string>$SHORTCUT_NAME</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+</dict>
+</plist>
+EOF
+
+mkdir -p "$CONTENTS_DIR/Resources"
+cp "$ICON_PATH" "$CONTENTS_DIR/Resources/AppIcon.icns" || warn "Failed to copy icon to $CONTENTS_DIR/Resources/AppIcon.icns"
+
+info "Created Applcations shortcut for start.sh: $APP_DIR"
+
 cd "$TARGET_DIR" || err "Could not return to project directory."
 
 info "Setup complete!"
