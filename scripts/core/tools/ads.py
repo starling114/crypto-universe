@@ -3,6 +3,7 @@ import os
 import requests
 from core.tools.metamask import Metamask
 from core.tools.rabby import Rabby
+from core.tools.phantom import Phantom
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
@@ -19,17 +20,20 @@ class Ads:
     URL = os.getenv("ADSPOWER_URL", "http://local.adspower.net:50325/api/v1")
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
-    WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask}
+    WALLET_PHANTOM = "phantom"
+    WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask, WALLET_PHANTOM: Phantom}
     SYSTEM_TABS = ["Rabby Offscreen Page", "DevTools"]
 
-    def __init__(self, profile, wallet_password=None, wallet=WALLET_RABBY, label=None):
+    def __init__(self, profile, wallet_password=None, wallet_type=WALLET_RABBY, label=None):
         self.profile = profile
         self.label = label or profile
         self.driver = self._start_profile()
         self.actions = ActionChains(self.driver)
+        self.wallet_password = wallet_password
+        self.wallet_type = None
         self.wallet: Rabby | Metamask = None
         self._prepare_browser()
-        self._prepare_wallet(wallet, wallet_password)
+        self.change_wallet(wallet_type)
 
     def open_url(self, url, timeout=30, track_mouse=False, sleep_time=None):
         try:
@@ -87,6 +91,24 @@ class Ads:
 
         logger.debug(f"Profile: {self.label} | {result} | Clicking element: {xpath}")
         return result
+
+    def text_from_dom(self, xpath):
+        logger.debug(f"Profile: {self.label} | Getting DOM text: {xpath}")
+        return self.execute_script(
+            f"""
+            var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            return element ? element.textContent : null;
+        """
+        )
+
+    def click_element_dom(self, xpath):
+        logger.debug(f"Profile: {self.label} | Clicking DOM element: {xpath}")
+        return self.execute_script(
+            f"""
+            var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            return element ? element.click() : null;
+        """
+        )
 
     def hover_element(self, xpath, timeout=5):
         web_element = self.find_element(xpath, timeout)
@@ -351,13 +373,17 @@ class Ads:
 
         self.switch_tab(tabs[0])
 
-    def _prepare_wallet(self, wallet_name, wallet_password):
-        wallet = self.WALLETS.get(wallet_name)
+    def change_wallet(self, wallet_type):
+        if wallet_type == self.wallet_type:
+            return
+
+        wallet = self.WALLETS.get(wallet_type)
 
         if wallet:
-            self.wallet = wallet(self, wallet_password)
+            self.wallet = wallet(self, self.wallet_password)
+            self.wallet_type = wallet_type
         else:
-            raise ExecutionError(f"Invalid wallet: {wallet_name}")
+            raise ExecutionError(f"Invalid wallet: {wallet_type}")
 
     def _track_mouse_position(self):
         self.execute_script(

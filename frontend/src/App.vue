@@ -1,20 +1,4 @@
 <template>
-  <div v-if="!versionUpToDate && showVersionBanner"
-    class="fixed bottom-0 start-0 z-50 flex justify-between w-full p-4 border-t border-orange-400 bg-orange-200 dark:bg-orange-900 dark:border-orange-600">
-    <div class="flex items-center mx-auto">
-      <p class="flex items-center text-sm font-normal text-gray-900 dark:text-white">
-        <FireIcon class="mr-1 flex-shrink-0 w-6 h-6" />
-
-        <span>Crypto Universe is out of date, please update it running `git pull`</span>
-      </p>
-    </div>
-    <div class="flex items-center">
-      <button @click="handleBannderDismiss" type="button"
-        class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-none hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:text-white">
-        <XMarkIcon class="flex-shrink-0 w-6 h-6" />
-      </button>
-    </div>
-  </div>
   <section>
     <cu-sidebar>
       <cu-sidebar-logo text="Crypto Universe" logo="logo.png" :debug="debugMode" :premium="premiumMode" />
@@ -306,14 +290,14 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('chore-rabby_import')">
+      <cu-sidebar-item v-if="moduleEnabled('chore-rabby_import') || moduleEnabled('chore-phantom_import')">
         <template #left>
           <RectangleGroupIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
         <template #center>Chore</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/chore-rabby_import">
+        <cu-sidebar-sub-item v-if="moduleEnabled('chore-rabby_import')" tag="router-link" link="/chore-rabby_import">
           <template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -326,6 +310,22 @@
               }" />
           </template>
           <template #center>Rabby Import</template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item v-if="moduleEnabled('chore-phantom_import')" tag="router-link"
+          link="/chore-phantom_import">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(phantom.png)',
+                WebkitMaskImage: 'url(phantom.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Phantom Import</template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
@@ -381,9 +381,7 @@ import {
   ArrowDownOnSquareStackIcon,
   PaperAirplaneIcon,
   ArrowUpOnSquareStackIcon,
-  FireIcon,
   RectangleStackIcon,
-  XMarkIcon,
   ArrowsRightLeftIcon,
   RectangleGroupIcon,
   BeakerIcon,
@@ -392,10 +390,8 @@ import {
 
 const modules = ref([])
 const premiumModules = ref([])
-const versionUpToDate = ref(true)
 const debugMode = ref(false)
 const premiumMode = ref(false)
-const showVersionBanner = ref(true)
 
 const module = ref('crypto_universe')
 
@@ -411,7 +407,6 @@ const loadDefaults = async () => {
 
   debugMode.value = proxy.$globalConfigs.debug_mode
   premiumMode.value = proxy.$globalConfigs.premium_mode
-  versionUpToDate.value = proxy.$globalConfigs.version_up_to_date
 }
 
 const moduleEnabled = (module) => {
@@ -420,10 +415,6 @@ const moduleEnabled = (module) => {
 
 const premiumModuleEnabled = (module) => {
   return premiumMode.value && premiumModules.value.includes(module)
-}
-
-const handleBannderDismiss = () => {
-  showVersionBanner.value = false
 }
 
 onMounted(async () => {

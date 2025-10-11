@@ -5,6 +5,7 @@ from modules.bridge.hyperlane.bridge_hyperlane import BridgeHyperlane
 from modules.bridge.jumper.bridge_jumper import BridgeJumper
 from modules.bridge.relay.bridge_relay import BridgeRelay
 from modules.chore.rabby_import.rabby_import import RabbyImport
+from modules.chore.phantom_import.phantom_import import PhantomImport
 from modules.swap.jumper.swap_jumper import SwapJumper
 from modules.swap.pancakeswap.swap_pancakeswap import SwapPancakeswap
 from modules.testing.ads_execution.ads_execution import AdsExecution
@@ -31,6 +32,7 @@ MODULES = {
     "transfer": Transfer,
     "yt_tokens": YtTokens,
     "chore-rabby_import": RabbyImport,
+    "chore-phantom_import": PhantomImport,
     "testing-ads_execution": AdsExecution,
 }
 PREMIUM_MODULES = {

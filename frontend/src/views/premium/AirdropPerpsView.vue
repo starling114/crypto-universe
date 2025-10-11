@@ -2,13 +2,6 @@
   <cu-title title="Airdrop - Perps" />
 
   <div class="mb-2">
-    <div class="mt-2 grid grid-cols-2 gap-2">
-      <cu-select name="mainPerpType" v-model="mainPerpType" :options="availablePerps" label="Main Perp" />
-      <cu-select name="hedgePerpType" v-model="hedgePerpType" :options="availablePerps" label="Hedge Perp" />
-    </div>
-    <cu-label name="profiles" label="Profiles" tooltip="Choose profiles to run automation." />
-    <VueMultiselect name="profiles" placeholder="Select profiles..." v-model="profiles" :options="availableProfiles"
-      :multiple="true" :close-on-select="false" label="name" track-by="serial_number" />
     <cu-label name="assetsToTrade" label="Assets to trade" tooltip="Choose assets to trade." />
     <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
       :options="availableAssetsToTrade" :multiple="true" :close-on-select="false" label="name" track-by="name" />
@@ -21,6 +14,48 @@
         label="name" track-by="name" />
       <cu-input name="exoticAssetsProbability" size="small" v-model="exoticAssetsProbability" label="Probability"
         placeholder="Probability" />
+    </div>
+
+    <div class="mt-2 grid grid-cols-2 gap-2">
+      <cu-select name="mainPerpType" v-model="currentMainPerpType" :options="availablePerps" label="Main Perp" />
+      <cu-select name="hedgePerpType" v-model="currentHedgePerpType" :options="availablePerps" label="Hedge Perp" />
+    </div>
+    <cu-label name="currentProfiles" label="Profiles for this batch" tooltip="Choose profiles for this batch." />
+    <VueMultiselect name="currentProfiles" placeholder="Select profiles..." v-model="currentProfiles"
+      :options="availableProfilesForSelection" :multiple="true" :close-on-select="false" label="name"
+      track-by="serial_number" />
+
+    <div class="mt-4 flex justify-start gap-2">
+      <cu-button v-if="editingBatchIndex == null" color="green" size="small" label="Add Batch" @click="addBatch" />
+      <cu-button v-if="editingBatchIndex !== null" color="yellow" size="small" label="Update Batch"
+        @click="updateBatch" />
+      <cu-button v-if="editingBatchIndex !== null" size="small" label="Cancel Edit" @click="cancelEdit" />
+    </div>
+
+    <div v-if="batches.length > 0" class="mt-4">
+      <cu-label name="batches" label="Configured Batches" />
+      <div class="space-y-2">
+        <div v-for="(batch, index) in batches" :key="index"
+          class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                Batch #{{ index + 1 }}
+              </div>
+              <div class="text-xs text-gray-700 dark:text-gray-300">
+                <span class="font-medium">Main:</span> {{ batch.mainPerpType }} |
+                <span class="font-medium">Hedge:</span> {{ batch.hedgePerpType }} |
+                <span class="font-medium">Profiles ({{ batch.profiles.length }}):</span>
+                {{batch.profiles.map(p => p.name).join(', ')}}
+              </div>
+            </div>
+            <div class="flex gap-1 ml-2">
+              <cu-button @click="editBatch(index)" color="yellow" size="small" label="Edit" />
+              <cu-button @click="removeBatch(index)" color="red" size="small" label="Remove" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -96,13 +131,6 @@
       <cu-checkbox name="getLatestStats" v-model="getLatestStats" label="Only get latest balance and volume stats"
         tooltip="Only get latest balance and volume stats, don't run trading logic." />
     </div>
-    <div class="mb-2">
-      <cu-checkbox name="parallelExecution" v-model="parallelExecution" label="Parallel execution"
-        tooltip="Run N profiles in parallel, set how many profiles to run in a batch." />
-    </div>
-    <div v-if="parallelExecution" class="mt-1 grid grid-cols-6 gap-2">
-      <cu-input name="profilesInBatch" size="small" v-model="profilesInBatch" placeholder="Profiles in batch" />
-    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -115,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed } from 'vue'
 import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
@@ -132,11 +160,14 @@ import {
 import VueMultiselect from 'vue-multiselect'
 
 const availablePerps = ref([])
-const mainPerpType = ref(null)
-const hedgePerpType = ref(null)
+const currentMainPerpType = ref(null)
+const currentHedgePerpType = ref(null)
+const currentProfiles = ref([])
 
 const availableProfiles = ref([])
-const profiles = ref([])
+
+const batches = ref([])
+const editingBatchIndex = ref(null)
 
 const minLeverage = ref(5)
 const maxLeverage = ref(7)
@@ -162,8 +193,6 @@ const exoticAssetsToTrade = ref([])
 const exoticAssetsProbability = ref(3)
 
 const logVolumes = ref(false)
-const parallelExecution = ref(false)
-const profilesInBatch = ref(5)
 const getLatestStats = ref(false)
 
 const logs = ref([])
@@ -176,6 +205,69 @@ const { proxy } = getCurrentInstance()
 const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleClearLogs = async () => logs.value = []
 const handleScriptFinish = async () => moduleRunning.value = false
+
+const availableProfilesForSelection = computed(() => {
+  const usedSerialNumbers = batches.value
+    .filter((_, index) => index !== editingBatchIndex.value)
+    .flatMap(batch => batch.profiles.map(p => p.serial_number))
+
+  return availableProfiles.value.filter(
+    profile => !usedSerialNumbers.includes(profile.serial_number)
+  )
+})
+
+const addBatch = () => {
+  if (!currentMainPerpType.value || !currentHedgePerpType.value || currentProfiles.value.length === 0) {
+    alert('Please select main perp, hedge perp, and at least one profile')
+    return
+  }
+
+  batches.value.push({
+    mainPerpType: currentMainPerpType.value,
+    hedgePerpType: currentHedgePerpType.value,
+    profiles: [...currentProfiles.value]
+  })
+
+  // Reset current selections
+  currentProfiles.value = []
+}
+
+const editBatch = (index) => {
+  const batch = batches.value[index]
+  currentMainPerpType.value = batch.mainPerpType
+  currentHedgePerpType.value = batch.hedgePerpType
+  currentProfiles.value = [...batch.profiles]
+  editingBatchIndex.value = index
+}
+
+const updateBatch = () => {
+  if (editingBatchIndex.value === null) return
+
+  if (!currentMainPerpType.value || !currentHedgePerpType.value || currentProfiles.value.length === 0) {
+    alert('Please select main perp, hedge perp, and at least one profile')
+    return
+  }
+
+  batches.value[editingBatchIndex.value] = {
+    mainPerpType: currentMainPerpType.value,
+    hedgePerpType: currentHedgePerpType.value,
+    profiles: [...currentProfiles.value]
+  }
+
+  cancelEdit()
+}
+
+const cancelEdit = () => {
+  editingBatchIndex.value = null
+  currentProfiles.value = []
+}
+
+const removeBatch = (index) => {
+  batches.value.splice(index, 1)
+  if (editingBatchIndex.value === index) {
+    cancelEdit()
+  }
+}
 
 const loadDefaults = async () => {
   await loadAdsProfiles(proxy, (profilesData) => {
@@ -191,9 +283,17 @@ const loadDefaults = async () => {
   }, logs)
 
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
-    if (!Object.hasOwn(data, 'profiles')) return
+    if (!Object.hasOwn(data, 'assets_to_trade')) return
 
-    profiles.value = availableProfiles.value.filter(item => (data.profiles ?? []).includes(item.serial_number))
+    assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
+    tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
+    exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
+    exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
+    batches.value = (data.batches ?? []).map(batch => ({
+      mainPerpType: batch.main_perp_type || availablePerps.value[0],
+      hedgePerpType: batch.hedge_perp_type || availablePerps.value[0],
+      profiles: availableProfiles.value.filter(item => (batch.profiles ?? []).includes(item.serial_number))
+    }))
     minLeverage.value = data.min_leverage ?? minLeverage.value
     maxLeverage.value = data.max_leverage ?? maxLeverage.value
     minPositionUsd.value = data.min_position_usd ?? minPositionUsd.value
@@ -210,29 +310,31 @@ const loadDefaults = async () => {
     marketOrderSlippage.value = data.market_order_slippage ?? marketOrderSlippage.value
     sizeMismatchPercent.value = data.size_mismatch_percent ?? sizeMismatchPercent.value
     liquidationThresholdPercent.value = data.liquidation_threshold_percent ?? liquidationThresholdPercent.value
-    parallelExecution.value = data.parallel_execution ?? parallelExecution.value
-    profilesInBatch.value = data.profiles_in_batch ?? profilesInBatch.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
-    assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
-    tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
-    exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
-    exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
     getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
-    mainPerpType.value = data.main_perp_type ?? mainPerpType.value
-    hedgePerpType.value = data.hedge_perp_type ?? hedgePerpType.value
   }, logs)
-  mainPerpType.value = mainPerpType.value || availablePerps.value[0]
-  hedgePerpType.value = hedgePerpType.value || availablePerps.value[0]
+
+  currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
+  currentHedgePerpType.value = currentHedgePerpType.value || availablePerps.value[0]
 
   moduleRunning.value = (await statusModule(proxy, module.value, logs)) ?? moduleRunning.value
 }
 
 const handleExecute = async () => {
+  if (batches.value.length === 0) {
+    alert('Please add at least one batch before executing')
+    return
+  }
+
   moduleRunning.value = true
 
   await updateModuleData(proxy, module.value, 'instructions', 'python', {
-    profiles: profiles.value.map(profile => profile.serial_number),
-    labels: profiles.value.map(profile => profile.name),
+    batches: batches.value.map(batch => ({
+      main_perp_type: batch.mainPerpType,
+      hedge_perp_type: batch.hedgePerpType,
+      profiles: batch.profiles.map(profile => profile.serial_number),
+      labels: batch.profiles.map(profile => profile.name)
+    })),
     min_leverage: parseFloat(minLeverage.value),
     max_leverage: parseFloat(maxLeverage.value),
     min_position_usd: parseFloat(minPositionUsd.value),
@@ -249,16 +351,12 @@ const handleExecute = async () => {
     market_order_slippage: parseFloat(marketOrderSlippage.value),
     size_mismatch_percent: parseFloat(sizeMismatchPercent.value),
     liquidation_threshold_percent: parseFloat(liquidationThresholdPercent.value),
-    parallel_execution: parallelExecution.value,
-    profiles_in_batch: profilesInBatch.value,
     log_volumes: logVolumes.value,
     assets_to_trade: assetsToTrade.value.map(asset => asset.name),
     trade_exotic_assets: tradeExoticAssets.value,
     exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
     exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
-    get_latest_stats: getLatestStats.value,
-    main_perp_type: mainPerpType.value,
-    hedge_perp_type: hedgePerpType.value
+    get_latest_stats: getLatestStats.value
   }, logs)
 
   await startModule(proxy, module.value, logs)

@@ -10,7 +10,6 @@ import {
   parseLogs,
   moduleDataFilepath,
   pythonExecutable,
-  checkVersion,
   debugMode,
   adsProfiles,
   configs,
@@ -30,7 +29,6 @@ const logEmitter = new EventEmitter()
 const ansiToHtml = new AnsiToHtml()
 
 let pythonProcesses = {}
-const versionUpTodate = await checkVersion()
 
 if (runAuthentication()) {
   app.use(basicAuth({
@@ -59,7 +57,7 @@ apiRoutes.get('/ads_profiles', async (req, res) => {
 })
 
 apiRoutes.get('/configs', async (req, res) => {
-  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), version_up_to_date: versionUpTodate, configs: configs })
+  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), configs: configs })
 })
 
 apiRoutes.get('/balances', async (req, res) => {

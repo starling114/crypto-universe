@@ -30,6 +30,7 @@ import TransferSettingsView from '@/views/settings/TransferSettingsView.vue'
 import YtTokensView from '@/views/YtTokensView.vue'
 import YtTokensSettingsView from '@/views/settings/YtTokensSettingsView.vue'
 import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
+import ChorePhantomImportView from '@/views/ChorePhantomImportView.vue'
 import AirdropPerpsView from '@/views/premium/AirdropPerpsView.vue'
 import AirdropPerpsSettingsView from '@/views/settings/premium/AirdropPerpsSettingsView.vue'
 import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
@@ -203,6 +204,12 @@ const routes = [
     name: 'Chore Rabby Import',
     component: ChoreRabbyImportView,
     meta: { title: 'CU | Chore - Rabby Import' }
+  },
+  {
+    path: '/chore-Phantom_import',
+    name: 'Chore Phantom Import',
+    component: ChorePhantomImportView,
+    meta: { title: 'CU | Chore - Phantom Import' }
   },
   {
     path: '/testing-ads_execution',

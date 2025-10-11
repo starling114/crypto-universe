@@ -13,6 +13,7 @@ class Rabby:
         self.password = password
         self.identifier = os.getenv("RABY_IDENTIFIER", self.IDENTIFIER)
         self.unlock_path = os.getenv("RABY_UNLOCK_PATH", self.UNLOCK_PATH)
+        self._is_authenticated = False
 
     def url(self):
         return f"chrome-extension://{self.identifier}/index.html"
@@ -24,19 +25,23 @@ class Rabby:
         self.ads.open_url(self.url())
 
     def authenticate(self) -> None:
-        self.ads.open_url(self.url())
+        if not self._is_authenticated:
+            self.ads.open_url(self.url())
 
-        if self.ads.find_element('//div[text()="Swap"]', 2):
-            logger.info(f"Profile: {self.ads.label} | Rabby | Already authenticated")
-            return
+            if self.ads.find_element('//div[text()="Swap"]', 2):
+                logger.info(f"Profile: {self.ads.label} | Rabby | Already authenticated")
+                self._is_authenticated = True
+                return
 
-        self.ads.open_url(self.unlock_url())
+            self.ads.open_url(self.unlock_url())
 
-        self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
-        self.ads.click_element('//button[span[text()="Unlock"]]')
-        if not self.ads.until_present('//div[text()="Swap"]', 15):
-            raise ExecutionError("Rabby auth failed")
-        logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
+            self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
+            self.ads.click_element('//button[span[text()="Unlock"]]')
+            if not self.ads.until_present('//div[text()="Swap"]', 15):
+                raise ExecutionError("Phantom auth failed")
+
+            self._is_authenticated = True
+            logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
 
     def sign(self):
         logger.debug(f"Profile: {self.ads.label} | Rabby | Signing transaction")
