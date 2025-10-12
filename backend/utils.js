@@ -6,6 +6,7 @@ import path from 'path'
 export const wait = ms => new Promise(r => setTimeout(r, ms))
 export const sleep = async (millis) => new Promise(resolve => setTimeout(resolve, millis))
 export const configs = readJson('./configs.json')
+export const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
 
 const prices = await getTokensPrice()
 
@@ -45,8 +46,6 @@ export function parseLogs(log) {
 }
 
 export function debugMode() {
-  const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
-
   return !!instructions.debug_mode
 }
 
@@ -75,7 +74,13 @@ export function moduleDataFilepath(module, type, script_type) {
 }
 
 export async function adsProfiles() {
-  const apiUrl = (process.env.ADSPOWER_URL || 'http://local.adspower.net:50325/api/v1') + '/user/list';
+  let baseUrl;
+  if (instructions['ads_url'] && instructions['ads_url'] != "") {
+    baseUrl = instructions['ads_url']
+  } else {
+    baseUrl = 'http://local.adspower.net:50325'
+  }
+  const apiUrl = baseUrl + '/api/v1/user/list';
   const pageSize = 100;
   let allProfiles = [];
   let page = 1;
@@ -142,8 +147,6 @@ export async function getTokensPrice() {
 }
 
 export function premiumMode() {
-  const instructions = readJson('./backend/modules/crypto_universe/instructions.json')
-
   return !!instructions.license_key
 }
 

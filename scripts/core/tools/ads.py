@@ -13,11 +13,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import ExecutionError, logger, sleep
+from utils import ExecutionError, logger, sleep, INSTRUCTIONS
 
 
 class Ads:
-    URL = os.getenv("ADSPOWER_URL", "http://local.adspower.net:50325/api/v1")
     WALLET_RABBY = "rabby"
     WALLET_METAMASK = "metamask"
     WALLET_PHANTOM = "phantom"
@@ -34,6 +33,14 @@ class Ads:
         self.wallet: Rabby | Metamask = None
         self._prepare_browser()
         self.change_wallet(wallet_type)
+
+    def url(self):
+        if INSTRUCTIONS['ads_url'] and INSTRUCTIONS['ads_url'] != '':
+            base_url = INSTRUCTIONS['ads_url']
+        else:
+            base_url = "http://local.adspower.net:50325"
+
+        return f"{base_url}/api/v1"
 
     def open_url(self, url, timeout=30, track_mouse=False, sleep_time=None):
         try:
@@ -249,7 +256,7 @@ class Ads:
             data = self._check_browser()
             if data["data"]["status"] == "Active":
                 parameters = {"serial_number": self.profile}
-                requests.get(f"{Ads.URL}/browser/stop", params=parameters)
+                requests.get(f"{self.url()}/browser/stop", params=parameters)
             else:
                 logger.success(f"Profile: {self.label} | Closed")
                 break
@@ -306,7 +313,7 @@ class Ads:
     def proxy_ip(self):
         try:
             parameters = {"serial_number": self.profile}
-            response = requests.get(f"{Ads.URL}/user/list", params=parameters)
+            response = requests.get(f"{self.url()}/user/list", params=parameters)
             response.raise_for_status()
             sleep(0.5)
             json_response = response.json()
@@ -344,7 +351,7 @@ class Ads:
         try:
             logger.debug(f"Profile: {self.label} | Checking browser")
             parameters = {"serial_number": self.profile}
-            response = requests.get(f"{Ads.URL}/browser/active", params=parameters)
+            response = requests.get(f"{self.url()}/browser/active", params=parameters)
             response.raise_for_status()
             json_response = response.json()
             if json_response["code"] == 0:
@@ -356,7 +363,7 @@ class Ads:
 
     def _open_browser(self):
         parameters = {"serial_number": self.profile, "open_tabs": 1}
-        response = requests.get(f"{Ads.URL}/browser/start", params=parameters)
+        response = requests.get(f"{self.url()}/browser/start", params=parameters)
         response.raise_for_status()
         return response.json()
 
