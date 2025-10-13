@@ -34,6 +34,7 @@ import ChorePhantomImportView from '@/views/ChorePhantomImportView.vue'
 import AirdropPerpsView from '@/views/premium/AirdropPerpsView.vue'
 import AirdropPerpsSettingsView from '@/views/settings/premium/AirdropPerpsSettingsView.vue'
 import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
+import TestingProcessingView from '@/views/TestingProcessingView.vue'
 
 const app = createApp(App)
 
@@ -216,6 +217,12 @@ const routes = [
     name: 'Testing ADS Execution',
     component: TestingAdsExecutionView,
     meta: { title: 'CU | Testing - ADS Execution' }
+  },
+  {
+    path: '/testing-processing',
+    name: 'Testing Processing',
+    component: TestingProcessingView,
+    meta: { title: 'CU | Testing - Processing' }
   }
 ]
 

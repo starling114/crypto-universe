@@ -329,14 +329,15 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('testing-ads_execution')">
+      <cu-sidebar-item v-if="moduleEnabled('testing-ads_execution') || moduleEnabled('testing-processing')">
         <template #left>
           <BeakerIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
         <template #center>Testing</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/testing-ads_execution">
+        <cu-sidebar-sub-item v-if="moduleEnabled('testing-ads_execution')" tag="router-link"
+          link="/testing-ads_execution">
           <template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -349,6 +350,21 @@
               }" />
           </template>
           <template #center>ADS Execution</template>
+        </cu-sidebar-sub-item>
+
+        <cu-sidebar-sub-item v-if="moduleEnabled('testing-processing')" tag="router-link" link="/testing-processing">
+          <template #left>
+            <div
+              class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              :style="{
+                maskImage: 'url(ads.png)',
+                WebkitMaskImage: 'url(ads.png)',
+                maskSize: '100% 100%',
+                WebkitMaskSize: '100% 100%',
+                backgroundColor: 'currentColor'
+              }" />
+          </template>
+          <template #center>Processing</template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
