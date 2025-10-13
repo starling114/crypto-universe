@@ -16,7 +16,7 @@ import {
   runAuthentication,
   premiumMode
 } from "./utils.js"
-import { spawn } from 'child_process'
+import { spawn, exec } from 'child_process'
 import { EventEmitter } from 'events'
 import AnsiToHtml from 'ansi-to-html'
 
@@ -100,8 +100,22 @@ apiRoutes.post('/stop_module', (req, res) => {
 
   if (pythonProcesses[module]) {
     logEmitter.emit('log', `Stopping '${module}' module...`, module)
-    pythonProcesses[module].kill('SIGINT')
-    delete pythonProcesses[module]
+
+    if (process.platform === 'win32') {
+      const pid = pythonProcesses[module].pid;
+      exec(`taskkill /pid ${pid} /T /F`, (error, stdout, stderr) => {
+        console.error(stdout)
+        console.error(stderr)
+        if (error) {
+          console.error('Error stopping process:', error)
+        }
+        delete pythonProcesses[module]
+      });
+    } else {
+      pythonProcesses[module].kill('SIGINT')
+      delete pythonProcesses[module]
+    }
+
     res.json(true)
   } else {
     logEmitter.emit('log', 'No module running', module)
@@ -148,6 +162,11 @@ apiRoutes.post('/start_module', (req, res) => {
         logEmitter.emit('log', `Module '${module}' finished with exit code ${code}`, module)
         delete pythonProcesses[module]
       })
+
+      pythonProcesses[module].on('error', (err) => {
+        logEmitter.emit('log', `Module '${module}' failed to start ${err}`, module)
+        delete pythonProcesses[module]
+      });
     } catch (error) {
       logEmitter.emit('log', `Error starting '${module}' module: ${error}`, module)
       res.json(false)

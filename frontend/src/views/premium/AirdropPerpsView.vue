@@ -131,6 +131,10 @@
       <cu-checkbox name="getLatestStats" v-model="getLatestStats" label="Only get latest balance and volume stats"
         tooltip="Only get latest balance and volume stats, don't run trading logic." />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="stopProcessing" v-model="stopProcessing" label="Close all orders and positions"
+        tooltip="use this to close all orders and positions, trading cycle won't be executed." />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -194,6 +198,7 @@ const exoticAssetsProbability = ref(3)
 
 const logVolumes = ref(false)
 const getLatestStats = ref(false)
+const stopProcessing = ref(false)
 
 const logs = ref([])
 const moduleRunning = ref(false)
@@ -312,6 +317,7 @@ const loadDefaults = async () => {
     liquidationThresholdPercent.value = data.liquidation_threshold_percent ?? liquidationThresholdPercent.value
     logVolumes.value = data.log_volumes ?? logVolumes.value
     getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
+    stopProcessing.value = data.stop_processing ?? stopProcessing.value
   }, logs)
 
   currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
@@ -356,7 +362,8 @@ const handleExecute = async () => {
     trade_exotic_assets: tradeExoticAssets.value,
     exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
     exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
-    get_latest_stats: getLatestStats.value
+    get_latest_stats: getLatestStats.value,
+    stop_processing: stopProcessing.value
   }, logs)
 
   await startModule(proxy, module.value, logs)
