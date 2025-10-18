@@ -44,7 +44,7 @@ app.use('/api', apiRoutes)
 app.use(express.static('./frontend/dist'))
 
 app.get('*', (req, res) => {
-  res.sendFile('./frontend/dist/index.html')
+  res.sendFile(path.resolve('./frontend/dist/index.html'))
 })
 
 apiRoutes.get('/ads_profiles', async (req, res) => {

@@ -135,6 +135,15 @@
       <cu-checkbox name="stopProcessing" v-model="stopProcessing" label="Close all orders and positions"
         tooltip="use this to close all orders and positions, trading cycle won't be executed." />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="minimumCycleBalanceCheck" v-model="minimumCycleBalanceCheck"
+        label="Check minimum allowed balance value"
+        tooltip="Enable to fail cycles if any of the balances is less than allowed one." />
+    </div>
+    <div v-if="minimumCycleBalanceCheck" class="mt-1 grid grid-cols-3 gap-2">
+      <cu-input name="minimumCycleBalance" size="small" v-model="minimumCycleBalance" label="Minimum allowed balance"
+        placeholder="Minimum allowed balance" />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -195,6 +204,8 @@ const availableExoticAssetsToTrade = ref([])
 const tradeExoticAssets = ref(false)
 const exoticAssetsToTrade = ref([])
 const exoticAssetsProbability = ref(3)
+const minimumCycleBalanceCheck = ref(false)
+const minimumCycleBalance = ref(1000)
 
 const logVolumes = ref(false)
 const getLatestStats = ref(false)
@@ -318,6 +329,8 @@ const loadDefaults = async () => {
     logVolumes.value = data.log_volumes ?? logVolumes.value
     getLatestStats.value = data.get_latest_stats ?? getLatestStats.value
     stopProcessing.value = data.stop_processing ?? stopProcessing.value
+    minimumCycleBalanceCheck.value = data.minimum_cycle_balance_check ?? minimumCycleBalanceCheck.value
+    minimumCycleBalance.value = data.minimum_cycle_balance ?? minimumCycleBalance.value
   }, logs)
 
   currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
@@ -363,7 +376,9 @@ const handleExecute = async () => {
     exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
     exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
     get_latest_stats: getLatestStats.value,
-    stop_processing: stopProcessing.value
+    stop_processing: stopProcessing.value,
+    minimum_cycle_balance_check: minimumCycleBalanceCheck.value,
+    minimum_cycle_balance: parseFloat(minimumCycleBalance.value)
   }, logs)
 
   await startModule(proxy, module.value, logs)

@@ -35,8 +35,8 @@ class Ads:
         self.change_wallet(wallet_type)
 
     def url(self):
-        if INSTRUCTIONS['ads_url'] and INSTRUCTIONS['ads_url'] != '':
-            base_url = INSTRUCTIONS['ads_url']
+        if INSTRUCTIONS["ads_url"] and INSTRUCTIONS["ads_url"] != "":
+            base_url = INSTRUCTIONS["ads_url"]
         else:
             base_url = "http://local.adspower.net:50325"
 
