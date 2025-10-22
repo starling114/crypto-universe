@@ -34,44 +34,108 @@ def machine_id():
     identifiers.append(platform.system())
     identifiers.append(platform.machine())
 
+    def is_valid_uuid(uuid_str: str) -> bool:
+        if not uuid_str:
+            return False
+
+        uuid_str = uuid_str.lower().strip()
+        invalid_patterns = [
+            "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "00000000-0000-0000-0000-000000000000",
+            "to be filled",
+            "unknown",
+        ]
+        return not any(pattern in uuid_str for pattern in invalid_patterns)
+
     try:
         if platform.system() == "Windows":
-            result = subprocess.check_output(
-                "wmic csproduct get uuid", shell=True, stderr=subprocess.DEVNULL
-            ).decode()
-            uuid_line = result.split("\n")[1].strip()
-            if uuid_line and uuid_line.lower() not in ['', 'ffffffff-ffff-ffff-ffff-ffffffffffff']:
-                identifiers.append(uuid_line)
+            try:
+                result = (
+                    subprocess.check_output(
+                        "wmic csproduct get uuid", shell=True, stderr=subprocess.DEVNULL, timeout=5
+                    )
+                    .decode()
+                    .strip()
+                )
+
+                lines = [l.strip() for l in result.split("\n") if l.strip()]
+                if len(lines) > 1 and is_valid_uuid(lines[1]):
+                    identifiers.append(lines[1])
+            except Exception:
+                try:
+                    ps_cmd = 'powershell -Command "(Get-CimInstance -ClassName Win32_ComputerSystemProduct).UUID"'
+                    result = (
+                        subprocess.check_output(ps_cmd, shell=True, stderr=subprocess.DEVNULL, timeout=5)
+                        .decode()
+                        .strip()
+                    )
+
+                    if result and is_valid_uuid(result):
+                        identifiers.append(result)
+                except Exception:
+                    pass
 
             try:
-                cpu_result = subprocess.check_output(
-                    "wmic cpu get processorid", shell=True, stderr=subprocess.DEVNULL
-                ).decode()
-                cpu_id = cpu_result.split("\n")[1].strip()
-                if cpu_id:
-                    identifiers.append(cpu_id)
-            except:
-                pass
+                cpu_result = (
+                    subprocess.check_output(
+                        "wmic cpu get processorid", shell=True, stderr=subprocess.DEVNULL, timeout=5
+                    )
+                    .decode()
+                    .strip()
+                )
+
+                lines = [l.strip() for l in cpu_result.split("\n") if l.strip()]
+                if len(lines) > 1 and lines[1]:
+                    identifiers.append(lines[1])
+            except Exception:
+                try:
+                    ps_cmd = 'powershell -Command "(Get-CimInstance -ClassName Win32_Processor).ProcessorId"'
+                    result = (
+                        subprocess.check_output(ps_cmd, shell=True, stderr=subprocess.DEVNULL, timeout=5)
+                        .decode()
+                        .strip()
+                    )
+
+                    if result:
+                        identifiers.append(result)
+                except Exception:
+                    pass
 
             try:
-                mb_result = subprocess.check_output(
-                    "wmic baseboard get serialnumber", shell=True, stderr=subprocess.DEVNULL
-                ).decode()
-                mb_serial = mb_result.split("\n")[1].strip()
-                if mb_serial and mb_serial.lower() not in ['', 'to be filled by o.e.m.']:
-                    identifiers.append(mb_serial)
-            except:
-                pass
+                mb_result = (
+                    subprocess.check_output(
+                        "wmic baseboard get serialnumber", shell=True, stderr=subprocess.DEVNULL, timeout=5
+                    )
+                    .decode()
+                    .strip()
+                )
+
+                lines = [l.strip() for l in mb_result.split("\n") if l.strip()]
+                if len(lines) > 1 and is_valid_uuid(lines[1]):
+                    identifiers.append(lines[1])
+            except Exception:
+                try:
+                    ps_cmd = 'powershell -Command "(Get-CimInstance -ClassName Win32_BaseBoard).SerialNumber"'
+                    result = (
+                        subprocess.check_output(ps_cmd, shell=True, stderr=subprocess.DEVNULL, timeout=5)
+                        .decode()
+                        .strip()
+                    )
+
+                    if result and is_valid_uuid(result):
+                        identifiers.append(result)
+                except Exception:
+                    pass
 
         elif platform.system() == "Linux":
             try:
                 with open("/etc/machine-id", "r") as f:
                     identifiers.append(f.read().strip())
-            except:
+            except Exception:
                 try:
                     with open("/sys/class/dmi/id/product_uuid", "r") as f:
                         identifiers.append(f.read().strip())
-                except:
+                except Exception:
                     pass
 
         elif platform.system() == "Darwin":
