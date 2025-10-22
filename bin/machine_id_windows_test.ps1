@@ -52,7 +52,10 @@ def machine_id():
     ]
 
     for name, cmd in commands:
-        result = subprocess.check_output(cmd, shell=True).decode()
+        try:
+            result = subprocess.check_output(cmd, shell=True).decode()
+        except:
+            result = "ERRORED"
         print(f"\n{name}:\n{result}")
 
     return "success finished"
