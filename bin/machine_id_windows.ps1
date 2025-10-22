@@ -15,7 +15,7 @@ function Write-ErrorAndExit {
 
 function Get-PythonPath {
     $python = $null
-    
+
     try {
         $python3 = Get-Command python3 -ErrorAction SilentlyContinue
         if ($python3) {
@@ -25,7 +25,7 @@ function Get-PythonPath {
             }
         }
     } catch {}
-    
+
     try {
         $python = Get-Command python -ErrorAction SilentlyContinue
         if ($python) {
@@ -35,7 +35,7 @@ function Get-PythonPath {
             }
         }
     } catch {}
-    
+
     Write-ErrorAndExit "Python 3.10 or higher is required. Please install it from https://www.python.org/downloads/"
 }
 
@@ -47,9 +47,6 @@ import uuid, platform, subprocess, hashlib
 def machine_id():
     identifiers = []
 
-    mac = uuid.getnode()
-    identifiers.append(str(mac))
-
     identifiers.append(platform.system())
     identifiers.append(platform.machine())
 
@@ -59,8 +56,28 @@ def machine_id():
                 "wmic csproduct get uuid", shell=True, stderr=subprocess.DEVNULL
             ).decode()
             uuid_line = result.split("\n")[1].strip()
-            if uuid_line:
+            if uuid_line and uuid_line.lower() not in ['', 'ffffffff-ffff-ffff-ffff-ffffffffffff']:
                 identifiers.append(uuid_line)
+
+            try:
+                cpu_result = subprocess.check_output(
+                    "wmic cpu get processorid", shell=True, stderr=subprocess.DEVNULL
+                ).decode()
+                cpu_id = cpu_result.split("\n")[1].strip()
+                if cpu_id:
+                    identifiers.append(cpu_id)
+            except:
+                pass
+
+            try:
+                mb_result = subprocess.check_output(
+                    "wmic baseboard get serialnumber", shell=True, stderr=subprocess.DEVNULL
+                ).decode()
+                mb_serial = mb_result.split("\n")[1].strip()
+                if mb_serial and mb_serial.lower() not in ['', 'to be filled by o.e.m.']:
+                    identifiers.append(mb_serial)
+            except:
+                pass
 
         elif platform.system() == "Linux":
             try:
@@ -85,9 +102,12 @@ def machine_id():
     except Exception:
         pass
 
+    if len(identifiers) <= 2:
+        mac = uuid.getnode()
+        identifiers.append(str(mac))
+
     combined = "|".join(identifiers)
     machine_id = hashlib.sha256(combined.encode()).hexdigest()
-    # Take first 32 characters for readability
     short_id = machine_id[:32].upper()
     group_size = 4
     groups = [short_id[i : i + group_size] for i in range(0, len(short_id), group_size)]
