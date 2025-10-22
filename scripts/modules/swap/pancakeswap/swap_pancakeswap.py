@@ -115,6 +115,9 @@ class SwapPancakeswap:
     # https://github.com/czbag/base/blob/e0558d094e608dd7eefae4aa789898f6fe7306f6/config.py#L119
     def swap(self):
         try:
+            logger.warning(f"{self.address} | {self.from_token.symbol}->{self.to_token.symbol} | Implementation error")
+            return False
+
             logger.info(f"{self.address} | {self.from_token.symbol}->{self.to_token.symbol} | Swap started")
 
             self.pre_checks()
