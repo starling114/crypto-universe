@@ -15,7 +15,12 @@
     "ARB",
     "LINK",
     "WLFI",
-    "FARTCOIN"
+    "FARTCOIN",
+    "XAU",
+    "XAG",
+    "MET",
+    "MEGA",
+    "MON"
   ],
   "perps": [
     "lighter",
