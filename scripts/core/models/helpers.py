@@ -1,9 +1,9 @@
+from utils import CONFIGS, ERC20_ABI, NULL_TOKEN_ADDRESS, PRIVATE_CONFIGS
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
 
-from core.models.token import Token
 from core.models.chain import Chain
-from utils import CONFIGS, PRIVATE_CONFIGS, ERC20_ABI, NULL_TOKEN_ADDRESS
+from core.models.token import Token
 
 
 def build_token(web3, chain=None, symbol=None, token_address=None):

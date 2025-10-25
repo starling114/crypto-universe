@@ -1,11 +1,8 @@
 import os
 
 import requests
-from core.tools.metamask import Metamask
-from core.tools.rabby import Rabby
-from core.tools.phantom import Phantom
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
@@ -13,7 +10,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import ExecutionError, logger, sleep, INSTRUCTIONS
+
+from core.tools.metamask import Metamask
+from core.tools.phantom import Phantom
+from core.tools.rabby import Rabby
+from utils import INSTRUCTIONS, ExecutionError, logger, sleep
 
 
 class Ads:
@@ -315,7 +316,7 @@ class Ads:
             parameters = {"serial_number": self.profile}
             response = requests.get(f"{self.url()}/user/list", params=parameters)
             response.raise_for_status()
-            sleep(0.5)
+            sleep(1)
             json_response = response.json()
             if json_response["code"] == 0:
                 return json_response.get("data", {}).get("list", [])[0].get("ip")
@@ -411,4 +412,5 @@ class Ads:
             if self.driver.title not in self.SYSTEM_TABS:
                 final_tabs.append(tab)
 
+        return final_tabs
         return final_tabs

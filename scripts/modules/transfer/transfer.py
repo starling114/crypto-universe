@@ -1,21 +1,21 @@
 import random
 
-from utils import load_json, log_error, wei_to_int, debug_mode, sleep, logger
 from core.helpers import (
-    calculate_token_balance,
     calculate_base_amount,
-    transaction_data,
-    send_transaction,
-    verify_transaction,
+    calculate_token_balance,
     estimate_fee,
     execute_amount_validations,
     get_private_key,
     get_transaction_link,
-    zip_to_objects,
-    prettify_seconds,
     prettify_number,
+    prettify_seconds,
+    send_transaction,
+    transaction_data,
+    verify_transaction,
+    zip_to_objects,
 )
-from core.models.helpers import build_token, build_chain, build_web3
+from core.models.helpers import build_chain, build_token, build_web3
+from utils import debug_mode, load_json, log_error, logger, sleep, wei_to_int
 
 
 class Transfer:
@@ -48,13 +48,15 @@ class Transfer:
 
     def calculate_amount(self):
         balance = calculate_token_balance(self.web3, self.source_address, self.token)
-        amount = calculate_base_amount(balance, self.amount, self.leave_balance, self.leave_balance_amount)
+        amount = calculate_base_amount(
+            balance, self.amount, self.leave_balance, self.leave_balance_amount, self.token.decimals
+        )
 
         if self.token.is_native() and self.leave_balance and float(self.leave_balance_amount) == 0:
             fee = self.calculate_fee(amount)
             amount = amount - fee
 
-        execute_amount_validations(balance, amount)
+        execute_amount_validations(balance, amount, decimals=self.token.decimals)
 
         return amount
 

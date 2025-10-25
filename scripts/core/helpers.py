@@ -1,4 +1,4 @@
-from utils import SECRETS, CONFIGS, int_to_wei, wei_to_int, round_number, ExecutionError, logger
+from utils import CONFIGS, SECRETS, ExecutionError, int_to_wei, round_number, wei_to_int
 
 
 def transaction_data(web3, from_address, to_address=None, data=None, value=None):
@@ -206,41 +206,38 @@ def calculate_token_balance(web3, wallet_address, token, check_balance=True):
     return int(balance)
 
 
-def calculate_base_amount(balance, amount, leave_balance, leave_balance_amount):
+def calculate_base_amount(balance, amount, leave_balance, leave_balance_amount, decimals=18):
     calculated_amount = 0
 
     if leave_balance:
-        if balance <= int_to_wei(float(leave_balance_amount)):
+        if balance <= int_to_wei(float(leave_balance_amount), decimals):
             raise ExecutionError(
                 f"Not enough balance. Balance <= Leave Balance Amount ({prettify_number(wei_to_int(balance))} <= {leave_balance_amount})"
             )
         else:
-            calculated_amount = balance - int_to_wei(float(leave_balance_amount))
+            calculated_amount = balance - int_to_wei(float(leave_balance_amount), decimals)
     else:
-        calculated_amount = int_to_wei(float(amount))
+        calculated_amount = int_to_wei(float(amount), decimals)
 
     return calculated_amount
 
 
 def execute_amount_validations(
-    balance,
-    amount,
-    min_transaction_amount=0.0000001,
-    max_transaction_amount=1000,
+    balance, amount, min_transaction_amount=0.0000001, max_transaction_amount=1000, decimals=18
 ):
-    min_amount = int_to_wei(min_transaction_amount)
-    max_amount = int_to_wei(max_transaction_amount)
+    min_amount = int_to_wei(min_transaction_amount, decimals)
+    max_amount = int_to_wei(max_transaction_amount, decimals)
     if balance < amount:
         raise ExecutionError(
-            f"Not enough balance. Balance < Amount ({prettify_number(wei_to_int(balance))} < {prettify_number(wei_to_int(amount))})"
+            f"Not enough balance. Balance < Amount ({prettify_number(wei_to_int(balance, decimals))} < {prettify_number(wei_to_int(amount, decimals))})"
         )
 
     if amount < min_amount:
         raise ExecutionError(
-            f"Amount < Min transaction amount ({prettify_number(wei_to_int(amount))} < {prettify_number(wei_to_int(min_amount))})"
+            f"Amount < Min transaction amount ({prettify_number(wei_to_int(amount, decimals))} < {prettify_number(wei_to_int(min_amount, decimals))})"
         )
 
     if amount > max_amount:
         raise ExecutionError(
-            f"Amount > Max transaction amount ({prettify_number(wei_to_int(amount))} > {prettify_number(wei_to_int(max_amount))})"
+            f"Amount > Max transaction amount ({prettify_number(wei_to_int(amount, decimals))} > {prettify_number(wei_to_int(max_amount, decimals))})"
         )
