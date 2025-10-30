@@ -9,6 +9,10 @@
     "BNB"
   ],
   "exotic_assets_to_trade": [
+    "UNI",
+    "ZK",
+    "NEAR",
+    "WIF",
     "KAITO",
     "PUMP",
     "LINEA",
@@ -20,7 +24,8 @@
     "XAG",
     "MET",
     "MEGA",
-    "MON"
+    "MON",
+    "ENA"
   ],
   "perps": [
     "lighter",

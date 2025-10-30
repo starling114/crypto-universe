@@ -3,12 +3,22 @@
 
   <div class="mb-2">
     <cu-label name="assetsToTrade" label="Assets to trade" tooltip="Choose assets to trade." />
-    <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
-      :options="availableAssetsToTrade" :multiple="true" :close-on-select="false" label="name" track-by="name" />
+    <div class="mb-2">
+      <cu-checkbox name="customAssets" v-model="customAssetsEnabled" label="Custom assets"
+        tooltip="Enable to specify assets not present in the list." />
+    </div>
+    <div v-if="!customAssetsEnabled">
+      <VueMultiselect name="assetsToTrade" placeholder="Select assets to trade..." v-model="assetsToTrade"
+        :options="availableAssetsToTrade" :multiple="true" :close-on-select="false" label="name" track-by="name" />
+    </div>
+    <div v-else class="mt-1 grid grid-cols-3 gap-2">
+      <cu-input name="customAssetsInput" size="small" v-model="customAssetsInput" placeholder="e.g., BTC, ETH, SOL"
+        tooltip="Enter comma separated assets." />
+    </div>
     <cu-checkbox name="tradeExoticAssets" v-model="tradeExoticAssets" label="Trade exotic assets"
       tooltip="Choose exotic assets to trade and set probability of picking exotic asset instead of regular asset." />
     <div v-if="tradeExoticAssets">
-      <cu-label name="exoticAssetsToTrade" label="Exotic assets to trade" />
+      <cu-label name="exoticAssetsToTrade" />
       <VueMultiselect name="exoticAssetsToTrade" placeholder="Select exotic assets to trade..."
         v-model="exoticAssetsToTrade" :options="availableExoticAssetsToTrade" :multiple="true" :close-on-select="false"
         label="name" track-by="name" />
@@ -144,6 +154,18 @@
       <cu-input name="minimumCycleBalance" size="small" v-model="minimumCycleBalance" label="Minimum allowed balance"
         placeholder="Minimum allowed balance" />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="alwaysUseFirstAsMain" v-model="alwaysUseFirstAsMain" label="Always use first profile as main"
+        tooltip="Always use the first profile in each batch as the main profile." />
+    </div>
+    <div class="mb-2">
+      <cu-checkbox name="customMainPositionSide" v-model="customMainPositionSide" label="Custom main position side"
+        tooltip="Enable to choose a fixed main position side." />
+    </div>
+    <div v-if="customMainPositionSide" class="mt-1 grid grid-cols-3 gap-2">
+      <cu-select name="mainPositionSide" size="small" v-model="mainPositionSide" :options="availableSides"
+        label="Main position side" />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -198,6 +220,8 @@ const setMarketOrderSlippage = ref(false)
 const marketOrderSlippage = ref(0.05)
 const sizeMismatchPercent = ref(0.5)
 const liquidationThresholdPercent = ref(5)
+const customAssetsEnabled = ref(false)
+const customAssetsInput = ref('')
 const assetsToTrade = ref([])
 const availableAssetsToTrade = ref([])
 const availableExoticAssetsToTrade = ref([])
@@ -206,6 +230,10 @@ const exoticAssetsToTrade = ref([])
 const exoticAssetsProbability = ref(3)
 const minimumCycleBalanceCheck = ref(false)
 const minimumCycleBalance = ref(1000)
+const alwaysUseFirstAsMain = ref(false)
+const customMainPositionSide = ref(false)
+const mainPositionSide = ref('buy')
+const availableSides = ref(['buy', 'sell'])
 
 const logVolumes = ref(false)
 const getLatestStats = ref(false)
@@ -302,13 +330,21 @@ const loadDefaults = async () => {
     if (!Object.hasOwn(data, 'assets_to_trade')) return
 
     assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
+    customAssetsEnabled.value = data.custom_assets ?? customAssetsEnabled.value
+    if (customAssetsEnabled.value) {
+      customAssetsInput.value = data.assets_to_trade?.join(', ') ?? customAssetsInput.value
+    } else {
+      customAssetsInput.value = ''
+    }
     tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
     exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
     exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
     batches.value = (data.batches ?? []).map(batch => ({
       mainPerpType: batch.main_perp_type || availablePerps.value[0],
       hedgePerpType: batch.hedge_perp_type || availablePerps.value[0],
-      profiles: availableProfiles.value.filter(item => (batch.profiles ?? []).includes(item.serial_number))
+      profiles: (batch.profiles ?? [])
+        .map(sn => availableProfiles.value.find(item => item.serial_number === sn))
+        .filter(Boolean)
     }))
     minLeverage.value = data.min_leverage ?? minLeverage.value
     maxLeverage.value = data.max_leverage ?? maxLeverage.value
@@ -331,6 +367,9 @@ const loadDefaults = async () => {
     stopProcessing.value = data.stop_processing ?? stopProcessing.value
     minimumCycleBalanceCheck.value = data.minimum_cycle_balance_check ?? minimumCycleBalanceCheck.value
     minimumCycleBalance.value = data.minimum_cycle_balance ?? minimumCycleBalance.value
+    alwaysUseFirstAsMain.value = data.always_use_first_as_main ?? alwaysUseFirstAsMain.value
+    customMainPositionSide.value = data.custom_main_position_side ?? customMainPositionSide.value
+    mainPositionSide.value = data.main_position_side ?? mainPositionSide.value
   }, logs)
 
   currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
@@ -371,14 +410,20 @@ const handleExecute = async () => {
     size_mismatch_percent: parseFloat(sizeMismatchPercent.value),
     liquidation_threshold_percent: parseFloat(liquidationThresholdPercent.value),
     log_volumes: logVolumes.value,
-    assets_to_trade: assetsToTrade.value.map(asset => asset.name),
+    assets_to_trade: customAssetsEnabled.value
+      ? customAssetsInput.value.split(',').map(a => a.trim()).filter(Boolean)
+      : assetsToTrade.value.map(asset => asset.name),
+    custom_assets: customAssetsEnabled.value,
     trade_exotic_assets: tradeExoticAssets.value,
     exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
     exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
     get_latest_stats: getLatestStats.value,
     stop_processing: stopProcessing.value,
     minimum_cycle_balance_check: minimumCycleBalanceCheck.value,
-    minimum_cycle_balance: parseFloat(minimumCycleBalance.value)
+    minimum_cycle_balance: parseFloat(minimumCycleBalance.value),
+    always_use_first_as_main: alwaysUseFirstAsMain.value,
+    custom_main_position_side: customMainPositionSide.value,
+    main_position_side: mainPositionSide.value
   }, logs)
 
   await startModule(proxy, module.value, logs)
@@ -391,7 +436,7 @@ const handleStop = async () => {
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)
 
 
-watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder], () => {
+watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder, customAssetsEnabled], () => {
   setTimeout(() => {
     initFlowbite()
   }, 10)

@@ -1,6 +1,9 @@
 import os
 
 import requests
+from core.tools.metamask import Metamask
+from core.tools.phantom import Phantom
+from core.tools.rabby import Rabby
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.options import Options
@@ -10,10 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-from core.tools.metamask import Metamask
-from core.tools.phantom import Phantom
-from core.tools.rabby import Rabby
 from utils import INSTRUCTIONS, ExecutionError, logger, sleep
 
 
@@ -140,6 +139,7 @@ class Ads:
                 for _ in range(len(web_element.get_attribute("value"))):
                     web_element.send_keys(Keys.BACKSPACE)
                     sleep(delay)
+                web_element.clear()
                 web_element.send_keys(text)
             else:
                 web_element.clear()

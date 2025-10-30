@@ -12,7 +12,7 @@ This guide explains how to install and run Crypto Universe on Windows step by st
   - During install, check “Add Python to PATH”.
 
 ## Quick Setup (Recommended)
-If you already have Git, Node.js, and Python 3.10+ installed, run this single command in PowerShell to perform the initial install:
+If you already have Git, Node.js, and Python 3.10.11 installed, run this single command in PowerShell to perform the initial install:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseBasicParsing https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/bin/setup_windows.ps1 | iex"

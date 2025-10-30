@@ -32,8 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/starling114/crypto-universe/refs/he
 ### After initial setup
 - To start the app click `CU` shortcut
 - Update the app:
-  - Double-click `Desktop/crypto-universe/bin/update.sh`
-  - Or run from Terminal in the project folder: `./bin/update.sh`
+  - Run `cd ~/Desktop/crypto-universe && ./bin/update.sh`
 
 Tip: If double-click doesn’t run in Terminal, right‑click the file and choose “Open With” → Terminal.
 
