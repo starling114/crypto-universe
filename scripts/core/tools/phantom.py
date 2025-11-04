@@ -1,6 +1,3 @@
-import os
-
-from selenium.common import NoSuchWindowException
 from utils import ExecutionError, logger, sleep
 
 
@@ -30,8 +27,10 @@ class Phantom:
 
             self.ads.input_text('//input[@data-testid="unlock-form-password-input"]', self.password)
             self.ads.click_element('//button[@data-testid="unlock-form-submit-button"]')
-            if not self.ads.until_present('//div[text()="Receive"]', 15):
-                raise ExecutionError("Phantom auth failed")
+            if not self.ads.until_present('//div[text()="Receive"]', 3):
+                self.ads.open_url(self.url())
+                if not self.ads.until_present('//div[text()="Receive"]', 15):
+                    raise ExecutionError("Phantom auth failed")
 
             self._is_authenticated = True
             logger.success(f"Profile: {self.ads.label} | Phantom | Authenticated")

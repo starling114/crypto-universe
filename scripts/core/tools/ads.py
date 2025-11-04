@@ -110,12 +110,17 @@ class Ads:
 
     def click_element_dom(self, xpath):
         logger.debug(f"Profile: {self.label} | Clicking DOM element: {xpath}")
-        return self.execute_script(
-            f"""
-            var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-            return element ? element.click() : null;
-        """
-        )
+        try:
+            self.execute_script(
+                f"""
+                var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                return element ? element.click() : null;
+            """
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Profile: {self.label} | Error clicking DOM element: {xpath} | {e}")
+            return False
 
     def hover_element(self, xpath, timeout=5):
         web_element = self.find_element(xpath, timeout)
