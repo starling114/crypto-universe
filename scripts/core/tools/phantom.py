@@ -27,10 +27,9 @@ class Phantom:
 
             self.ads.input_text('//input[@data-testid="unlock-form-password-input"]', self.password)
             self.ads.click_element('//button[@data-testid="unlock-form-submit-button"]')
+            self.ads.click_element('//div[@id="modal"]//div[2]//div//div', 3)
             if not self.ads.until_present('//div[text()="Receive"]', 3):
-                self.ads.open_url(self.url())
-                if not self.ads.until_present('//div[text()="Receive"]', 15):
-                    raise ExecutionError("Phantom auth failed")
+                raise ExecutionError("Phantom auth failed")
 
             self._is_authenticated = True
             logger.success(f"Profile: {self.ads.label} | Phantom | Authenticated")
