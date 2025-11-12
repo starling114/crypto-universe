@@ -348,6 +348,7 @@ class Ads:
 
         options = Options()
         options.add_experimental_option("debuggerAddress", selenium_port)
+        options.add_experimental_option("enableExtensionTargets", True)
         options.add_argument("--disable-blink-features=AutomationControlled")
 
         driver = webdriver.Chrome(options=options, service=service)
