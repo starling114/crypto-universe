@@ -166,6 +166,14 @@
       <cu-select name="mainPositionSide" size="small" v-model="mainPositionSide" :options="availableSides"
         label="Main position side" />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="tradeCycles" v-model="tradeCycles" label="Trade N cycles"
+        tooltip="Enable to set a specific number of trading cycles to execute." />
+    </div>
+    <div v-if="tradeCycles" class="mt-1 grid grid-cols-3 gap-2">
+      <cu-input name="numberOfTradingCycles" size="small" v-model="numberOfTradingCycles"
+        label="Number of trading cycles" placeholder="Number of trading cycles" />
+    </div>
   </cu-collapsible-section>
 
   <div class="mt-4 mb-4 flex justify-center">
@@ -234,6 +242,8 @@ const alwaysUseFirstAsMain = ref(false)
 const customMainPositionSide = ref(false)
 const mainPositionSide = ref('buy')
 const availableSides = ref(['buy', 'sell'])
+const tradeCycles = ref(false)
+const numberOfTradingCycles = ref(10)
 
 const logVolumes = ref(false)
 const getLatestStats = ref(false)
@@ -370,6 +380,8 @@ const loadDefaults = async () => {
     alwaysUseFirstAsMain.value = data.always_use_first_as_main ?? alwaysUseFirstAsMain.value
     customMainPositionSide.value = data.custom_main_position_side ?? customMainPositionSide.value
     mainPositionSide.value = data.main_position_side ?? mainPositionSide.value
+    tradeCycles.value = data.trade_cycles ?? tradeCycles.value
+    numberOfTradingCycles.value = data.number_of_trading_cycles ?? numberOfTradingCycles.value
   }, logs)
 
   currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
@@ -423,7 +435,9 @@ const handleExecute = async () => {
     minimum_cycle_balance: parseFloat(minimumCycleBalance.value),
     always_use_first_as_main: alwaysUseFirstAsMain.value,
     custom_main_position_side: customMainPositionSide.value,
-    main_position_side: mainPositionSide.value
+    main_position_side: mainPositionSide.value,
+    trade_cycles: tradeCycles.value,
+    number_of_trading_cycles: parseInt(numberOfTradingCycles.value)
   }, logs)
 
   await startModule(proxy, module.value, logs)
@@ -436,7 +450,7 @@ const handleStop = async () => {
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)
 
 
-watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder, customAssetsEnabled], () => {
+watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder, customAssetsEnabled, tradeCycles], () => {
   setTimeout(() => {
     initFlowbite()
   }, 10)
