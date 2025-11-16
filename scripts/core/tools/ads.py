@@ -5,7 +5,11 @@ from core.tools.metamask import Metamask
 from core.tools.phantom import Phantom
 from core.tools.rabby import Rabby
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    InvalidArgumentException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
@@ -351,7 +355,17 @@ class Ads:
         options.add_experimental_option("enableExtensionTargets", True)
         options.add_argument("--disable-blink-features=AutomationControlled")
 
-        driver = webdriver.Chrome(options=options, service=service)
+        try:
+            driver = webdriver.Chrome(options=options, service=service)
+        except InvalidArgumentException as e:
+            if "cannot parse capability: goog:chromeOptions" in str(e):
+                options = Options()
+                options.add_experimental_option("debuggerAddress", selenium_port)
+                options.add_argument("--disable-blink-features=AutomationControlled")
+                driver = webdriver.Chrome(options=options, service=service)
+            else:
+                raise e
+
         return driver
 
     def _check_browser(self):
