@@ -23,16 +23,18 @@ class Phantom:
             if self.ads.find_element('//div[text()="Receive"]', 2):
                 logger.info(f"Profile: {self.ads.label} | Phantom | Already authenticated")
                 self._is_authenticated = True
-                return
+            else:
+                self.ads.input_text('//input[@data-testid="unlock-form-password-input"]', self.password)
+                self.ads.click_element('//button[@data-testid="unlock-form-submit-button"]')
+                self.ads.click_element('//div[@id="modal"]//div[2]//div//div', 3)
+                if not self.ads.until_present('//div[text()="Receive"]', 3):
+                    raise ExecutionError("Phantom auth failed")
 
-            self.ads.input_text('//input[@data-testid="unlock-form-password-input"]', self.password)
-            self.ads.click_element('//button[@data-testid="unlock-form-submit-button"]')
-            self.ads.click_element('//div[@id="modal"]//div[2]//div//div', 3)
-            if not self.ads.until_present('//div[text()="Receive"]', 3):
-                raise ExecutionError("Phantom auth failed")
+                self._is_authenticated = True
+                logger.success(f"Profile: {self.ads.label} | Phantom | Authenticated")
 
-            self._is_authenticated = True
-            logger.success(f"Profile: {self.ads.label} | Phantom | Authenticated")
+            self.ads.new_tab()
+            self.ads.close_all_other_tabs()
 
     # def sign(self):
     #     logger.debug(f"Profile: {self.ads.label} | Phantom | Signing transaction")

@@ -1,7 +1,6 @@
 import os
 
 from selenium.common import NoSuchWindowException
-from selenium.webdriver import Keys
 from utils import ExecutionError, logger, sleep
 
 
@@ -32,17 +31,19 @@ class Rabby:
             if self.ads.find_element('//div[text()="Swap"]', 2):
                 logger.info(f"Profile: {self.ads.label} | Rabby | Already authenticated")
                 self._is_authenticated = True
-                return
+            else:
+                self.ads.open_url(self.unlock_url())
 
-            self.ads.open_url(self.unlock_url())
+                self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
+                self.ads.click_element('//button[span[text()="Unlock"]]')
+                if not self.ads.until_present('//div[text()="Swap"]', 15):
+                    raise ExecutionError("Rabby auth failed")
 
-            self.ads.input_text('//input[@placeholder="Enter the Password to Unlock"]', self.password)
-            self.ads.click_element('//button[span[text()="Unlock"]]')
-            if not self.ads.until_present('//div[text()="Swap"]', 15):
-                raise ExecutionError("Rabby auth failed")
+                self._is_authenticated = True
+                logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
 
-            self._is_authenticated = True
-            logger.success(f"Profile: {self.ads.label} | Rabby | Authenticated")
+            self.ads.new_tab()
+            self.ads.close_all_other_tabs()
 
     def sign(self):
         logger.debug(f"Profile: {self.ads.label} | Rabby | Signing transaction")

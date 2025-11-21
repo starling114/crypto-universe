@@ -16,13 +16,15 @@ class Metamask:
 
         if not self.ads.find_element('//button[text()="Unlock"]', 2):
             logger.info(f"Profile: {self.ads.label} | Metamask | Already authenticated")
-            return
+        else:
+            self.ads.input_text('//input[@data-testid="unlock-password"]', self.password)
+            self.ads.click_element('//button[text()="Unlock"]')
+            if not self.ads.find_element('//button[@data-testid="account-options-menu-button"]', 15):
+                raise Exception("Metamask auth failed")
+            logger.success(f"Profile: {self.ads.label} | Metamask | Authenticated")
 
-        self.ads.input_text('//input[@data-testid="unlock-password"]', self.password)
-        self.ads.click_element('//button[text()="Unlock"]')
-        if not self.ads.find_element('//button[@data-testid="account-options-menu-button"]', 15):
-            raise Exception("Metamask auth failed")
-        logger.success(f"Profile: {self.ads.label} | Metamask | Authenticated")
+        self.ads.new_tab()
+        self.ads.close_all_other_tabs()
 
     def sign(self):
         logger.debug(f"Profile: {self.ads.label} | Metamask | Signing transaction")

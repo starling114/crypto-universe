@@ -286,6 +286,32 @@ class Ads:
         logger.debug(f"Profile: {self.label} | Switching tab: {tab}")
         self.driver.switch_to.window(tab)
 
+    def new_tab(self):
+        logger.debug(f"Profile: {self.label} | Opening new blank tab")
+        current_tabs = self._filter_tabs()
+        self.driver.execute_script("window.open('about:blank', '_blank');")
+        sleep(0.5)
+        new_tabs = self._filter_tabs()
+        new_tab_handle = [tab for tab in new_tabs if tab not in current_tabs][0]
+        self.switch_tab(new_tab_handle)
+        logger.debug(f"Profile: {self.label} | New tab opened: {new_tab_handle}")
+        return new_tab_handle
+
+    def close_all_other_tabs(self):
+        logger.debug(f"Profile: {self.label} | Closing all other tabs")
+        current_tab = self.current_tab()
+        filtered_tabs = self._filter_tabs()
+        for tab in filtered_tabs:
+            if tab != current_tab:
+                try:
+                    self.switch_tab(tab)
+                    logger.debug(f"Profile: {self.label} | Closing tab: {self.driver.title}")
+                    self.driver.close()
+                except Exception as e:
+                    logger.debug(f"Profile: {self.label} | Error closing tab: {e}")
+        self.switch_tab(current_tab)
+        logger.debug(f"Profile: {self.label} | All other tabs closed")
+
     def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
         logger.debug(f"Profile: {self.label} | Finding tab: {part_of_name}, {part_of_url}")
         current_tab = self.current_tab()
