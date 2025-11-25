@@ -22,6 +22,7 @@ const props = defineProps({
 })
 
 const availableSizeClasses = {
+  xsmall: 'text-xs p-1',
   small: 'text-xs p-2',
   normal: 'p-2.5'
 }

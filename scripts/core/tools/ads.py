@@ -88,6 +88,25 @@ class Ads:
         logger.debug(f"Profile: {self.label} | {result is not None} | Finding element: {xpath}")
         return result
 
+    def find_elements(self, xpath, timeout=5, sleep_time=None, source=None, retries=3):
+        result = []
+        for _ in range(retries):
+            try:
+                if source is not None:
+                    result = source.find_elements(By.XPATH, xpath)
+                else:
+                    result = self.driver.find_elements(By.XPATH, xpath)
+
+                if sleep_time:
+                    sleep(sleep_time)
+
+                break
+            except StaleElementReferenceException:
+                sleep(0.5)
+
+        logger.debug(f"Profile: {self.label} | Found {len(result)} elements | Finding elements: {xpath}")
+        return result
+
     def click_element(self, xpath, timeout=5, sleep_time=None):
         web_element = self.find_element(xpath, timeout)
 
@@ -103,16 +122,42 @@ class Ads:
         logger.debug(f"Profile: {self.label} | {result} | Clicking element: {xpath}")
         return result
 
-    def text_from_dom(self, xpath):
+    def text_from_dom(self, xpath, sleep_time=None):
         logger.debug(f"Profile: {self.label} | Getting DOM text: {xpath}")
-        return self.execute_script(
+        result = self.execute_script(
             f"""
             var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
             return element ? element.textContent : null;
-        """
+            """
         )
+        if sleep_time:
+            sleep(sleep_time)
 
-    def click_element_dom(self, xpath):
+        logger.debug(f"Profile: {self.label} | DOM text: {result}")
+        return result
+
+    def texts_from_dom(self, xpath, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Getting DOM texts: {xpath}")
+        result = self.execute_script(
+            f"""
+            var xpathResult = document.evaluate("{xpath}", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            var texts = [];
+            for (var i = 0; i < xpathResult.snapshotLength; i++) {{
+                var element = xpathResult.snapshotItem(i);
+                if (element) {{
+                    texts.push(element.textContent);
+                }}
+            }}
+            return texts;
+            """
+        )
+        if sleep_time:
+            sleep(sleep_time)
+
+        logger.debug(f"Profile: {self.label} | Found {len(result) if result else 0} DOM texts: {xpath}")
+        return result or []
+
+    def click_element_dom(self, xpath, sleep_time=None):
         logger.debug(f"Profile: {self.label} | Clicking DOM element: {xpath}")
         try:
             self.execute_script(
@@ -121,6 +166,9 @@ class Ads:
                 return element ? element.click() : null;
             """
             )
+            if sleep_time:
+                sleep(sleep_time)
+
             return True
         except Exception as e:
             logger.error(f"Profile: {self.label} | Error clicking DOM element: {xpath} | {e}")

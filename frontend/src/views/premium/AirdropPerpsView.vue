@@ -1,6 +1,13 @@
 <template>
   <cu-title title="Airdrop - Perps" />
 
+  <div v-if="editingBatchIndex !== null"
+    class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg border border-yellow-300 dark:border-yellow-700">
+    <div class="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
+      Editing Batch #{{ editingBatchIndex + 1 }}
+    </div>
+  </div>
+
   <div class="mb-2">
     <cu-label name="assetsToTrade" label="Assets to trade" tooltip="Choose assets to trade." />
     <div class="mb-2">
@@ -34,39 +41,6 @@
     <VueMultiselect name="currentProfiles" placeholder="Select profiles..." v-model="currentProfiles"
       :options="availableProfilesForSelection" :multiple="true" :close-on-select="false" label="name"
       track-by="serial_number" />
-
-    <div class="mt-4 flex justify-start gap-2">
-      <cu-button v-if="editingBatchIndex == null" color="green" size="small" label="Add Batch" @click="addBatch" />
-      <cu-button v-if="editingBatchIndex !== null" color="yellow" size="small" label="Update Batch"
-        @click="updateBatch" />
-      <cu-button v-if="editingBatchIndex !== null" size="small" label="Cancel Edit" @click="cancelEdit" />
-    </div>
-
-    <div v-if="batches.length > 0" class="mt-4">
-      <cu-label name="batches" label="Configured Batches" />
-      <div class="space-y-2">
-        <div v-for="(batch, index) in batches" :key="index"
-          class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600">
-          <div class="flex justify-between items-start">
-            <div class="flex-1">
-              <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                Batch #{{ index + 1 }}
-              </div>
-              <div class="text-xs text-gray-700 dark:text-gray-300">
-                <span class="font-medium">Main:</span> {{ batch.mainPerpType }} |
-                <span class="font-medium">Hedge:</span> {{ batch.hedgePerpType }} |
-                <span class="font-medium">Profiles ({{ batch.profiles.length }}):</span>
-                {{batch.profiles.map(p => p.name).join(', ')}}
-              </div>
-            </div>
-            <div class="flex gap-1 ml-2">
-              <cu-button @click="editBatch(index)" color="yellow" size="small" label="Edit" />
-              <cu-button @click="removeBatch(index)" color="red" size="small" label="Remove" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
@@ -158,6 +132,10 @@
       <cu-checkbox name="alwaysUseFirstAsMain" v-model="alwaysUseFirstAsMain" label="Always use first profile as main"
         tooltip="Always use the first profile in each batch as the main profile." />
     </div>
+    <div v-if="alwaysUseFirstAsMain" class="mb-2">
+      <cu-checkbox name="tradeMainAsSpot" v-model="tradeMainAsSpot" label="Trade main as spot"
+        tooltip="Trade main as spot when always use first as main is enabled." />
+    </div>
     <div class="mb-2">
       <cu-checkbox name="customMainPositionSide" v-model="customMainPositionSide" label="Custom main position side"
         tooltip="Enable to choose a fixed main position side." />
@@ -176,6 +154,100 @@
     </div>
   </cu-collapsible-section>
 
+  <div class="mb-2">
+    <div class="mt-4 flex justify-start gap-2">
+      <cu-button v-if="editingBatchIndex == null" color="green" size="small" label="Add Batch" @click="addBatch" />
+      <cu-button v-if="editingBatchIndex !== null" color="yellow" size="small" label="Update Batch"
+        @click="updateBatch" />
+      <cu-button v-if="editingBatchIndex !== null" size="small" label="Cancel Edit" @click="cancelEdit" />
+    </div>
+
+    <div v-if="batches.length > 0" class="mt-4">
+      <cu-label name="batches" label="Configured Batches" />
+      <div class="space-y-2">
+        <div v-for="(batch, index) in batches" :key="index"
+          :class="['p-3 rounded-lg border', batch.enabled ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60']">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="flex items-center gap-2">
+                  <template v-if="editingBatchNameIndex === index">
+                    <div class="mb-0">
+                      <cu-input :ref="el => { if (el) batchNameInputRefs[index] = el; }" :name="`batchName-${index}`"
+                        :model-value="batch.name || `Batch #${index + 1}`"
+                        @update:model-value="(value) => { batches[index].name = value }" size="xsmall"
+                        placeholder="Batch name"
+                        class="!mb-0 [&_input]:!text-sm [&_input]:!font-semibold [&_input]:!w-auto [&_input]:!min-w-[100px] [&_input]:!max-w-[200px] [&_input]:!focus:ring-orange-500" />
+                    </div>
+                  </template>
+                  <template v-else>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                      {{ batch.name || `Batch #${index + 1}` }}
+                    </span>
+                    <button type="button" @click="startEditingBatchName(index)"
+                      class="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      title="Edit batch name">
+                      <PencilSquareIcon class="w-3.5 h-3.5" />
+                    </button>
+                  </template>
+                </div>
+                <cu-toggle :name="`batchEnabled-${index}`" :model-value="batch.enabled"
+                  @update:model-value="(value) => handleBatchEnabledChange(index, value)"
+                  tooltip="Enable or disable this batch. Disabled batches are stored but not executed." />
+              </div>
+              <div class="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                <div>
+                  <span class="font-medium">Assets:</span>
+                  {{(batch.customAssetsEnabled ? batch.customAssetsInput : batch.assetsToTrade?.map(a =>
+                    a.name)?.join(', ')) || 'None'
+                  }}
+                  <span v-if="batch.tradeExoticAssets" class="ml-1 text-orange-600 dark:text-orange-400">
+                    (+ {{batch.exoticAssetsToTrade?.map(a => a.name)?.join(', ') || 'None'}} exotic)
+                  </span>
+                </div>
+                <div>
+                  <span class="font-medium">Main:</span> {{ batch.mainPerpType }} |
+                  <span class="font-medium">Hedge:</span> {{ batch.hedgePerpType }} |
+                  <span class="font-medium">Profiles ({{ batch.profiles.length }}):</span>
+                  {{batch.profiles.map(p => p.name).join(', ')}}
+                </div>
+                <div>
+                  <span class="font-medium">Position:</span> ${{ batch.minPositionUsd }}-${{ batch.maxPositionUsd }} |
+                  <span class="font-medium">Leverage:</span> {{ batch.minLeverage }}-{{ batch.maxLeverage }}x |
+                  <span class="font-medium">Hold:</span> {{ batch.minHoldingMinutes }}-{{ batch.maxHoldingMinutes }}min
+                  |
+                  <span class="font-medium">Delay:</span> {{ batch.minOpenDelayMinutes }}-{{
+                    batch.maxOpenDelayMinutes }}min |
+                  <span class="font-medium"> Size Mismatch:</span> {{ batch.sizeMismatchPercent }}% |
+                  <span class="font-medium"> Liquidation:</span> {{ batch.liquidationThresholdPercent }}%
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">
+                  <span v-if="batch.limitOrder">
+                    <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
+                      }}min</span>
+                    <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
+                  </span>
+                  <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
+                  }}%</span>
+                  <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
+                  <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
+                    spot</span>
+                  <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
+                    }}</span>
+                  <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-1 ml-2">
+              <cu-button @click="editBatch(index)" color="yellow" size="small" label="Edit" />
+              <cu-button @click="removeBatch(index)" color="red" size="small" label="Remove" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="mt-4 mb-4 flex justify-center">
     <cu-button class="w-1/3" color="green" label="Execute" @click="handleExecute" :disabled="moduleRunning" />
     <cu-button class="w-1/3 ml-4" color="red" label="Stop" @click="handleStop" :disabled="!moduleRunning" />
@@ -186,7 +258,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed, nextTick } from 'vue'
 import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
@@ -198,8 +270,10 @@ import {
   CuButton,
   CuSelect,
   CuCheckbox,
+  CuToggle,
   CuLogs
 } from '@/components/cu'
+import { PencilSquareIcon } from '@heroicons/vue/24/solid'
 import VueMultiselect from 'vue-multiselect'
 
 const availablePerps = ref([])
@@ -211,6 +285,9 @@ const availableProfiles = ref([])
 
 const batches = ref([])
 const editingBatchIndex = ref(null)
+const editingBatchNameIndex = ref(null)
+const batchNameInputRefs = ref({})
+const batchNameKeydownHandlers = ref({})
 
 const minLeverage = ref(5)
 const maxLeverage = ref(7)
@@ -239,6 +316,7 @@ const exoticAssetsProbability = ref(3)
 const minimumCycleBalanceCheck = ref(false)
 const minimumCycleBalance = ref(1000)
 const alwaysUseFirstAsMain = ref(false)
+const tradeMainAsSpot = ref(false)
 const customMainPositionSide = ref(false)
 const mainPositionSide = ref('buy')
 const availableSides = ref(['buy', 'sell'])
@@ -262,7 +340,7 @@ const handleScriptFinish = async () => moduleRunning.value = false
 
 const availableProfilesForSelection = computed(() => {
   const usedSerialNumbers = batches.value
-    .filter((_, index) => index !== editingBatchIndex.value)
+    .filter((batch, index) => index !== editingBatchIndex.value && batch.enabled)
     .flatMap(batch => batch.profiles.map(p => p.serial_number))
 
   return availableProfiles.value.filter(
@@ -270,50 +348,216 @@ const availableProfilesForSelection = computed(() => {
   )
 })
 
-const addBatch = () => {
-  if (!currentMainPerpType.value || !currentHedgePerpType.value || currentProfiles.value.length === 0) {
-    alert('Please select main perp, hedge perp, and at least one profile')
-    return
-  }
+const resetFormToDefaults = () => {
+  currentProfiles.value = []
+  currentMainPerpType.value = availablePerps.value[0]
+  currentHedgePerpType.value = availablePerps.value[0]
+}
 
-  batches.value.push({
+const getCurrentBatchSettings = () => {
+  return {
+    customAssetsEnabled: customAssetsEnabled.value,
+    customAssetsInput: customAssetsInput.value,
+    assetsToTrade: assetsToTrade.value,
+    tradeExoticAssets: tradeExoticAssets.value,
+    exoticAssetsToTrade: exoticAssetsToTrade.value,
+    exoticAssetsProbability: exoticAssetsProbability.value,
     mainPerpType: currentMainPerpType.value,
     hedgePerpType: currentHedgePerpType.value,
-    profiles: [...currentProfiles.value]
-  })
+    profiles: currentProfiles.value,
+    minLeverage: minLeverage.value,
+    maxLeverage: maxLeverage.value,
+    minPositionUsd: minPositionUsd.value,
+    maxPositionUsd: maxPositionUsd.value,
+    minHoldingMinutes: minHoldingMinutes.value,
+    maxHoldingMinutes: maxHoldingMinutes.value,
+    minOpenDelayMinutes: minOpenDelayMinutes.value,
+    maxOpenDelayMinutes: maxOpenDelayMinutes.value,
+    limitOrder: limitOrder.value,
+    limitCancelOrder: limitCancelOrder.value,
+    minVerifyOrderMinutes: minVerifyOrderMinutes.value,
+    maxVerifyOrderMinutes: maxVerifyOrderMinutes.value,
+    setMarketOrderSlippage: setMarketOrderSlippage.value,
+    marketOrderSlippage: marketOrderSlippage.value,
+    sizeMismatchPercent: sizeMismatchPercent.value,
+    liquidationThresholdPercent: liquidationThresholdPercent.value,
+    logVolumes: logVolumes.value,
+    getLatestStats: getLatestStats.value,
+    stopProcessing: stopProcessing.value,
+    minimumCycleBalanceCheck: minimumCycleBalanceCheck.value,
+    minimumCycleBalance: minimumCycleBalance.value,
+    alwaysUseFirstAsMain: alwaysUseFirstAsMain.value,
+    tradeMainAsSpot: tradeMainAsSpot.value,
+    customMainPositionSide: customMainPositionSide.value,
+    mainPositionSide: mainPositionSide.value,
+    tradeCycles: tradeCycles.value,
+    numberOfTradingCycles: numberOfTradingCycles.value,
+    enabled: true,
+    name: null
+  }
+}
 
-  // Reset current selections
-  currentProfiles.value = []
+const loadBatchSettingsToForm = (batch) => {
+  customAssetsEnabled.value = batch.customAssetsEnabled ?? customAssetsEnabled.value
+  customAssetsInput.value = batch.customAssetsInput ?? customAssetsInput.value
+  assetsToTrade.value = batch.assetsToTrade ?? assetsToTrade.value
+  tradeExoticAssets.value = batch.tradeExoticAssets ?? tradeExoticAssets.value
+  exoticAssetsToTrade.value = batch.exoticAssetsToTrade ?? exoticAssetsToTrade.value
+  exoticAssetsProbability.value = batch.exoticAssetsProbability ?? exoticAssetsProbability.value
+  currentMainPerpType.value = batch.mainPerpType ?? availablePerps.value[0]
+  currentHedgePerpType.value = batch.hedgePerpType ?? availablePerps.value[0]
+  currentProfiles.value = batch.profiles ?? currentProfiles.value
+  minLeverage.value = batch.minLeverage ?? minLeverage.value
+  maxLeverage.value = batch.maxLeverage ?? maxLeverage.value
+  minPositionUsd.value = batch.minPositionUsd ?? minPositionUsd.value
+  maxPositionUsd.value = batch.maxPositionUsd ?? maxPositionUsd.value
+  minHoldingMinutes.value = batch.minHoldingMinutes ?? minHoldingMinutes.value
+  maxHoldingMinutes.value = batch.maxHoldingMinutes ?? maxHoldingMinutes.value
+  minOpenDelayMinutes.value = batch.minOpenDelayMinutes ?? minOpenDelayMinutes.value
+  maxOpenDelayMinutes.value = batch.maxOpenDelayMinutes ?? maxOpenDelayMinutes.value
+  limitOrder.value = batch.limitOrder ?? limitOrder.value
+  limitCancelOrder.value = batch.limitCancelOrder ?? limitCancelOrder.value
+  minVerifyOrderMinutes.value = batch.minVerifyOrderMinutes ?? minVerifyOrderMinutes.value
+  maxVerifyOrderMinutes.value = batch.maxVerifyOrderMinutes ?? maxVerifyOrderMinutes.value
+  setMarketOrderSlippage.value = batch.setMarketOrderSlippage ?? setMarketOrderSlippage.value
+  marketOrderSlippage.value = batch.marketOrderSlippage ?? marketOrderSlippage.value
+  sizeMismatchPercent.value = batch.sizeMismatchPercent ?? sizeMismatchPercent.value
+  liquidationThresholdPercent.value = batch.liquidationThresholdPercent ?? liquidationThresholdPercent.value
+  logVolumes.value = batch.logVolumes ?? logVolumes.value
+  getLatestStats.value = batch.getLatestStats ?? getLatestStats.value
+  stopProcessing.value = batch.stopProcessing ?? stopProcessing.value
+  minimumCycleBalanceCheck.value = batch.minimumCycleBalanceCheck ?? minimumCycleBalanceCheck.value
+  minimumCycleBalance.value = batch.minimumCycleBalance ?? minimumCycleBalance.value
+  alwaysUseFirstAsMain.value = batch.alwaysUseFirstAsMain ?? alwaysUseFirstAsMain.value
+  tradeMainAsSpot.value = batch.tradeMainAsSpot ?? tradeMainAsSpot.value
+  customMainPositionSide.value = batch.customMainPositionSide ?? customMainPositionSide.value
+  mainPositionSide.value = batch.mainPositionSide ?? mainPositionSide.value
+  tradeCycles.value = batch.tradeCycles ?? tradeCycles.value
+  numberOfTradingCycles.value = batch.numberOfTradingCycles ?? numberOfTradingCycles.value
+}
+
+const validateBatch = () => {
+  if (customAssetsEnabled.value) {
+    if (!customAssetsInput.value || customAssetsInput.value.trim() === '') {
+      alert('Please enter custom assets or disable custom assets and select from the list')
+      return false
+    }
+  } else {
+    if (!assetsToTrade.value || assetsToTrade.value.length === 0) {
+      alert('Please select at least one asset to trade')
+      return false
+    }
+  }
+
+  if (!currentProfiles.value || currentProfiles.value.length < 2) {
+    alert('Please select at least two profiles')
+    return false
+  }
+
+  if (!currentMainPerpType.value || !currentHedgePerpType.value) {
+    alert('Please select both main perp and hedge perp')
+    return false
+  }
+
+  if (tradeExoticAssets.value) {
+    if (!exoticAssetsToTrade.value || exoticAssetsToTrade.value.length === 0) {
+      alert('Please select at least one exotic asset when trade exotic assets is enabled')
+      return false
+    }
+    if (!exoticAssetsProbability.value || isNaN(parseFloat(exoticAssetsProbability.value)) || parseFloat(exoticAssetsProbability.value) <= 0) {
+      alert('Please enter a valid probability value for exotic assets')
+      return false
+    }
+  }
+
+  return true
+}
+
+const addBatch = () => {
+  if (!validateBatch()) return
+
+  batches.value.push(getCurrentBatchSettings())
+  resetFormToDefaults()
 }
 
 const editBatch = (index) => {
   const batch = batches.value[index]
-  currentMainPerpType.value = batch.mainPerpType
-  currentHedgePerpType.value = batch.hedgePerpType
-  currentProfiles.value = [...batch.profiles]
+  loadBatchSettingsToForm(batch)
   editingBatchIndex.value = index
 }
 
 const updateBatch = () => {
   if (editingBatchIndex.value === null) return
 
-  if (!currentMainPerpType.value || !currentHedgePerpType.value || currentProfiles.value.length === 0) {
-    alert('Please select main perp, hedge perp, and at least one profile')
-    return
-  }
+  if (!validateBatch()) return
 
-  batches.value[editingBatchIndex.value] = {
-    mainPerpType: currentMainPerpType.value,
-    hedgePerpType: currentHedgePerpType.value,
-    profiles: [...currentProfiles.value]
-  }
-
+  const currentBatch = batches.value[editingBatchIndex.value]
+  const currentEnabled = currentBatch.enabled
+  const currentName = currentBatch.name ?? null
+  const updatedBatch = getCurrentBatchSettings()
+  updatedBatch.enabled = currentEnabled
+  updatedBatch.name = currentName
+  batches.value[editingBatchIndex.value] = updatedBatch
   cancelEdit()
+}
+
+const updateBatchName = (index, newName) => {
+  if (batches.value[index]) {
+    const trimmedName = newName?.trim() || null
+    if (trimmedName && trimmedName.match(/^Batch #\d+$/)) {
+      batches.value[index].name = null
+    } else {
+      batches.value[index].name = trimmedName || null
+    }
+  }
+}
+
+const startEditingBatchName = (index) => {
+  editingBatchNameIndex.value = index
+  nextTick(() => {
+    const inputRef = batchNameInputRefs.value[index]
+    if (inputRef) {
+      const input = inputRef.$el?.querySelector('input')
+      if (input) {
+        input.focus()
+        input.select()
+
+        const handleBlur = () => {
+          finishEditingBatchName(index, input.value)
+        }
+        const handleKeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            input.blur()
+          } else if (e.key === 'Escape') {
+            e.preventDefault()
+            editingBatchNameIndex.value = null
+            input.removeEventListener('keydown', handleKeydown)
+            batchNameKeydownHandlers.value[index] = null
+          }
+        }
+
+        input.addEventListener('blur', handleBlur, { once: true })
+        input.addEventListener('keydown', handleKeydown)
+        batchNameKeydownHandlers.value[index] = { input, handleKeydown }
+      }
+    }
+  })
+}
+
+const finishEditingBatchName = (index, newName) => {
+  updateBatchName(index, newName)
+  const handler = batchNameKeydownHandlers.value[index]
+  if (handler) {
+    handler.input.removeEventListener('keydown', handler.handleKeydown)
+    delete batchNameKeydownHandlers.value[index]
+  }
+  editingBatchNameIndex.value = null
 }
 
 const cancelEdit = () => {
   editingBatchIndex.value = null
-  currentProfiles.value = []
+  resetFormToDefaults()
 }
 
 const removeBatch = (index) => {
@@ -321,6 +565,37 @@ const removeBatch = (index) => {
   if (editingBatchIndex.value === index) {
     cancelEdit()
   }
+}
+
+const validateBatchEnable = (batchIndex) => {
+  const batch = batches.value[batchIndex]
+  if (!batch || batch.enabled) return true
+
+  const batchProfileSerialNumbers = batch.profiles.map(p => p.serial_number)
+  const conflictingBatches = batches.value
+    .filter((b, index) => index !== batchIndex && b.enabled)
+    .filter(b => b.profiles.some(p => batchProfileSerialNumbers.includes(p.serial_number)))
+
+  if (conflictingBatches.length > 0) {
+    const conflictingProfiles = conflictingBatches
+      .flatMap(b => b.profiles.filter(p => batchProfileSerialNumbers.includes(p.serial_number)))
+      .map(p => p.name)
+      .filter((name, index, self) => self.indexOf(name) === index) // Remove duplicates
+
+    alert(`Cannot enable batch: The following profiles are already used in other enabled batches: ${conflictingProfiles.join(', ')}`)
+    return false
+  }
+
+  return true
+}
+
+const handleBatchEnabledChange = (index, newValue) => {
+  if (newValue === true) {
+    if (!validateBatchEnable(index)) {
+      return
+    }
+  }
+  batches.value[index].enabled = newValue
 }
 
 const loadDefaults = async () => {
@@ -337,25 +612,19 @@ const loadDefaults = async () => {
   }, logs)
 
   await loadModuleData(proxy, module.value, 'instructions', 'python', (data) => {
-    if (!Object.hasOwn(data, 'assets_to_trade')) return
-
-    assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
-    customAssetsEnabled.value = data.custom_assets ?? customAssetsEnabled.value
+    customAssetsEnabled.value = data.custom_assets_enabled ?? customAssetsEnabled.value
     if (customAssetsEnabled.value) {
       customAssetsInput.value = data.assets_to_trade?.join(', ') ?? customAssetsInput.value
     } else {
       customAssetsInput.value = ''
     }
+    assetsToTrade.value = availableAssetsToTrade.value.filter(asset => (data.assets_to_trade ?? []).includes(asset.name))
     tradeExoticAssets.value = data.trade_exotic_assets ?? tradeExoticAssets.value
     exoticAssetsToTrade.value = availableExoticAssetsToTrade.value.filter(asset => (data.exotic_assets_to_trade ?? []).includes(asset.name))
     exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
-    batches.value = (data.batches ?? []).map(batch => ({
-      mainPerpType: batch.main_perp_type || availablePerps.value[0],
-      hedgePerpType: batch.hedge_perp_type || availablePerps.value[0],
-      profiles: (batch.profiles ?? [])
-        .map(sn => availableProfiles.value.find(item => item.serial_number === sn))
-        .filter(Boolean)
-    }))
+    currentMainPerpType.value = data.main_perp_type ?? availablePerps.value[0]
+    currentHedgePerpType.value = data.hedge_perp_type ?? availablePerps.value[0]
+    currentProfiles.value = availableProfiles.value.filter(profile => (data.profiles ?? []).includes(profile.serial_number))
     minLeverage.value = data.min_leverage ?? minLeverage.value
     maxLeverage.value = data.max_leverage ?? maxLeverage.value
     minPositionUsd.value = data.min_position_usd ?? minPositionUsd.value
@@ -378,14 +647,53 @@ const loadDefaults = async () => {
     minimumCycleBalanceCheck.value = data.minimum_cycle_balance_check ?? minimumCycleBalanceCheck.value
     minimumCycleBalance.value = data.minimum_cycle_balance ?? minimumCycleBalance.value
     alwaysUseFirstAsMain.value = data.always_use_first_as_main ?? alwaysUseFirstAsMain.value
+    tradeMainAsSpot.value = data.trade_main_as_spot ?? tradeMainAsSpot.value
     customMainPositionSide.value = data.custom_main_position_side ?? customMainPositionSide.value
     mainPositionSide.value = data.main_position_side ?? mainPositionSide.value
     tradeCycles.value = data.trade_cycles ?? tradeCycles.value
     numberOfTradingCycles.value = data.number_of_trading_cycles ?? numberOfTradingCycles.value
-  }, logs)
 
-  currentMainPerpType.value = currentMainPerpType.value || availablePerps.value[0]
-  currentHedgePerpType.value = currentHedgePerpType.value || availablePerps.value[0]
+    batches.value = (data.batches ?? []).map(batch => ({
+      name: batch.name || null,
+      customAssetsEnabled: batch.custom_assets_enabled ?? customAssetsEnabled.value,
+      customAssetsInput: (batch.custom_assets_enabled ?? customAssetsEnabled.value) ? batch.assets_to_trade?.join(', ') ?? customAssetsInput.value : '',
+      assetsToTrade: availableAssetsToTrade.value.filter(asset => (batch.assets_to_trade ?? []).includes(asset.name)),
+      tradeExoticAssets: batch.trade_exotic_assets ?? tradeExoticAssets.value,
+      exoticAssetsToTrade: availableExoticAssetsToTrade.value.filter(asset => (batch.exotic_assets_to_trade ?? []).includes(asset.name)),
+      exoticAssetsProbability: batch.exotic_assets_probability ?? exoticAssetsProbability.value,
+      mainPerpType: batch.main_perp_type || availablePerps.value[0],
+      hedgePerpType: batch.hedge_perp_type || availablePerps.value[0],
+      profiles: availableProfiles.value.filter(profile => (batch.profiles ?? []).includes(profile.serial_number)),
+      minLeverage: batch.min_leverage ?? minLeverage.value,
+      maxLeverage: batch.max_leverage ?? maxLeverage.value,
+      minPositionUsd: batch.min_position_usd ?? minPositionUsd.value,
+      maxPositionUsd: batch.max_position_usd ?? maxPositionUsd.value,
+      minHoldingMinutes: batch.min_holding_minutes ?? minHoldingMinutes.value,
+      maxHoldingMinutes: batch.max_holding_minutes ?? maxHoldingMinutes.value,
+      minOpenDelayMinutes: batch.min_open_delay_minutes ?? minOpenDelayMinutes.value,
+      maxOpenDelayMinutes: batch.max_open_delay_minutes ?? maxOpenDelayMinutes.value,
+      limitOrder: batch.limit_order ?? limitOrder.value,
+      limitCancelOrder: batch.limit_cancel_order ?? limitCancelOrder.value,
+      minVerifyOrderMinutes: batch.min_verify_order_minutes ?? minVerifyOrderMinutes.value,
+      maxVerifyOrderMinutes: batch.max_verify_order_minutes ?? maxVerifyOrderMinutes.value,
+      setMarketOrderSlippage: batch.set_market_order_slippage ?? setMarketOrderSlippage.value,
+      marketOrderSlippage: batch.market_order_slippage ?? marketOrderSlippage.value,
+      sizeMismatchPercent: batch.size_mismatch_percent ?? sizeMismatchPercent.value,
+      liquidationThresholdPercent: batch.liquidation_threshold_percent ?? liquidationThresholdPercent.value,
+      logVolumes: batch.log_volumes ?? logVolumes.value,
+      getLatestStats: batch.get_latest_stats ?? getLatestStats.value,
+      stopProcessing: batch.stop_processing ?? stopProcessing.value,
+      minimumCycleBalanceCheck: batch.minimum_cycle_balance_check ?? minimumCycleBalanceCheck.value,
+      minimumCycleBalance: batch.minimum_cycle_balance ?? minimumCycleBalance.value,
+      alwaysUseFirstAsMain: batch.always_use_first_as_main ?? alwaysUseFirstAsMain.value,
+      tradeMainAsSpot: batch.trade_main_as_spot ?? tradeMainAsSpot.value,
+      customMainPositionSide: batch.custom_main_position_side ?? customMainPositionSide.value,
+      mainPositionSide: batch.main_position_side ?? mainPositionSide.value,
+      tradeCycles: batch.trade_cycles ?? tradeCycles.value,
+      numberOfTradingCycles: batch.number_of_trading_cycles ?? numberOfTradingCycles.value,
+      enabled: batch.enabled ?? false
+    }))
+  }, logs)
 
   moduleRunning.value = (await statusModule(proxy, module.value, logs)) ?? moduleRunning.value
 }
@@ -396,15 +704,67 @@ const handleExecute = async () => {
     return
   }
 
+  const enabledBatches = batches.value.filter(batch => batch.enabled)
+  if (enabledBatches.length === 0) {
+    alert('Please enable at least one batch before executing')
+    return
+  }
+
   moduleRunning.value = true
 
   await updateModuleData(proxy, module.value, 'instructions', 'python', {
     batches: batches.value.map(batch => ({
+      name: batch.name || null,
+      custom_assets_enabled: batch.customAssetsEnabled,
+      assets_to_trade: batch.customAssetsEnabled
+        ? batch.customAssetsInput.split(',').map(a => a.trim()).filter(Boolean)
+        : batch.assetsToTrade.map(asset => asset.name),
+      trade_exotic_assets: batch.tradeExoticAssets,
+      exotic_assets_to_trade: batch.exoticAssetsToTrade.map(asset => asset.name),
+      exotic_assets_probability: parseFloat(batch.exoticAssetsProbability),
       main_perp_type: batch.mainPerpType,
       hedge_perp_type: batch.hedgePerpType,
       profiles: batch.profiles.map(profile => profile.serial_number),
-      labels: batch.profiles.map(profile => profile.name)
+      labels: batch.profiles.map(profile => profile.name),
+      min_leverage: parseFloat(batch.minLeverage),
+      max_leverage: parseFloat(batch.maxLeverage),
+      min_position_usd: parseFloat(batch.minPositionUsd),
+      max_position_usd: parseFloat(batch.maxPositionUsd),
+      min_holding_minutes: parseFloat(batch.minHoldingMinutes),
+      max_holding_minutes: parseFloat(batch.maxHoldingMinutes),
+      min_open_delay_minutes: parseFloat(batch.minOpenDelayMinutes),
+      max_open_delay_minutes: parseFloat(batch.maxOpenDelayMinutes),
+      limit_order: batch.limitOrder,
+      limit_cancel_order: batch.limitCancelOrder,
+      min_verify_order_minutes: parseFloat(batch.minVerifyOrderMinutes),
+      max_verify_order_minutes: parseFloat(batch.maxVerifyOrderMinutes),
+      set_market_order_slippage: batch.setMarketOrderSlippage,
+      market_order_slippage: parseFloat(batch.marketOrderSlippage),
+      size_mismatch_percent: parseFloat(batch.sizeMismatchPercent),
+      liquidation_threshold_percent: parseFloat(batch.liquidationThresholdPercent),
+      log_volumes: batch.logVolumes,
+      get_latest_stats: batch.getLatestStats,
+      stop_processing: batch.stopProcessing,
+      minimum_cycle_balance_check: batch.minimumCycleBalanceCheck,
+      minimum_cycle_balance: parseFloat(batch.minimumCycleBalance),
+      always_use_first_as_main: batch.alwaysUseFirstAsMain,
+      trade_main_as_spot: batch.tradeMainAsSpot,
+      custom_main_position_side: batch.customMainPositionSide,
+      main_position_side: batch.mainPositionSide,
+      trade_cycles: batch.tradeCycles,
+      number_of_trading_cycles: parseInt(batch.numberOfTradingCycles),
+      enabled: batch.enabled
     })),
+    custom_assets_enabled: customAssetsEnabled.value,
+    assets_to_trade: customAssetsEnabled.value
+      ? customAssetsInput.value.split(',').map(a => a.trim()).filter(Boolean)
+      : assetsToTrade.value.map(asset => asset.name),
+    trade_exotic_assets: tradeExoticAssets.value,
+    exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
+    exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
+    main_perp_type: currentMainPerpType.value,
+    hedge_perp_type: currentHedgePerpType.value,
+    profiles: currentProfiles.value.map(profile => profile.serial_number),
     min_leverage: parseFloat(minLeverage.value),
     max_leverage: parseFloat(maxLeverage.value),
     min_position_usd: parseFloat(minPositionUsd.value),
@@ -422,18 +782,12 @@ const handleExecute = async () => {
     size_mismatch_percent: parseFloat(sizeMismatchPercent.value),
     liquidation_threshold_percent: parseFloat(liquidationThresholdPercent.value),
     log_volumes: logVolumes.value,
-    assets_to_trade: customAssetsEnabled.value
-      ? customAssetsInput.value.split(',').map(a => a.trim()).filter(Boolean)
-      : assetsToTrade.value.map(asset => asset.name),
-    custom_assets: customAssetsEnabled.value,
-    trade_exotic_assets: tradeExoticAssets.value,
-    exotic_assets_to_trade: exoticAssetsToTrade.value.map(asset => asset.name),
-    exotic_assets_probability: parseFloat(exoticAssetsProbability.value),
     get_latest_stats: getLatestStats.value,
     stop_processing: stopProcessing.value,
     minimum_cycle_balance_check: minimumCycleBalanceCheck.value,
     minimum_cycle_balance: parseFloat(minimumCycleBalance.value),
     always_use_first_as_main: alwaysUseFirstAsMain.value,
+    trade_main_as_spot: tradeMainAsSpot.value,
     custom_main_position_side: customMainPositionSide.value,
     main_position_side: mainPositionSide.value,
     trade_cycles: tradeCycles.value,
@@ -450,7 +804,7 @@ const handleStop = async () => {
 const handleBeforeUnload = beforeUnloadModule(moduleRunning)
 
 
-watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder, customAssetsEnabled, tradeCycles], () => {
+watch([setMarketOrderSlippage, tradeExoticAssets, limitOrder, customAssetsEnabled, tradeCycles, alwaysUseFirstAsMain], () => {
   setTimeout(() => {
     initFlowbite()
   }, 10)
