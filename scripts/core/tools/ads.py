@@ -122,6 +122,20 @@ class Ads:
         logger.debug(f"Profile: {self.label} | {result} | Clicking element: {xpath}")
         return result
 
+    def element_attribute_from_dom(self, xpath, attribute, sleep_time=None):
+        logger.debug(f"Profile: {self.label} | Getting DOM attribute: {xpath} -> {attribute}")
+        result = self.execute_script(
+            f"""
+            var element = document.evaluate("{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            return element ? element.getAttribute("{attribute}") : null;
+            """
+        )
+        if sleep_time:
+            sleep(sleep_time)
+
+        logger.debug(f"Profile: {self.label} | DOM attribute: {result}")
+        return result
+
     def text_from_dom(self, xpath, sleep_time=None):
         logger.debug(f"Profile: {self.label} | Getting DOM text: {xpath}")
         result = self.execute_script(
