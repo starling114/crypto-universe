@@ -224,16 +224,16 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                      }}min</span>
+                    }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                  }}%</span>
+                    }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                    }}</span>
+                  }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
                 </div>
               </div>
@@ -259,7 +259,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed, nextTick } from 'vue'
-import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadBrowserProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
@@ -599,7 +599,7 @@ const handleBatchEnabledChange = (index, newValue) => {
 }
 
 const loadDefaults = async () => {
-  await loadAdsProfiles(proxy, (profilesData) => {
+  await loadBrowserProfiles(proxy, (profilesData) => {
     availableProfiles.value = profilesData
   }, logs)
 

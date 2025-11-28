@@ -73,31 +73,48 @@ export function moduleDataFilepath(module, type, script_type) {
   return path.resolve(`${folder}${type}.json`)
 }
 
-export async function adsProfiles() {
-  let baseUrl;
-  if (instructions['ads_url'] && instructions['ads_url'] != "") {
-    baseUrl = instructions['ads_url']
-  } else {
-    baseUrl = 'http://local.adspower.net:50325'
-  }
-  const apiUrl = baseUrl + '/api/v1/user/list';
-  const pageSize = 100;
+export async function browserProfiles() {
   let allProfiles = [];
-  let page = 1;
 
-  while (true) {
-    const { data: { code, data } } = await axios.get(apiUrl, {
-      params: { page_size: pageSize, page }
-    });
+  if (instructions['afina_api_key'] && instructions['afina_api_key'] != "") {
+    const apiUrl = 'http://127.0.0.1:50777/api/profiles/list'
+    const headers = {"x-api-key": instructions['afina_api_key']}
 
-    if (code !== 0 || !data?.list?.length) break;
+    const { data: { message, accounts } } = await axios.get(apiUrl, { headers });
 
-    allProfiles.push(...data.list.map(profile => ({
-      serial_number: profile.serial_number,
-      name: profile.name
-    })));
+    if (message !== 'Accounts successfully fetched') {
+      return []
+    }
 
-    page++;
+    allProfiles = accounts.map(account => ({
+      serial_number: account.accountId,
+      name: account.name
+    }));
+  } else {
+    let baseUrl;
+    if (instructions['ads_url'] && instructions['ads_url'] != "") {
+      baseUrl = instructions['ads_url']
+    } else {
+      baseUrl = 'http://local.adspower.net:50325'
+    }
+    const apiUrl = baseUrl + '/api/v1/user/list';
+    const pageSize = 100;
+    let page = 1;
+  
+    while (true) {
+      const { data: { code, data } } = await axios.get(apiUrl, {
+        params: { page_size: pageSize, page }
+      });
+  
+      if (code !== 0 || !data?.list?.length) break;
+  
+      allProfiles.push(...data.list.map(profile => ({
+        serial_number: profile.serial_number,
+        name: profile.name
+      })));
+  
+      page++;
+    }
   }
 
   return allProfiles.sort((a, b) => a.serial_number - b.serial_number);

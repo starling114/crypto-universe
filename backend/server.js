@@ -11,7 +11,7 @@ import {
   moduleDataFilepath,
   pythonExecutable,
   debugMode,
-  adsProfiles,
+  browserProfiles,
   configs,
   runAuthentication,
   premiumMode
@@ -47,12 +47,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve('./frontend/dist/index.html'))
 })
 
-apiRoutes.get('/ads_profiles', async (req, res) => {
+apiRoutes.get('/browser_profiles', async (req, res) => {
   try {
-    const profiles = await adsProfiles()
+    const profiles = await browserProfiles()
     res.json({ profiles: profiles })
   } catch (error) {
-    res.status(500).json({ error: `Error fetching ADS profiles: ${error.message}` })
+    res.status(500).json({ error: `Error fetching browser profiles: ${error.message}` })
   }
 })
 

@@ -40,6 +40,10 @@
     <div class="mt-1 grid grid-cols-2 gap-2">
       <cu-input name="adsUrl" label="ADS Url" size="small" v-model="adsUrl" placeholder="ADS Api url" />
     </div>
+    <div class="mt-1 grid grid-cols-2 gap-2">
+      <cu-input name="afinaApiKey" label="Afina Api Key" size="small" v-model="afinaApiKey"
+        placeholder="Afina Api Key" />
+    </div>
     <div class="grid grid-cols-2 gap-2">
       <cu-checkbox name="debugMode" v-model="debugMode" label="Debug Mode" tooltip="Turn on to enable debug mode." />
     </div>
@@ -77,6 +81,7 @@ const licenseKey = ref('')
 const licenseKeyValidationError = ref(false)
 const debugMode = ref(false)
 const adsUrl = ref('')
+const afinaApiKey = ref('')
 
 const module = ref('crypto_universe')
 
@@ -91,6 +96,7 @@ const loadDefaults = async () => {
     licenseKey.value = data.license_key ?? licenseKey.value
     debugMode.value = data.debug_mode ?? debugMode.value
     adsUrl.value = data.ads_url ?? adsUrl.value
+    afinaApiKey.value = data.afina_api_key ?? afinaApiKey.value
   })
 
   await loadModuleData(proxy, module.value, 'secrets', 'js', (data) => {
@@ -123,6 +129,7 @@ const handleSave = async () => {
     license_key: licenseKey.value,
     debug_mode: debugMode.value,
     ads_url: adsUrl.value,
+    afina_api_key: afinaApiKey.value,
   })
 
   window.location.reload()

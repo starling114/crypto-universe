@@ -20,7 +20,7 @@ class PhantomImport:
             self.ads.wallet.import_new(self.label, None, self.password, self.seed_phrase)
 
             logger.success(f"Profile: {self.ads.label} | Phantom Import | Imported Successfully")
-            self.ads.close_browser()
+            self.ads.close()
             return True
         except Exception as e:
             log_error(e, f"Profile: {self.profile}")

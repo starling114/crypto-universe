@@ -14,7 +14,7 @@ except ImportError:
         from utils import sleep
 
 from core.helpers import zip_to_objects
-from core.tools.ads import Ads
+from core.tools.helpers import choose_browser
 from utils import load_json, logger, sleep
 
 
@@ -24,7 +24,7 @@ class AdsExecution:
         self.label = label
         self.label = password
         self.process = process
-        self.ads = Ads(profile, wallet_password=password, label=label)
+        self.browser = choose_browser(profile, wallet_password=password, label=label)
 
     def log_prefix(self):
         if self.process:
@@ -38,11 +38,11 @@ class AdsExecution:
 
     def start(self):
         logger.info(f"{self.log_prefix()}Starting trading strategy")
-        self.ads.wallet.authenticate()
+        self.browser.wallet.authenticate()
         sleep(2)
         logger.info("Openning lighter...")
-        self.ads.open_url("https://app.lighter.xyz/trade/ETH", sleep_time=2)
-        if self.ads.until_present('//button[contains(text(), "Positions")]', 30):
+        self.browser.open_url("https://app.lighter.xyz/trade/ETH", sleep_time=2)
+        if self.browser.until_present('//button[contains(text(), "Positions")]', 30):
             logger.success(f"{self.log_prefix()} Test successfully passed")
         else:
             logger.error(f"{self.log_prefix()} Test passed unsuccessfully")
