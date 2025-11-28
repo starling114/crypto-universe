@@ -224,16 +224,16 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                      }}min</span>
+                    }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                  }}%</span>
+                    }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                    }}</span>
+                  }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
                 </div>
               </div>
@@ -624,7 +624,7 @@ const loadDefaults = async () => {
     exoticAssetsProbability.value = data.exotic_assets_probability ?? exoticAssetsProbability.value
     currentMainPerpType.value = data.main_perp_type ?? availablePerps.value[0]
     currentHedgePerpType.value = data.hedge_perp_type ?? availablePerps.value[0]
-    currentProfiles.value = availableProfiles.value.filter(profile => (data.profiles ?? []).includes(profile.serial_number))
+    currentProfiles.value = (data.profiles ?? []).map(serialNumber => availableProfiles.value.find(profile => profile.serial_number === serialNumber)).filter(Boolean)
     minLeverage.value = data.min_leverage ?? minLeverage.value
     maxLeverage.value = data.max_leverage ?? maxLeverage.value
     minPositionUsd.value = data.min_position_usd ?? minPositionUsd.value
@@ -663,7 +663,7 @@ const loadDefaults = async () => {
       exoticAssetsProbability: batch.exotic_assets_probability ?? exoticAssetsProbability.value,
       mainPerpType: batch.main_perp_type || availablePerps.value[0],
       hedgePerpType: batch.hedge_perp_type || availablePerps.value[0],
-      profiles: availableProfiles.value.filter(profile => (batch.profiles ?? []).includes(profile.serial_number)),
+      profiles: (batch.profiles ?? []).map(serialNumber => availableProfiles.value.find(profile => profile.serial_number === serialNumber)).filter(Boolean),
       minLeverage: batch.min_leverage ?? minLeverage.value,
       maxLeverage: batch.max_leverage ?? maxLeverage.value,
       minPositionUsd: batch.min_position_usd ?? minPositionUsd.value,
