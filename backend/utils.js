@@ -97,7 +97,10 @@ export async function adsProfiles() {
       name: profile.name
     })));
 
+    if (allProfiles.length < pageSize) break;
+
     page++;
+    await sleep(1000);
   }
 
   return allProfiles.sort((a, b) => a.serial_number - b.serial_number);
