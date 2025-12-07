@@ -136,13 +136,15 @@
       <cu-checkbox name="tradeMainAsSpot" v-model="tradeMainAsSpot" label="Trade main as spot"
         tooltip="Trade main as spot when always use first as main is enabled." />
     </div>
-    <div class="mb-2">
-      <cu-checkbox name="customMainPositionSide" v-model="customMainPositionSide" label="Custom main position side"
-        tooltip="Enable to choose a fixed main position side." />
-    </div>
-    <div v-if="customMainPositionSide" class="mt-1 grid grid-cols-3 gap-2">
-      <cu-select name="mainPositionSide" size="small" v-model="mainPositionSide" :options="availableSides"
-        label="Main position side" />
+    <div v-if="!tradeMainAsSpot">
+      <div class="mb-2">
+        <cu-checkbox name="customMainPositionSide" v-model="customMainPositionSide" label="Custom main position side"
+          tooltip="Enable to choose a fixed main position side." />
+      </div>
+      <div v-if="customMainPositionSide" class="mt-1 grid grid-cols-3 gap-2">
+        <cu-select name="mainPositionSide" size="small" v-model="mainPositionSide" :options="availableSides"
+          label="Main position side" />
+      </div>
     </div>
     <div class="mb-2">
       <cu-checkbox name="tradeCycles" v-model="tradeCycles" label="Trade N cycles"
@@ -164,35 +166,35 @@
 
     <div v-if="batches.length > 0" class="mt-4">
       <cu-label name="batches" label="Configured Batches" />
-      <div class="space-y-2">
-        <div v-for="(batch, index) in batches" :key="index"
-          :class="['p-3 rounded-lg border', batch.enabled ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60']">
+      <div v-if="enabledBatches.length > 0" class="space-y-2 mb-4">
+        <div v-for="({ batch, originalIndex }) in enabledBatches" :key="originalIndex"
+          class="rounded-lg border p-3 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
                 <div class="flex items-center gap-2">
-                  <template v-if="editingBatchNameIndex === index">
+                  <template v-if="editingBatchNameIndex === originalIndex">
                     <div class="mb-0">
-                      <cu-input :ref="el => { if (el) batchNameInputRefs[index] = el; }" :name="`batchName-${index}`"
-                        :model-value="batch.name || `Batch #${index + 1}`"
-                        @update:model-value="(value) => { batches[index].name = value }" size="xsmall"
+                      <cu-input :ref="el => { if (el) batchNameInputRefs[originalIndex] = el; }"
+                        :name="`batchName-${originalIndex}`" :model-value="batch.name || `Batch #${originalIndex + 1}`"
+                        @update:model-value="(value) => { batches[originalIndex].name = value }" size="xsmall"
                         placeholder="Batch name"
                         class="!mb-0 [&_input]:!text-sm [&_input]:!font-semibold [&_input]:!w-auto [&_input]:!min-w-[100px] [&_input]:!max-w-[200px] [&_input]:!focus:ring-orange-500" />
                     </div>
                   </template>
                   <template v-else>
                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                      {{ batch.name || `Batch #${index + 1}` }}
+                      {{ batch.name || `Batch #${originalIndex + 1}` }}
                     </span>
-                    <button type="button" @click="startEditingBatchName(index)"
+                    <button type="button" @click="startEditingBatchName(originalIndex)"
                       class="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       title="Edit batch name">
                       <PencilSquareIcon class="w-3.5 h-3.5" />
                     </button>
                   </template>
                 </div>
-                <cu-toggle :name="`batchEnabled-${index}`" :model-value="batch.enabled"
-                  @update:model-value="(value) => handleBatchEnabledChange(index, value)"
+                <cu-toggle :name="`batchEnabled-${originalIndex}`" :model-value="batch.enabled"
+                  @update:model-value="(value) => handleBatchEnabledChange(originalIndex, value)"
                   tooltip="Enable or disable this batch. Disabled batches are stored but not executed." />
               </div>
               <div class="text-xs text-gray-700 dark:text-gray-300 space-y-1">
@@ -224,27 +226,73 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                    }}min</span>
+                      }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                    }}%</span>
+                  }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                  }}</span>
+                    }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
+                  <span v-if="batch.logVolumes" class="mr-2">| Log Volumes</span>
+                  <span v-if="batch.getLatestStats" class="mr-2">| Only get latest stats</span>
+                  <span v-if="batch.stopProcessing" class="mr-2">| Close all orders and positions</span>
+                  <span v-if="batch.minimumCycleBalanceCheck" class="mr-2">| Min Balance Check: ${{
+                    batch.minimumCycleBalance
+                    }}</span>
                 </div>
               </div>
             </div>
             <div class="flex gap-1 ml-2">
-              <cu-button @click="editBatch(index)" color="yellow" size="small" label="Edit" />
-              <cu-button @click="removeBatch(index)" color="red" size="small" label="Remove" />
+              <cu-button @click="editBatch(originalIndex)" color="yellow" size="small" label="Edit" />
+              <cu-button @click="removeBatch(originalIndex)" color="red" size="small" label="Remove" />
             </div>
           </div>
         </div>
       </div>
+      <cu-collapsible-section v-if="disabledBatches.length > 0" name="disabledBatches"
+        :title="`Disabled Batches (${disabledBatches.length})`">
+        <div class="space-y-2">
+          <div v-for="({ batch, originalIndex }) in disabledBatches" :key="originalIndex"
+            class="rounded-lg border p-1.5 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-0.5">
+                  <div class="flex items-center gap-2">
+                    <template v-if="editingBatchNameIndex === originalIndex">
+                      <div class="mb-0">
+                        <cu-input :ref="el => { if (el) batchNameInputRefs[originalIndex] = el; }"
+                          :name="`batchName-${originalIndex}`"
+                          :model-value="batch.name || `Batch #${originalIndex + 1}`"
+                          @update:model-value="(value) => { batches[originalIndex].name = value }" size="xsmall"
+                          placeholder="Batch name"
+                          class="!mb-0 [&_input]:!text-sm [&_input]:!font-semibold [&_input]:!w-auto [&_input]:!min-w-[100px] [&_input]:!max-w-[200px] [&_input]:!focus:ring-orange-500" />
+                      </div>
+                    </template>
+                    <template v-else>
+                      <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ batch.name || `Batch #${originalIndex + 1}` }}
+                      </span>
+                    </template>
+                  </div>
+                  <cu-toggle :name="`batchEnabled-${originalIndex}`" :model-value="batch.enabled"
+                    @update:model-value="(value) => handleBatchEnabledChange(originalIndex, value)"
+                    tooltip="Enable or disable this batch. Disabled batches are stored but not executed." />
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-500">
+                  {{ batch.profiles.length }} profile{{ batch.profiles.length !== 1 ? 's' : '' }} |
+                  {{(batch.customAssetsEnabled ? batch.customAssetsInput : batch.assetsToTrade?.map(a =>
+                    a.name)?.join(', ')) || 'None'
+                  }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </cu-collapsible-section>
     </div>
   </div>
 
@@ -346,6 +394,18 @@ const availableProfilesForSelection = computed(() => {
   return availableProfiles.value.filter(
     profile => !usedSerialNumbers.includes(profile.serial_number)
   )
+})
+
+const enabledBatches = computed(() => {
+  return batches.value
+    .map((batch, index) => ({ batch, originalIndex: index }))
+    .filter(({ batch }) => batch.enabled)
+})
+
+const disabledBatches = computed(() => {
+  return batches.value
+    .map((batch, index) => ({ batch, originalIndex: index }))
+    .filter(({ batch }) => !batch.enabled)
 })
 
 const resetFormToDefaults = () => {
