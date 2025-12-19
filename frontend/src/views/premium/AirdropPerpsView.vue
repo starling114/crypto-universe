@@ -307,7 +307,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed, nextTick } from 'vue'
-import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, statusModule, beforeUnloadModule, beforeRouteLeaveModule, loadProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
@@ -659,7 +659,7 @@ const handleBatchEnabledChange = (index, newValue) => {
 }
 
 const loadDefaults = async () => {
-  await loadAdsProfiles(proxy, (profilesData) => {
+  await loadProfiles(proxy, (profilesData) => {
     availableProfiles.value = profilesData
   }, logs)
 

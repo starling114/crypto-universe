@@ -1,5 +1,5 @@
 <template>
-  <cu-title title="Testing - ADS Execution" />
+  <cu-title title="Testing - Browser Execution" />
 
   <div class="mb-2">
     <cu-label name="profiles" label="Profiles" tooltip="Choose profiles to run automation." />
@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
-import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
@@ -52,7 +52,7 @@ const parallelExecution = ref(false)
 const logs = ref([])
 const moduleRunning = ref(false)
 
-const module = ref('testing-ads_execution')
+const module = ref('testing-browser_execution')
 
 const { proxy } = getCurrentInstance()
 
@@ -60,7 +60,7 @@ const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
-  await loadAdsProfiles(proxy, (profilesData) => {
+  await loadProfiles(proxy, (profilesData) => {
     availableProfiles.value = profilesData
   }, logs)
 
