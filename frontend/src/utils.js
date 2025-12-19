@@ -20,8 +20,8 @@ export const loadConfigs = async (proxy, callback) => {
   })
 }
 
-export const loadAdsProfiles = async (proxy, callback, logs) => {
-  await proxy.$axios.get('/api/ads_profiles').then((response) => {
+export const loadProfiles = async (proxy, callback, logs) => {
+  await proxy.$axios.get('/api/profiles').then((response) => {
     if (response.data && response.data.profiles) callback(response.data.profiles)
   }).catch((error) => {
     if (logs) {

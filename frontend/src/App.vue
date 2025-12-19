@@ -329,14 +329,14 @@
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 
-      <cu-sidebar-item v-if="moduleEnabled('testing-ads_execution')">
+      <cu-sidebar-item v-if="moduleEnabled('testing-browser_execution')">
         <template #left>
           <BeakerIcon
             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </template>
         <template #center>Testing</template>
 
-        <cu-sidebar-sub-item tag="router-link" link="/testing-ads_execution">
+        <cu-sidebar-sub-item tag="router-link" link="/testing-browser_execution">
           <template #left>
             <div
               class="flex-shrink-0 w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -348,7 +348,7 @@
                 backgroundColor: 'currentColor'
               }" />
           </template>
-          <template #center>ADS Execution</template>
+          <template #center>Browser Execution</template>
         </cu-sidebar-sub-item>
       </cu-sidebar-item>
 

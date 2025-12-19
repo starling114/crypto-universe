@@ -37,11 +37,21 @@
   </cu-collapsible-section>
 
   <cu-collapsible-section name="additionalSettings" title="Additional Settings">
-    <div class="mt-1 grid grid-cols-2 gap-2">
-      <cu-input name="adsUrl" label="ADS Url" size="small" v-model="adsUrl" placeholder="ADS Api url" />
-    </div>
     <div class="grid grid-cols-2 gap-2">
       <cu-checkbox name="debugMode" v-model="debugMode" label="Debug Mode" tooltip="Turn on to enable debug mode." />
+    </div>
+    <div class="mt-1 grid grid-cols-2 gap-2">
+      <cu-select name="browserType" v-model="browserType" :options="browserTypeOptions"
+        placeholder="Select browser type" size="small" label="Browser Type"
+        tooltip="Select the browser type to use. If nothing is selected, ADS browser with default API URL will be used." />
+    </div>
+    <div v-if="browserType === 'ads'" class="mt-1 grid grid-cols-2 gap-2">
+      <cu-input name="adsUrl" label="ADS Url" size="small" v-model="adsUrl" placeholder="ADS Api url"
+        tooltip="Enter custom ADS API URL. Leave empty to use default: http://local.adspower.net:50325" />
+    </div>
+    <div v-if="browserType === 'afina'" class="mt-1 grid grid-cols-2 gap-2">
+      <cu-input name="afinaApiKey" label="Afina API Key" size="small" v-model="afinaApiKey" placeholder="Afina API key"
+        tooltip="Enter your Afina API key." />
     </div>
     <div class="mt-4 mb-4 flex justify-center">
       <cu-button class="w-1/3" color="green" label="Save" @click="handleSave" />
@@ -62,6 +72,7 @@ import {
   CuTextarea,
   CuCheckbox,
   CuInput,
+  CuSelect,
 } from '@/components/cu'
 
 const availableModules = ref([])
@@ -76,7 +87,14 @@ const premiumMode = ref(false)
 const licenseKey = ref('')
 const licenseKeyValidationError = ref(false)
 const debugMode = ref(false)
+const browserType = ref('')
 const adsUrl = ref('')
+const afinaApiKey = ref('')
+
+const browserTypeOptions = [
+  { label: 'ADS', value: 'ads' },
+  { label: 'Afina', value: 'afina' }
+]
 
 const module = ref('crypto_universe')
 
@@ -90,7 +108,9 @@ const loadDefaults = async () => {
     premiumModules.value = data.premium_modules ?? premiumModules.value
     licenseKey.value = data.license_key ?? licenseKey.value
     debugMode.value = data.debug_mode ?? debugMode.value
+    browserType.value = data.browser_type ?? browserType.value
     adsUrl.value = data.ads_url ?? adsUrl.value
+    afinaApiKey.value = data.afina_api_key ?? afinaApiKey.value
   })
 
   await loadModuleData(proxy, module.value, 'secrets', 'js', (data) => {
@@ -122,7 +142,9 @@ const handleSave = async () => {
     premium_modules: premiumModules.value,
     license_key: licenseKey.value,
     debug_mode: debugMode.value,
+    browser_type: browserType.value,
     ads_url: adsUrl.value,
+    afina_api_key: afinaApiKey.value,
   })
 
   window.location.reload()

@@ -1,26 +1,26 @@
 from multiprocessing import Pool
 
 from core.helpers import zip_to_objects
-from core.tools.ads import Ads
+from core.tools.browser import Browser
 from utils import load_json, log_error, logger, sleep
 
 
 class PhantomImport:
     def __init__(self, profile, label, password, seed_phrase):
         self.profile = profile
-        self.ads = Ads(profile, wallet_type=Ads.WALLET_PHANTOM)
+        self.browser = Browser.create(profile, wallet_type=Browser.WALLET_PHANTOM)
         self.label = label
         self.password = password
         self.seed_phrase = seed_phrase
 
     def execute(self):
         try:
-            logger.info(f"Profile: {self.ads.label} | Phantom Import | Starting")
+            logger.info(f"Profile: {self.browser.label} | Phantom Import | Starting")
 
-            self.ads.wallet.import_new(self.label, None, self.password, self.seed_phrase)
+            self.browser.wallet.import_new(self.label, None, self.password, self.seed_phrase)
 
-            logger.success(f"Profile: {self.ads.label} | Phantom Import | Imported Successfully")
-            self.ads.close_browser()
+            logger.success(f"Profile: {self.browser.label} | Phantom Import | Imported Successfully")
+            self.browser.close_browser()
             return True
         except Exception as e:
             log_error(e, f"Profile: {self.profile}")

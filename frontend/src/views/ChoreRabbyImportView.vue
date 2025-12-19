@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
-import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadAdsProfiles } from '@/utils'
+import { loadModuleData, stopModule, updateModuleData, startModule, beforeUnloadModule, beforeRouteLeaveModule, loadProfiles } from '@/utils'
 import { onBeforeRouteLeave } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import {
@@ -74,7 +74,7 @@ const handleAppendLogs = async (log) => logs.value.unshift(log)
 const handleScriptFinish = async () => moduleRunning.value = false
 
 const loadDefaults = async () => {
-  await loadAdsProfiles(proxy, (profiles) => {
+  await loadProfiles(proxy, (profiles) => {
     availableProfiles.value = profiles
   }, logs)
 

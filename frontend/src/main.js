@@ -33,7 +33,7 @@ import ChoreRabbyImportView from '@/views/ChoreRabbyImportView.vue'
 import ChorePhantomImportView from '@/views/ChorePhantomImportView.vue'
 import AirdropPerpsView from '@/views/premium/AirdropPerpsView.vue'
 import AirdropPerpsSettingsView from '@/views/settings/premium/AirdropPerpsSettingsView.vue'
-import TestingAdsExecutionView from '@/views/TestingAdsExecutionView.vue'
+import TestingBrowserExecutionView from '@/views/TestingBrowserExecutionView.vue'
 
 const app = createApp(App)
 
@@ -212,10 +212,10 @@ const routes = [
     meta: { title: 'CU | Chore - Phantom Import' }
   },
   {
-    path: '/testing-ads_execution',
-    name: 'Testing ADS Execution',
-    component: TestingAdsExecutionView,
-    meta: { title: 'CU | Testing - ADS Execution' }
+    path: '/testing-browser_execution',
+    name: 'Testing Browser Execution',
+    component: TestingBrowserExecutionView,
+    meta: { title: 'CU | Testing - Browser Execution' }
   }
 ]
 

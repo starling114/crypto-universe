@@ -73,7 +73,37 @@ export function moduleDataFilepath(module, type, script_type) {
   return path.resolve(`${folder}${type}.json`)
 }
 
-export async function adsProfiles() {
+export async function browserProfiles() {
+  if (instructions['browser_type'] === 'afina') {
+    return afinaProfiles()
+  } else if (instructions['browser_type'] === 'ads') {
+    return adsProfiles()
+  } else {
+    throw new Error('Invalid browser type')
+  }
+}
+
+async function afinaProfiles() {
+  const apiUrl = 'http://127.0.0.1:50777/api/profiles/list'
+
+  let apiKey = instructions['afina_api_key']
+  const { data: { message, accounts } } = await axios.get(apiUrl, {
+    headers: { 'x-api-key': apiKey}
+  })
+
+  if (message !== 'Accounts successfully fetched') {
+    throw new Error(message)
+  }
+
+  return accounts
+    .filter(account => !account.isDeleted)
+    .map(account => ({
+      serial_number: account.accountId,
+      name: account.name
+    }))  
+}
+
+async function adsProfiles() {
   let baseUrl;
   if (instructions['ads_url'] && instructions['ads_url'] != "") {
     baseUrl = instructions['ads_url']
