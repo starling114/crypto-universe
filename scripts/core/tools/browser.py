@@ -29,16 +29,14 @@ class Browser:
 
     @classmethod
     def create(cls, profile, wallet_password=None, wallet_type=WALLET_RABBY, label=None):
-        if INSTRUCTIONS["browser_type"] == "afina":
+        if INSTRUCTIONS.get("browser_type") == "afina":
             from core.tools.afina import Afina
 
             return Afina(profile, wallet_password, wallet_type, label)
-        elif INSTRUCTIONS["browser_type"] == "ads":
+        else:
             from core.tools.ads import Ads
 
             return Ads(profile, wallet_password, wallet_type, label)
-        else:
-            raise ExecutionError(f"Invalid browser type: {INSTRUCTIONS['browser_type']}")
 
     def __init__(self, profile, wallet_password=None, wallet_type=WALLET_RABBY, label=None):
         self.profile = profile

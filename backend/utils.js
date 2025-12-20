@@ -76,10 +76,8 @@ export function moduleDataFilepath(module, type, script_type) {
 export async function browserProfiles() {
   if (instructions['browser_type'] === 'afina') {
     return afinaProfiles()
-  } else if (instructions['browser_type'] === 'ads') {
-    return adsProfiles()
   } else {
-    throw new Error('Invalid browser type')
+    return adsProfiles()
   }
 }
 
