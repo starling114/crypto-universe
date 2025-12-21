@@ -30,7 +30,8 @@ import { defineProps, defineEmits, ref, onMounted, onBeforeUnmount, getCurrentIn
 const props = defineProps({
   logs: { type: Array, required: true },
   module: { type: String, required: true },
-  clear: { type: Boolean, default: false }
+  clear: { type: Boolean, default: false },
+  formatLogs: { type: Boolean, default: true }
 })
 
 const emit = defineEmits(['append:logs', 'finished:script', 'clear:logs'])
@@ -40,8 +41,27 @@ const isAutoScrolling = ref(false)
 
 const { proxy } = getCurrentInstance()
 
-const formatLogs = (text) => {
-  let newText = text
+const escapeHtml = (text) => {
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
+
+const safelyEscapeLogMessage = (text) => {
+  const parts = text.split('|')
+
+  if (parts.length >= 3) {
+    const structuredParts = parts.slice(0, 2).join('|')
+    const messageContent = parts.slice(2).join('|')
+    const escapedMessage = escapeHtml(messageContent)
+    return { structuredParts, escapedMessage }
+  }
+
+  return { structuredParts: null, escapedMessage: escapeHtml(text) }
+}
+
+const applyLinkFormatting = (text) => {
+  let formattedText = text
   const replaces = [
     {
       regex: /https?:\/\/[^\s]+/g,
@@ -56,17 +76,35 @@ const formatLogs = (text) => {
   ]
 
   replaces.forEach(({ regex, replaceText }) => {
-    newText = newText.replace(regex, replaceText)
+    formattedText = formattedText.replace(regex, replaceText)
   })
 
-  return newText
+  return formattedText
+}
+
+const processLogText = (text) => {
+  const { structuredParts, escapedMessage } = safelyEscapeLogMessage(text)
+
+  if (structuredParts !== null) {
+    let message = escapedMessage
+    if (props.formatLogs) {
+      message = applyLinkFormatting(escapedMessage)
+    }
+    return `${structuredParts}|${message}`
+  }
+
+  if (props.formatLogs) {
+    return applyLinkFormatting(escapedMessage)
+  }
+  return escapedMessage
 }
 
 const startLogStreaming = () => {
   eventSource.value = new EventSource(`${proxy.$axios.defaults.baseURL}/api/logs?module=${props.module}`)
 
   eventSource.value.onmessage = (event) => {
-    emit('append:logs', formatLogs(event.data))
+    const logText = processLogText(event.data)
+    emit('append:logs', logText)
     if (event.data.includes("finished with exit code")) emit('finished:script')
     if (isAutoScrolling.value) {
       scrollToBottom()

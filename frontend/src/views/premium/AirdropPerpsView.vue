@@ -226,23 +226,23 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                      }}min</span>
+                    }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                  }}%</span>
+                    }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                    }}</span>
+                  }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
                   <span v-if="batch.logVolumes" class="mr-2">| Log Volumes</span>
                   <span v-if="batch.getLatestStats" class="mr-2">| Only get latest stats</span>
                   <span v-if="batch.stopProcessing" class="mr-2">| Close all orders and positions</span>
                   <span v-if="batch.minimumCycleBalanceCheck" class="mr-2">| Min Balance Check: ${{
                     batch.minimumCycleBalance
-                    }}</span>
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -301,8 +301,8 @@
     <cu-button class="w-1/3 ml-4" color="red" label="Stop" @click="handleStop" :disabled="!moduleRunning" />
   </div>
 
-  <cu-logs :logs="logs" :clear="true" :module="module" @append:logs="handleAppendLogs" @clear:logs="handleClearLogs"
-    @finished:script="handleScriptFinish" />
+  <cu-logs :logs="logs" :clear="true" :module="module" :formatLogs="false" @append:logs="handleAppendLogs"
+    @clear:logs="handleClearLogs" @finished:script="handleScriptFinish" />
 </template>
 
 <script setup>
@@ -382,7 +382,13 @@ const module = ref('premium/airdrop-perps')
 
 const { proxy } = getCurrentInstance()
 
-const handleAppendLogs = async (log) => logs.value.unshift(log)
+const MAX_LOGS = 7000
+const handleAppendLogs = async (log) => {
+  logs.value.unshift(log)
+  if (logs.value.length > MAX_LOGS) {
+    logs.value.length = MAX_LOGS
+  }
+}
 const handleClearLogs = async () => logs.value = []
 const handleScriptFinish = async () => moduleRunning.value = false
 
