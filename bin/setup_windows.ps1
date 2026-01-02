@@ -29,15 +29,15 @@ function Ensure-Python {
   if (Get-Command python -ErrorAction SilentlyContinue) {
     $global:PY = 'python'
   }
-  if (-not $global:PY) { Err 'Python is not installed. Please install Python 3.10+ from https://www.python.org/downloads/ and try again.' }
+  if (-not $global:PY) { Err 'Python is not installed. Please install Python 3.10.11 from https://www.python.org/downloads/ and try again.' }
 
-  & $global:PY -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)" 2>$null | Out-Null
+  & $global:PY -c "import sys; sys.exit(0 if sys.version_info >= (3,10) and sys.version_info < (3,11) else 1)" 2>$null | Out-Null
   if ($LASTEXITCODE -ne 0) {
     $cur = & $global:PY -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"
-    Err "Your Python version ($cur) is too old. Please install Python 3.10+ from https://www.python.org/downloads/."
+    Err "Your Python version ($cur) is not compatible. Please install Python 3.10.11 from https://www.python.org/downloads/."
   }
   $pyVer = & $global:PY -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"
-  Info "Python $pyVer detected (>= 3.10)"
+  Info "Python $pyVer detected (3.10.*)"
 }
 
 Need-Cmd git

@@ -37,7 +37,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseBasicParsing htt
 
 ## Troubleshooting
 - Node/Python not found: install them from the links in Prerequisites and restart PowerShell.
-- Python version too old: install Python 3.10+.
+- Python version too old: install Python 3.10.
 - ExecutionPolicy errors: start PowerShell as Administrator or use the one‑liner (it bypasses policy for the current process only).
 
 ## Uninstall / Clean up

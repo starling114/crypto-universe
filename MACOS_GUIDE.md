@@ -11,7 +11,7 @@ This guide explains how to install and run Crypto Universe on macOS step by step
   - Download from https://www.python.org/downloads/release/python-31011/ and install.
 
 ## Quick Setup (Recommended)
-If you already have Git, Node.js, and Python 3.10+ installed, run this single command in Terminal to perform the initial install:
+If you already have Git, Node.js, and Python 3.10 installed, run this single command in Terminal to perform the initial install:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/starling114/crypto-universe/refs/heads/main/bin/setup.sh | bash
@@ -38,7 +38,7 @@ Tip: If double-click doesn’t run in Terminal, right‑click the file and choos
 
 ## Troubleshooting
 - Node/Python not found: install them from the links in Prerequisites and close/reopen Terminal.
-- Python version too old: install Python 3.10+.
+- Python version too old: install Python 3.10.
 - Permission errors creating folders: ensure your user can write to `~/Desktop`.
 
 ## Uninstall / Clean up

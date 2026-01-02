@@ -33,15 +33,15 @@ ensure_python() {
   elif command -v python >/dev/null 2>&1; then
     PY=python
   else
-    err "Python 3 is not installed. Please install Python 3.10 or higher from https://www.python.org/downloads/ and try again."
+    err "Python 3 is not installed. Please install Python 3.10.11 from https://www.python.org/downloads/ and try again."
   fi
 
-  if "$PY" -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" 2>/dev/null; then
+  if "$PY" -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) and sys.version_info < (3, 11) else 1)" 2>/dev/null; then
     PY_VER=$("$PY" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')")
-    info "Python ($PY_VER) is ready (meets 3.10 or higher requirement)."
+    info "Python ($PY_VER) is ready (3.10.*)."
   else
     CUR_VER=$("$PY" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')")
-    err "Your Python version ($CUR_VER) is too old. Please install Python 3.10 or higher from https://www.python.org/downloads/ and try again."
+    err "Your Python version ($CUR_VER) is not compatible. Please install Python 3.10.11 from https://www.python.org/downloads/ and try again."
   fi
 }
 
@@ -92,7 +92,7 @@ info "Setting up Python environment in scripts/myenv..."
 cd scripts || err "Could not access scripts directory. Please ensure the project structure is correct."
 if [ ! -d myenv ]; then
   if ! "$PY" -m venv myenv; then
-    err "Failed to create Python virtual environment. Please ensure Python 3.10+ is installed correctly."
+    err "Failed to create Python virtual environment. Please ensure Python 3.10.11 is installed correctly."
   fi
 fi
 
