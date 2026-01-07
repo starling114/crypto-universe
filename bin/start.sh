@@ -38,7 +38,7 @@ case "$(uname -s)" in
     ;;
 esac
 
-ZIP_PATTERN="premium-modules-${OS}-*-python3.10.zip"
+ZIP_PATTERN="premium-modules-${OS}-*-python3.10*.zip"
 
 for ZIP_FILE in "$ROOT_DIR"/$ZIP_PATTERN; do
   if [ -f "$ZIP_FILE" ]; then
