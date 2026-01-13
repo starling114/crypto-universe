@@ -226,23 +226,23 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                    }}min</span>
+                      }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                    }}%</span>
+                  }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                  }}</span>
+                    }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
                   <span v-if="batch.logVolumes" class="mr-2">| Log Volumes</span>
                   <span v-if="batch.getLatestStats" class="mr-2">| Only get latest stats</span>
                   <span v-if="batch.stopProcessing" class="mr-2">| Close all orders and positions</span>
                   <span v-if="batch.minimumCycleBalanceCheck" class="mr-2">| Min Balance Check: ${{
                     batch.minimumCycleBalance
-                  }}</span>
+                    }}</span>
                 </div>
               </div>
             </div>
@@ -297,7 +297,8 @@
   </div>
 
   <div class="mt-4 mb-4 flex justify-center">
-    <cu-button class="w-1/3" color="green" label="Execute" @click="handleExecute" :disabled="moduleRunning" />
+    <cu-button class="w-1/3" color="green" label="Execute" @click="handleExecute"
+      :disabled="moduleRunning || !hasProfilesLoaded" />
     <cu-button class="w-1/3 ml-4" color="red" label="Stop" @click="handleStop" :disabled="!moduleRunning" />
   </div>
 
@@ -382,15 +383,23 @@ const module = ref('premium/airdrop-perps')
 
 const { proxy } = getCurrentInstance()
 
-const MAX_LOGS = 7000
+const DEFAULT_MAX_LOGS = 1000
+const maxLogs = computed(() => {
+  return proxy.$globalConfigs?.instructions?.logs_limit ?? DEFAULT_MAX_LOGS
+})
+
 const handleAppendLogs = async (log) => {
   logs.value.unshift(log)
-  if (logs.value.length > MAX_LOGS) {
-    logs.value.length = MAX_LOGS
+  if (logs.value.length > maxLogs.value) {
+    logs.value.length = maxLogs.value
   }
 }
 const handleClearLogs = async () => logs.value = []
 const handleScriptFinish = async () => moduleRunning.value = false
+
+const hasProfilesLoaded = computed(() => {
+  return availableProfiles.value && availableProfiles.value.length > 0
+})
 
 const availableProfilesForSelection = computed(() => {
   const usedSerialNumbers = batches.value
@@ -627,6 +636,11 @@ const cancelEdit = () => {
 }
 
 const removeBatch = (index) => {
+  const batch = batches.value[index]
+  const batchName = batch?.name || `Batch #${index + 1}`
+  if (!confirm(`Are you sure you want to remove ${batchName}?`)) {
+    return
+  }
   batches.value.splice(index, 1)
   if (editingBatchIndex.value === index) {
     cancelEdit()
@@ -668,6 +682,10 @@ const loadDefaults = async () => {
   await loadProfiles(proxy, (profilesData) => {
     availableProfiles.value = profilesData
   }, logs)
+
+  if (!availableProfiles.value || availableProfiles.value.length === 0) {
+    await handleAppendLogs('Error: No profiles loaded. Please check if the antidetect browser is running and accessible.')
+  }
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
     if (!Object.hasOwn(data, 'assets_to_trade')) return
@@ -765,6 +783,16 @@ const loadDefaults = async () => {
 }
 
 const handleExecute = async () => {
+  if (editingBatchIndex.value !== null) {
+    alert('Please finish editing the batch (Update Batch or Cancel Edit) before executing')
+    return
+  }
+
+  if (!hasProfilesLoaded.value) {
+    await handleAppendLogs('Error: No profiles loaded. Please check if the antidetect browser is running and accessible.')
+    return
+  }
+
   if (batches.value.length === 0) {
     alert('Please add at least one batch before executing')
     return
@@ -886,7 +914,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
-onBeforeRouteLeave(beforeRouteLeaveModule(moduleRunning, handleStop))
+onBeforeRouteLeave(beforeRouteLeaveModule(moduleRunning))
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>

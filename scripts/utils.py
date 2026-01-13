@@ -163,7 +163,7 @@ def format_time_seconds(seconds: float) -> str:
 
 
 def parse_number_text(text):
-    formatted_text = text.replace("$", "").replace(",", "").strip()
+    formatted_text = text.replace("−", "-").replace("$", "").replace(",", "").strip()
     match = re.search(r"(-?[\d,.]+)", formatted_text)
     if match:
         return Decimal(match.group(1))

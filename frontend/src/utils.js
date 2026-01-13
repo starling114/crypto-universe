@@ -94,7 +94,7 @@ export const beforeRouteLeaveModule = (moduleRunning, callback) => {
     if (moduleRunning.value) {
       const answer = confirm('Module might be running. Do you really want to leave?')
       if (answer) {
-        await callback()
+        if (callback) await callback()
         next()
       } else {
         next(false)

@@ -41,6 +41,10 @@
       <cu-checkbox name="debugMode" v-model="debugMode" label="Debug Mode" tooltip="Turn on to enable debug mode." />
     </div>
     <div class="mt-1 grid grid-cols-2 gap-2">
+      <cu-input name="logsLimit" size="small" v-model="logsLimit" label="Logs limit" placeholder="Logs limit"
+        tooltip="Maximum number of logs to keep in memory. Older logs will be removed to prevent page freezing." />
+    </div>
+    <div class="mt-1 grid grid-cols-2 gap-2">
       <cu-select name="browserType" v-model="browserType" :options="browserTypeOptions"
         placeholder="Select browser type" size="small" label="Browser Type"
         tooltip="Select the browser type to use. If nothing is selected, ADS browser with default API URL will be used." />
@@ -87,6 +91,7 @@ const premiumMode = ref(false)
 const licenseKey = ref('')
 const licenseKeyValidationError = ref(false)
 const debugMode = ref(false)
+const logsLimit = ref(1000)
 const browserType = ref('')
 const adsUrl = ref('')
 const afinaApiKey = ref('')
@@ -108,6 +113,7 @@ const loadDefaults = async () => {
     premiumModules.value = data.premium_modules ?? premiumModules.value
     licenseKey.value = data.license_key ?? licenseKey.value
     debugMode.value = data.debug_mode ?? debugMode.value
+    logsLimit.value = data.logs_limit ?? logsLimit.value
     browserType.value = data.browser_type ?? browserType.value
     adsUrl.value = data.ads_url ?? adsUrl.value
     afinaApiKey.value = data.afina_api_key ?? afinaApiKey.value
@@ -142,6 +148,7 @@ const handleSave = async () => {
     premium_modules: premiumModules.value,
     license_key: licenseKey.value,
     debug_mode: debugMode.value,
+    logs_limit: parseInt(logsLimit.value),
     browser_type: browserType.value,
     ads_url: adsUrl.value,
     afina_api_key: afinaApiKey.value,

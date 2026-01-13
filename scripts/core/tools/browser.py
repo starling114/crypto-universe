@@ -392,6 +392,11 @@ class Browser:
         logger.debug(f"Profile: {self.label} | New tab opened: {new_tab_handle}")
         return new_tab_handle
 
+    def reload(self):
+        logger.debug(f"Profile: {self.label} | Reloading page")
+        self.driver.refresh()
+        logger.debug(f"Profile: {self.label} | Page reloaded")
+
     def close_all_other_tabs(self):
         logger.debug(f"Profile: {self.label} | Closing all other tabs")
         current_tab = self.current_tab()

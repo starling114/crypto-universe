@@ -13,6 +13,7 @@ import {
   debugMode,
   browserProfiles,
   configs,
+  instructions,
   runAuthentication,
   premiumMode
 } from "./utils.js"
@@ -57,7 +58,7 @@ apiRoutes.get('/profiles', async (req, res) => {
 })
 
 apiRoutes.get('/configs', async (req, res) => {
-  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), configs: configs })
+  res.json({ debug_mode: debugMode(), premium_mode: premiumMode(), configs: configs, instructions: instructions })
 })
 
 apiRoutes.get('/balances', async (req, res) => {
