@@ -44,6 +44,17 @@ level = "DEBUG" if debug_mode() else "INFO"
 format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
 logger.add(sys.stdout, colorize=True, format=format, level=level)
 
+os.makedirs("logs", exist_ok=True)
+file_format = "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+logger.add(
+    "logs/app_{time:YYYY-MM-DD}.log",
+    format=file_format,
+    level=level,
+    rotation="00:00",
+    retention="2 days",
+    encoding="utf-8",
+)
+
 
 class ExecutionError(Exception):
     pass
