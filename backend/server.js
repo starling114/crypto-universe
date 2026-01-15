@@ -197,5 +197,8 @@ apiRoutes.get('/logs', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Crypto Universe started: http://localhost:${port}`)
+  exec('git rev-parse --short=8 HEAD', (error, stdout, _stderr) => {
+    const commitHash = error ? 'unknown' : stdout.trim()
+    console.log(`Crypto Universe started (${commitHash}): http://localhost:${port}`)
+  })
 })
