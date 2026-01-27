@@ -28,6 +28,8 @@ class Afina(Browser):
         debug_address = f"{selenium_host}:{selenium_port}"
         chrome_driver = profile_data["data"]["webdriver"]
 
+        self._cdp_endpoint = ws_endpoint
+
         return super()._start_profile(chrome_driver, debug_address)
 
     def _open_browser(self):
@@ -50,7 +52,8 @@ class Afina(Browser):
         if len(tabs) > 1:
             for tab in tabs[1:]:
                 self.switch_tab(tab)
-                logger.debug(f"Profile: {self.label} | Closing `{self.driver.title}` tab")
+                url = self._get_current_url_cdp()
+                logger.debug(f"Profile: {self.label} | Closing `{url}` tab")
                 self.driver.close()
 
         self.switch_tab(tabs[0])

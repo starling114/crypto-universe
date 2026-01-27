@@ -1,4 +1,5 @@
 import os
+import re
 from abc import abstractmethod
 
 from core.tools.metamask import Metamask
@@ -25,7 +26,7 @@ class Browser:
     WALLET_METAMASK = "metamask"
     WALLET_PHANTOM = "phantom"
     WALLETS = {WALLET_RABBY: Rabby, WALLET_METAMASK: Metamask, WALLET_PHANTOM: Phantom}
-    SYSTEM_TABS = ["Rabby Offscreen Page", "DevTools"]
+    SYSTEM_URL_PATTERNS = [r"^chrome-extension://[a-z]+/offscreen\.html", r"^devtools://"]
 
     @classmethod
     def create(cls, profile, wallet_password=None, wallet_type=WALLET_RABBY, label=None):
@@ -379,6 +380,8 @@ class Browser:
     def switch_tab(self, tab):
         logger.debug(f"Profile: {self.label} | Switching tab: {tab}")
         self.driver.switch_to.window(tab)
+        url = self._get_current_url_cdp()
+        logger.debug(f"Profile: {self.label} | Switched to tab: {url}, tab: {tab}")
 
     def new_tab(self):
         logger.debug(f"Profile: {self.label} | Opening new blank tab")
@@ -405,35 +408,29 @@ class Browser:
             if tab != current_tab:
                 try:
                     self.switch_tab(tab)
-                    logger.debug(f"Profile: {self.label} | Closing tab: {self.driver.title}")
+                    url = self._get_current_url_cdp()
+                    logger.debug(f"Profile: {self.label} | Closing tab: {url}")
                     self.driver.close()
                 except Exception as e:
                     logger.debug(f"Profile: {self.label} | Error closing tab: {e}")
         self.switch_tab(current_tab)
         logger.debug(f"Profile: {self.label} | All other tabs closed")
 
-    def find_tab(self, part_of_url=None, part_of_name=None, keep_focused=False):
-        logger.debug(f"Profile: {self.label} | Finding tab: {part_of_name}, {part_of_url}")
+    def find_tab(self, part_of_url, keep_focused=False):
+        logger.debug(f"Profile: {self.label} | Finding tab: {part_of_url}")
         current_tab = self.current_tab()
         tabs = self.driver.window_handles
         for tab in reversed(tabs):
             self.switch_tab(tab)
-            if self.driver.title not in self.SYSTEM_TABS:
-                logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab, checking...")
-                if part_of_url is not None:
-                    logger.debug(f"Profile: {self.label} | Checking part of url: {self.driver.current_url}")
-                    if part_of_url in self.driver.current_url:
-                        target_tab = self.current_tab()
-                        if not keep_focused:
-                            self.switch_tab(current_tab)
-                        return target_tab
-                if part_of_name is not None:
-                    logger.debug(f"Profile: {self.label} | Checking part of name: {self.driver.title}")
-                    if part_of_name in self.driver.title:
-                        target_tab = self.current_tab()
-                        if not keep_focused:
-                            self.switch_tab(current_tab)
-                        return target_tab
+            url = self._get_current_url_cdp()
+            if not self._is_system_tab(url):
+                logger.debug(f"Profile: {self.label} | Switched to `{url}` tab, checking...")
+
+                if part_of_url in url:
+                    target_tab = self.current_tab()
+                    if not keep_focused:
+                        self.switch_tab(current_tab)
+                    return target_tab
         return None
 
     def mouse_position(self):
@@ -473,8 +470,24 @@ class Browser:
         final_tabs = []
         for tab in start_tabs:
             self.switch_tab(tab)
-            logger.debug(f"Profile: {self.label} | Switched to `{self.driver.title}` tab")
-            if self.driver.title not in self.SYSTEM_TABS:
+            if not self._is_system_tab(self._get_current_url_cdp()):
                 final_tabs.append(tab)
 
         return final_tabs
+
+    def _is_system_tab(self, url):
+        return any(re.match(pattern, url) for pattern in self.SYSTEM_URL_PATTERNS)
+
+    def _get_current_url_cdp(self):
+        try:
+            result = self.driver.execute_cdp_cmd("Target.getTargetInfo", {})
+            return result.get("targetInfo", {}).get("url", "")
+        except Exception:
+            try:
+                result = self.driver.execute_cdp_cmd(
+                    "Runtime.evaluate",
+                    {"expression": "location.href", "returnByValue": True},
+                )
+                return result.get("result", {}).get("value", "")
+            except Exception:
+                return self.driver.current_url

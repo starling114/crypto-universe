@@ -24,6 +24,7 @@ class Ads(Browser):
 
         chrome_driver = profile_data["data"]["webdriver"]
         selenium_port = profile_data["data"]["ws"]["selenium"]
+        self._cdp_endpoint = profile_data["data"]["ws"]["puppeteer"]
 
         return super()._start_profile(chrome_driver, selenium_port)
 
@@ -55,7 +56,8 @@ class Ads(Browser):
         if len(tabs) > 1:
             for tab in tabs[1:]:
                 self.switch_tab(tab)
-                logger.debug(f"Profile: {self.label} | Closing `{self.driver.title}` tab")
+                url = self._get_current_url_cdp()
+                logger.debug(f"Profile: {self.label} | Closing `{url}` tab")
                 self.driver.close()
 
         self.switch_tab(tabs[0])
