@@ -104,11 +104,9 @@ apiRoutes.post('/stop_module', (req, res) => {
 
     if (process.platform === 'win32') {
       const pid = pythonProcesses[module].pid;
-      exec(`taskkill /pid ${pid} /T /F`, (error, stdout, stderr) => {
-        console.error(stdout)
-        console.error(stderr)
+      exec(`taskkill /pid ${pid} /T /F`, (error) => {
         if (error) {
-          console.error('Error stopping process:', error)
+          console.error('Error stopping process:', error.message)
         }
         delete pythonProcesses[module]
       });
