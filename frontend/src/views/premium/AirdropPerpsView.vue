@@ -154,6 +154,9 @@
       <cu-input name="numberOfTradingCycles" size="small" v-model="numberOfTradingCycles"
         label="Number of trading cycles" placeholder="Number of trading cycles" />
     </div>
+    <div class="mb-2">
+      <cu-checkbox name="maintainLiquidation" v-model="maintainLiquidation" label="Maintain Liquidation" />
+    </div>
   </cu-collapsible-section>
 
   <div class="mb-2">
@@ -226,23 +229,24 @@
                 <div class="text-xs text-gray-600 dark:text-gray-400">
                   <span v-if="batch.limitOrder">
                     <span class="mr-2">| Limit Order: {{ batch.minVerifyOrderMinutes }}-{{ batch.maxVerifyOrderMinutes
-                      }}min</span>
+                    }}min</span>
                     <span v-if="batch.limitCancelOrder" class="mr-2">| Limit Cancel Order</span>
                   </span>
                   <span v-if="batch.setMarketOrderSlippage" class="mr-2">| Custom Slippage: {{ batch.marketOrderSlippage
-                  }}%</span>
+                    }}%</span>
                   <span v-if="batch.alwaysUseFirstAsMain" class="mr-2">| First as main</span>
                   <span v-if="batch.alwaysUseFirstAsMain && batch.tradeMainAsSpot" class="mr-2">| Trade main as
                     spot</span>
                   <span v-if="batch.customMainPositionSide" class="mr-2">| Main side: {{ batch.mainPositionSide
-                    }}</span>
+                  }}</span>
                   <span v-if="batch.tradeCycles" class="mr-2">| {{ batch.numberOfTradingCycles }} cycles</span>
+                  <span v-if="batch.maintainLiquidation" class="mr-2">| Maintain Liquidation</span>
                   <span v-if="batch.logVolumes" class="mr-2">| Log Volumes</span>
                   <span v-if="batch.getLatestStats" class="mr-2">| Only get latest stats</span>
                   <span v-if="batch.stopProcessing" class="mr-2">| Close all orders and positions</span>
                   <span v-if="batch.minimumCycleBalanceCheck" class="mr-2">| Min Balance Check: ${{
                     batch.minimumCycleBalance
-                    }}</span>
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -371,6 +375,7 @@ const mainPositionSide = ref('buy')
 const availableSides = ref(['buy', 'sell'])
 const tradeCycles = ref(false)
 const numberOfTradingCycles = ref(10)
+const maintainLiquidation = ref(false)
 
 const logVolumes = ref(false)
 const getLatestStats = ref(false)
@@ -467,6 +472,7 @@ const getCurrentBatchSettings = () => {
     mainPositionSide: mainPositionSide.value,
     tradeCycles: tradeCycles.value,
     numberOfTradingCycles: numberOfTradingCycles.value,
+    maintainLiquidation: maintainLiquidation.value,
     enabled: true,
     name: null
   }
@@ -509,6 +515,7 @@ const loadBatchSettingsToForm = (batch) => {
   mainPositionSide.value = batch.mainPositionSide ?? mainPositionSide.value
   tradeCycles.value = batch.tradeCycles ?? tradeCycles.value
   numberOfTradingCycles.value = batch.numberOfTradingCycles ?? numberOfTradingCycles.value
+  maintainLiquidation.value = batch.maintainLiquidation ?? maintainLiquidation.value
 }
 
 const validateBatch = () => {
@@ -684,7 +691,7 @@ const loadDefaults = async () => {
   }, logs)
 
   if (!availableProfiles.value || availableProfiles.value.length === 0) {
-    await handleAppendLogs('Error: No profiles loaded. Please check if the antidetect browser is running and accessible.')
+    alert('No profiles loaded. Please check if the antidetect browser is running and accessible.')
   }
 
   await loadModuleData(proxy, module.value, 'configs', 'python', (data) => {
@@ -736,6 +743,7 @@ const loadDefaults = async () => {
     mainPositionSide.value = data.main_position_side ?? mainPositionSide.value
     tradeCycles.value = data.trade_cycles ?? tradeCycles.value
     numberOfTradingCycles.value = data.number_of_trading_cycles ?? numberOfTradingCycles.value
+    maintainLiquidation.value = data.maintain_liquidation ?? maintainLiquidation.value
 
     batches.value = (data.batches ?? []).map(batch => ({
       name: batch.name || null,
@@ -775,6 +783,7 @@ const loadDefaults = async () => {
       mainPositionSide: batch.main_position_side ?? mainPositionSide.value,
       tradeCycles: batch.trade_cycles ?? tradeCycles.value,
       numberOfTradingCycles: batch.number_of_trading_cycles ?? numberOfTradingCycles.value,
+      maintainLiquidation: batch.maintain_liquidation ?? maintainLiquidation.value,
       enabled: batch.enabled ?? false
     }))
   }, logs)
@@ -789,7 +798,7 @@ const handleExecute = async () => {
   }
 
   if (!hasProfilesLoaded.value) {
-    await handleAppendLogs('Error: No profiles loaded. Please check if the antidetect browser is running and accessible.')
+    alert('No profiles loaded. Please check if the antidetect browser is running and accessible.')
     return
   }
 
@@ -801,6 +810,16 @@ const handleExecute = async () => {
   const enabledBatches = batches.value.filter(batch => batch.enabled)
   if (enabledBatches.length === 0) {
     alert('Please enable at least one batch before executing')
+    return
+  }
+
+  const batchesWithInsufficientProfiles = enabledBatches.filter(batch => !batch.profiles || batch.profiles.length < 2)
+  if (batchesWithInsufficientProfiles.length > 0) {
+    const batchNames = batchesWithInsufficientProfiles.map((batch) => {
+      const batchIndex = batches.value.findIndex(b => b === batch)
+      return batch.name || `Batch #${batchIndex + 1}`
+    }).join(', ')
+    alert(`All enabled batches must have at least 2 profiles selected. The following batches have insufficient profiles: ${batchNames}`)
     return
   }
 
@@ -847,6 +866,7 @@ const handleExecute = async () => {
       main_position_side: batch.mainPositionSide,
       trade_cycles: batch.tradeCycles,
       number_of_trading_cycles: parseInt(batch.numberOfTradingCycles),
+      maintain_liquidation: batch.maintainLiquidation,
       enabled: batch.enabled
     })),
     custom_assets_enabled: customAssetsEnabled.value,
@@ -885,7 +905,8 @@ const handleExecute = async () => {
     custom_main_position_side: customMainPositionSide.value,
     main_position_side: mainPositionSide.value,
     trade_cycles: tradeCycles.value,
-    number_of_trading_cycles: parseInt(numberOfTradingCycles.value)
+    number_of_trading_cycles: parseInt(numberOfTradingCycles.value),
+    maintain_liquidation: maintainLiquidation.value
   }, logs)
 
   await startModule(proxy, module.value, logs)
